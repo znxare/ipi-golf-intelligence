@@ -77,7 +77,7 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
             actual={formatNumber(commercial.annualPlayersActual)}
           />
           <PotentialActualRow
-            label="Green Fee"
+            label="Avg Green Fee"
             potential={formatRupees(qualifyInput.pricePerRound)}
             actual={formatRupees(qualifyInput.pricePerRound)}
           />

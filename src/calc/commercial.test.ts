@@ -41,7 +41,7 @@ describe('calculateCommercialView', () => {
 
   it('computes the potential side from the Customer Input Card consistently', () => {
     expect(result.annualPlayersPotential).toBe(64_512)
-    // Note: at a single ₹5,500 Green Fee for potential and actual, this is
+    // Note: at a single ₹5,500 Avg Green Fee for potential and actual, this is
     // ₹35.48 Cr — higher than the ₹16.10 Cr in the pasted worked example,
     // which implies a lower potential-only rate (~₹2,500) not currently
     // captured as an input. Flagged for the user rather than guessed at.

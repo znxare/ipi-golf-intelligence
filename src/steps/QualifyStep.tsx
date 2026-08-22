@@ -95,7 +95,7 @@ export function QualifyStep({
               onChange={(v) => onChange({ ...input, daysOpenPerYear: v })}
             />
             <Field
-              label="Green fee"
+              label="Avg green fee"
               value={input.pricePerRound}
               onChange={(v) => onChange({ ...input, pricePerRound: v })}
               suffix="₹"
