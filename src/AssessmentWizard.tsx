@@ -27,7 +27,7 @@ export function AssessmentWizard({
   onDone,
 }: {
   assessment: Assessment
-  onDone: () => void
+  onDone: (assessment: Assessment) => void
 }) {
   const [assessment, setAssessment] = useState<Assessment>(initial)
 
@@ -58,7 +58,9 @@ export function AssessmentWizard({
               ...assessment,
               qualifyResult,
               step: isNewBuild ? 'certify' : 'quantify',
-              quantifyInput: assessment.quantifyInput ?? createDefaultQuantifyInput(),
+              quantifyInput:
+                assessment.quantifyInput ??
+                createDefaultQuantifyInput(assessment.qualifyInput.actualPlayersPerDay),
             })
           }}
         />
@@ -114,7 +116,7 @@ export function AssessmentWizard({
               status: certifyResult.path === 'project_feasibility_stop' ? 'stopped' : 'certified',
             }
             setAssessment(finished)
-            assessmentStore.save(finished).then(onDone)
+            assessmentStore.save(finished).then(() => onDone(finished))
           }}
         />
       )}

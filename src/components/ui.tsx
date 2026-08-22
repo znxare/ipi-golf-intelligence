@@ -61,6 +61,82 @@ export function Field({
   )
 }
 
+export function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs text-ipi-700/70">{label}</span>
+      <span className="flex items-center rounded-lg border border-ipi-100 bg-white px-2 py-1.5">
+        <input
+          type="text"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full outline-none placeholder:text-ipi-700/30"
+        />
+      </span>
+    </label>
+  )
+}
+
+export function IntelRow({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="flex items-center justify-between border-b border-ipi-100 py-2 text-sm last:border-b-0">
+      <span className="text-ipi-700/70">{label}</span>
+      <span className="font-medium text-ink">{value}</span>
+    </div>
+  )
+}
+
+export function PotentialActualRow({
+  label,
+  potential,
+  actual,
+}: {
+  label: string
+  potential: ReactNode
+  actual: ReactNode
+}) {
+  return (
+    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-ipi-100 py-2 text-sm last:border-b-0">
+      <span className="text-ipi-700/70">{label}</span>
+      <span className="w-28 text-right font-medium text-ink">{potential}</span>
+      <span className="w-28 text-right font-medium text-ink">{actual}</span>
+    </div>
+  )
+}
+
+export function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
+        active ? 'bg-ipi-900 text-white' : 'text-ipi-700/70 hover:bg-ipi-50'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export function PrimaryButton({
   children,
   onClick,

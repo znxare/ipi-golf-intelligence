@@ -10,8 +10,8 @@ export const DEFAULT_IPI_OPPORTUNITY_RATE = 0.14
 export function calculateQualify(input: QualifyInput): QualifyResult {
   const annualRounds = input.potentialPlayersPerDay * input.daysOpenPerYear
   const potentialRevenueAnnual = annualRounds * input.pricePerRound
-  const ipiOpportunityAnnual =
-    input.estimatedOperatingCostAnnual * DEFAULT_IPI_OPPORTUNITY_RATE
+  const estimatedOperatingCostAnnual = input.potentialMaintenanceSpendPerDay * input.daysOpenPerYear
+  const ipiOpportunityAnnual = estimatedOperatingCostAnnual * DEFAULT_IPI_OPPORTUNITY_RATE
 
-  return { annualRounds, potentialRevenueAnnual, ipiOpportunityAnnual }
+  return { annualRounds, potentialRevenueAnnual, estimatedOperatingCostAnnual, ipiOpportunityAnnual }
 }

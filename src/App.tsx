@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AssessmentsList } from './AssessmentsList'
 import { AssessmentWizard } from './AssessmentWizard'
+import { CommercialLayer } from './CommercialLayer'
 import type { Assessment } from './domain/assessment'
 
 const NAV_ITEMS = [
@@ -36,14 +37,13 @@ function App() {
       <Sidebar />
       <div className="flex-1 bg-ipi-50 p-6">
         <div className="mx-auto max-w-5xl">
-          {openAssessment ? (
-            <AssessmentWizard
-              assessment={openAssessment}
-              onDone={() => setOpenAssessment(null)}
-            />
-          ) : (
-            <AssessmentsList onOpen={setOpenAssessment} />
+          {openAssessment && openAssessment.status === 'in_progress' && (
+            <AssessmentWizard assessment={openAssessment} onDone={setOpenAssessment} />
           )}
+          {openAssessment && openAssessment.status !== 'in_progress' && (
+            <CommercialLayer assessment={openAssessment} onBack={() => setOpenAssessment(null)} />
+          )}
+          {!openAssessment && <AssessmentsList onOpen={setOpenAssessment} />}
         </div>
       </div>
     </div>

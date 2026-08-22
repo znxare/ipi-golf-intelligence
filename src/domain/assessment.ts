@@ -11,6 +11,11 @@ import type {
 export type WizardStep = 'qualify' | 'quantify' | 'verify' | 'certify'
 export type AssessmentStatus = 'in_progress' | 'certified' | 'stopped'
 
+export interface NegotiationLine {
+  negotiatedQty: number
+  notes: string
+}
+
 export interface Assessment {
   id: string
   accountName: string
@@ -24,22 +29,38 @@ export interface Assessment {
   verifyInput?: VerifyInput
   verifyResult?: VerifyResult
   certifyResult?: CertifyResult
+  negotiation?: Record<string, NegotiationLine>
 }
 
 export function createDefaultQualifyInput(): QualifyInput {
   return {
+    courseCode: '18H / P72 / 7.5K YD',
+    location: '',
     customerType: 'non_existing',
-    potentialPlayersPerDay: 192,
     daysOpenPerYear: 336,
-    pricePerRound: 2500,
-    estimatedOperatingCostAnnual: 100_800_000,
+    pricePerRound: 5_500,
+    potentialPlayersPerDay: 192,
+    actualPlayersPerDay: 17,
+    potentialMaintenanceSpendPerDay: 300_000,
+    actualCustomerSpendPerMonth: 3_000_000,
+    salaryCostPerDay: 35_000,
+    waterRequirementPotentialPerDay: 2_000_000,
+    waterReserve: 500_000,
+    tankerCapacity: 20_000,
+    tankerCost: 1_000,
+    refillsPerYear: 12,
+    superintendent: '',
+    directorOfOperations: '',
+    procurementHead: '',
+    keyDecisionMaker: '',
+    ipiAccountOwner: '',
   }
 }
 
-export function createDefaultQuantifyInput(): QuantifyInput {
+export function createDefaultQuantifyInput(actualPlayersPerDay = 17): QuantifyInput {
   return {
     pricePerRound: 5_500,
-    actualPlayersPerDay: 17,
+    actualPlayersPerDay,
     golfSpendPerDay: 300_000,
     salariesPerDay: 100_000,
     waterPerDay: 40_000,

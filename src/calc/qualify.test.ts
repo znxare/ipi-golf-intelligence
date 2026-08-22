@@ -4,11 +4,26 @@ import { calculateQualify } from './qualify'
 describe('calculateQualify', () => {
   it('matches the Step 1 screenshot worked example', () => {
     const result = calculateQualify({
+      courseCode: '18H / P72 / 7.5K YD',
+      location: '',
       customerType: 'non_existing',
-      potentialPlayersPerDay: 192,
       daysOpenPerYear: 336,
       pricePerRound: 2500,
-      estimatedOperatingCostAnnual: 100_800_000, // ₹10.08 Cr
+      potentialPlayersPerDay: 192,
+      actualPlayersPerDay: 17,
+      potentialMaintenanceSpendPerDay: 300_000, // ₹3.00 L/day → ₹10.08 Cr/year
+      actualCustomerSpendPerMonth: 3_000_000,
+      salaryCostPerDay: 35_000,
+      waterRequirementPotentialPerDay: 2_000_000,
+      waterReserve: 500_000,
+      tankerCapacity: 20_000,
+      tankerCost: 1_000,
+      refillsPerYear: 12,
+      superintendent: '',
+      directorOfOperations: '',
+      procurementHead: '',
+      keyDecisionMaker: '',
+      ipiAccountOwner: '',
     })
 
     expect(result.annualRounds).toBe(64_512)

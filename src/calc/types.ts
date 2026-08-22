@@ -8,16 +8,32 @@ export type CertifyPath =
   | 'project_feasibility_stop'
 
 export interface QualifyInput {
+  courseCode: string
+  location: string
   customerType: CustomerType
-  potentialPlayersPerDay: number
   daysOpenPerYear: number
   pricePerRound: number
-  estimatedOperatingCostAnnual: number
+  potentialPlayersPerDay: number
+  actualPlayersPerDay: number
+  potentialMaintenanceSpendPerDay: number
+  actualCustomerSpendPerMonth: number
+  salaryCostPerDay: number
+  waterRequirementPotentialPerDay: number
+  waterReserve: number
+  tankerCapacity: number
+  tankerCost: number
+  refillsPerYear: number
+  superintendent: string
+  directorOfOperations: string
+  procurementHead: string
+  keyDecisionMaker: string
+  ipiAccountOwner: string
 }
 
 export interface QualifyResult {
   annualRounds: number
   potentialRevenueAnnual: number
+  estimatedOperatingCostAnnual: number
   ipiOpportunityAnnual: number
 }
 
@@ -58,4 +74,25 @@ export interface VerifyResult {
 export interface CertifyResult {
   path: CertifyPath
   nextAction: string
+}
+
+/**
+ * Commercial View (Sheet 1 — pre-negotiation intelligence). Derived entirely
+ * from the frozen Customer Input Card, independent of the Quantify/Verify
+ * assumption fields — the Commercial Layer reads the Frozen Backend, it
+ * never writes to it.
+ */
+export interface CommercialViewData {
+  annualPlayersPotential: number
+  annualPlayersActual: number
+  actualRevenuePerDay: number
+  breakEvenPlayersPerDay: number
+  gapToBreakEvenPlayers: number
+  revenueSpendPotentialAnnual: number
+  revenueSpendActualAnnual: number
+  annualSalaryCost: number
+  annualWaterCostPotential: number
+  annualWaterCostActual: number
+  ipiOpportunityPotentialAnnual: number
+  ipiOpportunityActualAnnual: number
 }
