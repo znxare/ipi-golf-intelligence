@@ -17,7 +17,7 @@ function Sidebar() {
         </div>
       </div>
       <div className="flex items-center gap-2 rounded-md bg-white/15 px-2.5 py-2 text-sm text-white">
-        Transaction matrix
+        Transaction
       </div>
     </div>
   )

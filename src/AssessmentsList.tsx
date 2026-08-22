@@ -39,7 +39,7 @@ export function AssessmentsList({ onOpen }: { onOpen: (assessment: Assessment) =
 
   return (
     <div>
-      <PageHeader eyebrow="Component 1 — Frozen Backend" title="Transaction matrix" />
+      <PageHeader eyebrow="Component 1 — Frozen Backend" title="Transaction" />
 
       <div className="mb-5 flex gap-2">
         <input
