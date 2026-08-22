@@ -7,6 +7,15 @@ export type CertifyPath =
   | 'establish_sow'
   | 'project_feasibility_stop'
 
+export type EquipmentCondition = 'excellent' | 'good' | 'fair' | 'poor'
+
+export interface EquipmentAuditItem {
+  id: string
+  name: string
+  quantity: number
+  condition: EquipmentCondition
+}
+
 export interface QualifyInput {
   courseName: string
   location: string
@@ -23,6 +32,8 @@ export interface QualifyInput {
   procurementHead: string
   keyDecisionMaker: string
   ipiAccountOwner: string
+  /** Existing equipment fleet — only asked for a Non-existing customer, the one path with a real fleet to audit. */
+  equipmentAudit: EquipmentAuditItem[]
 }
 
 export interface QualifyResult {

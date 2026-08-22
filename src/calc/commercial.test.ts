@@ -18,6 +18,7 @@ const EXAMPLE_CUSTOMER: QualifyInput = {
   procurementHead: '',
   keyDecisionMaker: '',
   ipiAccountOwner: '',
+  equipmentAudit: [],
 }
 
 const ACTUAL = { actualPlayersPerDay: 17, actualSpendPerDay: 300_000 }

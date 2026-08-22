@@ -19,6 +19,7 @@ describe('calculateQualify', () => {
       procurementHead: '',
       keyDecisionMaker: '',
       ipiAccountOwner: '',
+      equipmentAudit: [],
     })
 
     expect(result.annualRounds).toBe(64_512)

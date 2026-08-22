@@ -49,6 +49,7 @@ export function createDefaultQualifyInput(): QualifyInput {
     procurementHead: '',
     keyDecisionMaker: '',
     ipiAccountOwner: '',
+    equipmentAudit: [],
   }
 }
 

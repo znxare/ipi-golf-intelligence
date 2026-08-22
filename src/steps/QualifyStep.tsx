@@ -9,6 +9,7 @@ import {
   SelectField,
   TextField,
 } from '../components/ui'
+import { EquipmentAudit } from './EquipmentAudit'
 import { formatNumber, formatRupeesCompact } from '../format'
 
 const CUSTOMER_TYPES: {
@@ -233,6 +234,13 @@ export function QualifyStep({
           </div>
         </div>
       </div>
+
+      {input.customerType === 'non_existing' && (
+        <EquipmentAudit
+          items={input.equipmentAudit}
+          onChange={(equipmentAudit) => onChange({ ...input, equipmentAudit })}
+        />
+      )}
 
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
         <div className="bg-ipi-900 py-2.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
