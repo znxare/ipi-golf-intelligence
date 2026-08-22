@@ -4,8 +4,6 @@ import type {
   QualifyResult,
   QuantifyInput,
   QuantifyResult,
-  VerifyInput,
-  VerifyResult,
 } from '../calc/types'
 
 export type WizardStep = 'qualify' | 'quantify' | 'verify' | 'certify'
@@ -26,8 +24,6 @@ export interface Assessment {
   qualifyResult?: QualifyResult
   quantifyInput?: QuantifyInput
   quantifyResult?: QuantifyResult
-  verifyInput?: VerifyInput
-  verifyResult?: VerifyResult
   certifyResult?: CertifyResult
   negotiation?: Record<string, NegotiationLine>
 }
@@ -65,15 +61,6 @@ export function createDefaultQuantifyInput(actualPlayersPerDay = 17): QuantifyIn
       maintenance: 3_000_000,
     },
     equipmentVerification: {},
-  }
-}
-
-export function createDefaultVerifyInput(): VerifyInput {
-  return {
-    recurringGolfRevenueAnnual: 30_000_000,
-    availableCashFlowAnnual: 2_000_000,
-    footfallPerDay: 17,
-    breakEvenPlayersPerDay: 55,
   }
 }
 

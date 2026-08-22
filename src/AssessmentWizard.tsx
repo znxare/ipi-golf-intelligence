@@ -2,13 +2,8 @@ import { useEffect, useState } from 'react'
 import { calculateCertify } from './calc/certify'
 import { calculateQualify } from './calc/qualify'
 import { calculateQuantify } from './calc/quantify'
-import { calculateVerify } from './calc/verify'
 import { Badge, PageHeader, StepProgress } from './components/ui'
-import {
-  createDefaultQuantifyInput,
-  createDefaultVerifyInput,
-  type Assessment,
-} from './domain/assessment'
+import { createDefaultQuantifyInput, type Assessment } from './domain/assessment'
 import { assessmentStore } from './store/assessmentStore'
 import { CertifyStep } from './steps/CertifyStep'
 import { QualifyStep } from './steps/QualifyStep'
@@ -70,34 +65,17 @@ export function AssessmentWizard({
           onBack={() => setAssessment({ ...assessment, step: 'qualify' })}
           onNext={() => {
             const quantifyResult = calculateQuantify(assessment.quantifyInput!)
-            const defaultVerify = createDefaultVerifyInput()
-            setAssessment({
-              ...assessment,
-              quantifyResult,
-              step: 'verify',
-              verifyInput:
-                assessment.verifyInput ?? {
-                  ...defaultVerify,
-                  footfallPerDay: assessment.quantifyInput!.actualPlayersPerDay,
-                  breakEvenPlayersPerDay: quantifyResult.breakEvenPlayersPerDay,
-                },
-            })
+            setAssessment({ ...assessment, quantifyResult, step: 'verify' })
           }}
         />
       )}
 
-      {assessment.step === 'verify' && assessment.verifyInput && assessment.quantifyResult && assessment.quantifyInput && (
+      {assessment.step === 'verify' && assessment.quantifyResult && assessment.quantifyInput && (
         <VerifyStep
-          input={assessment.verifyInput}
-          quantifyResult={assessment.quantifyResult}
           qualifyInput={assessment.qualifyInput}
           quantifyInput={assessment.quantifyInput}
-          onChange={(verifyInput) => setAssessment({ ...assessment, verifyInput })}
           onBack={() => setAssessment({ ...assessment, step: 'quantify' })}
-          onNext={() => {
-            const verifyResult = calculateVerify(assessment.verifyInput!)
-            setAssessment({ ...assessment, verifyResult, step: 'certify' })
-          }}
+          onNext={() => setAssessment({ ...assessment, step: 'certify' })}
         />
       )}
 

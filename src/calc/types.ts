@@ -1,7 +1,5 @@
 export type CustomerType = 'existing' | 'non_existing' | 'new_build'
 
-export type AbilityToPay = 'growth' | 'operational' | 'development'
-
 export type CertifyPath =
   | 'maintain_recurring_sow'
   | 'establish_sow'
@@ -68,17 +66,6 @@ export interface QuantifyInput {
 export interface QuantifyResult {
   breakEvenPlayersPerDay: number
   totalIpiOpportunity: number
-}
-
-export interface VerifyInput {
-  recurringGolfRevenueAnnual: number
-  availableCashFlowAnnual: number
-  footfallPerDay: number
-  breakEvenPlayersPerDay: number
-}
-
-export interface VerifyResult {
-  abilityToPay: AbilityToPay
 }
 
 export interface CertifyResult {
