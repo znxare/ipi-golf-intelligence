@@ -73,7 +73,7 @@ export function QuantifyStep({
             emphasis
           />
         </div>
-        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-ipi-100 pt-3 text-xs text-ipi-700/70">
+        <div className="font-data mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-hairline pt-3 text-xs tabular-nums text-ipi-700/70">
           <span>Current revenue/day: {formatRupees(result.revenuePerDay)}</span>
           <span>Revenue at BE: {formatRupeesCompact(result.revenueAtBreakEven)}</span>
           <span>Gap to BE: {result.gapToBreakEvenPlayers} players/day</span>

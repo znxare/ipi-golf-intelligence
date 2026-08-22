@@ -39,13 +39,13 @@ export function VerifyStep({
       <SectionLabel>Verify operational and financial viability</SectionLabel>
       <Card className="mb-5">
         <div className="mb-3 grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-          <div className="flex justify-between border-b border-ipi-100 py-1.5">
+          <div className="flex justify-between border-b border-hairline py-1.5">
             <span className="text-ipi-700/70">Maintenance spend − salaries − water</span>
-            <span className="font-medium">{formatRupeesCompact(quantifyResult.ipiOpportunityPerDay)}/day</span>
+            <span className="font-data font-medium tabular-nums">{formatRupeesCompact(quantifyResult.ipiOpportunityPerDay)}/day</span>
           </div>
-          <div className="flex justify-between border-b border-ipi-100 py-1.5">
+          <div className="flex justify-between border-b border-hairline py-1.5">
             <span className="text-ipi-700/70">Amount available for IPI scope</span>
-            <span className="font-medium">{formatRupeesCompact(quantifyResult.totalIpiOpportunity)}</span>
+            <span className="font-data font-medium tabular-nums">{formatRupeesCompact(quantifyResult.totalIpiOpportunity)}</span>
           </div>
         </div>
 

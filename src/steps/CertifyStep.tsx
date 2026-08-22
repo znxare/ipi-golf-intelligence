@@ -23,7 +23,7 @@ export function CertifyStep({
   return (
     <div>
       <SectionLabel>Establish scope of work and define next action</SectionLabel>
-      <Card className={`mb-5 ${isStop ? 'border-ipi-100 bg-ipi-50' : 'border-ipi-900 bg-ipi-100'}`}>
+      <Card className={`mb-5 ${isStop ? 'border-hairline bg-ipi-50' : 'border-ipi-900 bg-ipi-100'}`}>
         <div className="text-sm font-medium text-ipi-900">{PATH_LABEL[result.path]}</div>
         <div className="mt-2 text-sm text-ipi-800">{result.nextAction}</div>
       </Card>

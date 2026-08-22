@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CommercialView } from './CommercialView'
-import { SecondaryButton, TabButton } from './components/ui'
+import { PageHeader, SecondaryButton, TabButton } from './components/ui'
 import type { Assessment, NegotiationLine } from './domain/assessment'
 import { NegotiationTable } from './NegotiationTable'
 import { assessmentStore } from './store/assessmentStore'
@@ -29,15 +29,13 @@ export function CommercialLayer({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <div className="text-sm font-medium text-ink">{assessment.accountName}</div>
-          <div className="text-xs text-ipi-700/60">Commercial Layer</div>
-        </div>
-        <SecondaryButton onClick={onBack}>← Back to list</SecondaryButton>
-      </div>
+      <PageHeader
+        eyebrow="Component 2 — Commercial Layer"
+        title={assessment.accountName}
+        actions={<SecondaryButton onClick={onBack}>← Back to list</SecondaryButton>}
+      />
 
-      <div className="mb-5 flex gap-1 rounded-lg bg-ipi-50 p-1">
+      <div className="mb-5 flex gap-1 rounded-lg border border-hairline bg-ipi-50 p-1">
         <TabButton active={sheet === 'commercial-view'} onClick={() => setSheet('commercial-view')}>
           Sheet 1 — Commercial View
         </TabButton>

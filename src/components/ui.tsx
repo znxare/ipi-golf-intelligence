@@ -2,14 +2,18 @@ import type { ReactNode } from 'react'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-ipi-100 bg-white p-4 ${className}`}>
+    <div className={`rounded-xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)] ${className}`}>
       {children}
     </div>
   )
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) {
-  return <div className="mb-2 text-sm text-ipi-700/70">{children}</div>
+  return (
+    <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ipi-700/60">
+      {children}
+    </div>
+  )
 }
 
 export function StatCard({
@@ -25,10 +29,20 @@ export function StatCard({
 }) {
   return (
     <div
-      className={`rounded-lg p-3 ${emphasis ? 'bg-ipi-100' : 'bg-ipi-50'}`}
+      className={`rounded-lg p-3 ${
+        emphasis
+          ? 'border-l-2 border-ipi-600 bg-ipi-100'
+          : 'border border-hairline bg-white'
+      }`}
     >
       <div className={`text-xs ${emphasis ? 'text-ipi-800' : 'text-ipi-700/70'}`}>{label}</div>
-      <div className={`text-lg font-medium ${emphasis ? 'text-ipi-900' : 'text-ink'}`}>{value}</div>
+      <div
+        className={`font-data tabular-nums ${
+          emphasis ? 'text-xl font-semibold text-ipi-950' : 'text-lg font-medium text-ink'
+        }`}
+      >
+        {value}
+      </div>
       {sublabel && <div className="mt-0.5 text-xs text-ipi-700/60">{sublabel}</div>}
     </div>
   )
@@ -48,12 +62,12 @@ export function Field({
   return (
     <label className="block">
       <span className="mb-1 block text-xs text-ipi-700/70">{label}</span>
-      <span className="flex items-center gap-1 rounded-lg border border-ipi-100 bg-white px-2 py-1.5">
+      <span className="flex items-center gap-1 rounded-lg border border-hairline bg-white px-2 py-1.5 transition-colors focus-within:border-ipi-600">
         <input
           type="number"
           value={Number.isNaN(value) ? '' : value}
           onChange={(e) => onChange(e.target.valueAsNumber)}
-          className="w-full outline-none"
+          className="font-data w-full tabular-nums outline-none"
         />
         {suffix && <span className="text-xs text-ipi-700/50">{suffix}</span>}
       </span>
@@ -75,7 +89,7 @@ export function TextField({
   return (
     <label className="block">
       <span className="mb-1 block text-xs text-ipi-700/70">{label}</span>
-      <span className="flex items-center rounded-lg border border-ipi-100 bg-white px-2 py-1.5">
+      <span className="flex items-center rounded-lg border border-hairline bg-white px-2 py-1.5 transition-colors focus-within:border-ipi-600">
         <input
           type="text"
           value={value}
@@ -88,11 +102,19 @@ export function TextField({
   )
 }
 
-export function IntelRow({ label, value }: { label: string; value: ReactNode }) {
+export function IntelRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string
+  value: ReactNode
+  mono?: boolean
+}) {
   return (
-    <div className="flex items-center justify-between border-b border-ipi-100 py-2 text-sm last:border-b-0">
+    <div className="flex items-center justify-between gap-4 border-b border-hairline py-2 text-sm last:border-b-0">
       <span className="text-ipi-700/70">{label}</span>
-      <span className="font-medium text-ink">{value}</span>
+      <span className={`text-right font-medium text-ink ${mono ? 'font-data tabular-nums' : ''}`}>{value}</span>
     </div>
   )
 }
@@ -107,10 +129,55 @@ export function PotentialActualRow({
   actual: ReactNode
 }) {
   return (
-    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-ipi-100 py-2 text-sm last:border-b-0">
+    <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-hairline py-2 text-sm last:border-b-0">
       <span className="text-ipi-700/70">{label}</span>
-      <span className="w-28 text-right font-medium text-ink">{potential}</span>
-      <span className="w-28 text-right font-medium text-ink">{actual}</span>
+      <span className="font-data w-28 text-right font-medium tabular-nums text-ink">{potential}</span>
+      <span className="font-data w-28 text-right font-medium tabular-nums text-ink">{actual}</span>
+    </div>
+  )
+}
+
+const BADGE_VARIANT: Record<'neutral' | 'positive' | 'muted' | 'warning', string> = {
+  neutral: 'bg-ipi-50 text-ipi-700/70',
+  positive: 'bg-ipi-100 text-ipi-900',
+  muted: 'bg-ipi-50 text-ipi-700/50',
+  warning: 'bg-amber-100 text-amber-600',
+}
+
+export function Badge({
+  children,
+  variant = 'neutral',
+}: {
+  children: ReactNode
+  variant?: 'neutral' | 'positive' | 'muted' | 'warning'
+}) {
+  return (
+    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${BADGE_VARIANT[variant]}`}>
+      {children}
+    </span>
+  )
+}
+
+export function PageHeader({
+  eyebrow,
+  title,
+  actions,
+}: {
+  eyebrow?: string
+  title: ReactNode
+  actions?: ReactNode
+}) {
+  return (
+    <div className="mb-5 flex items-center justify-between gap-4">
+      <div>
+        {eyebrow && (
+          <div className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-ipi-700/50">
+            {eyebrow}
+          </div>
+        )}
+        <div className="text-base font-semibold text-ink">{title}</div>
+      </div>
+      {actions && <div className="flex items-center gap-3">{actions}</div>}
     </div>
   )
 }
@@ -128,8 +195,8 @@ export function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-        active ? 'bg-ipi-900 text-white' : 'text-ipi-700/70 hover:bg-ipi-50'
+      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+        active ? 'bg-ipi-900 text-white' : 'text-ipi-700/70 hover:bg-white'
       }`}
     >
       {children}
@@ -151,7 +218,7 @@ export function PrimaryButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center gap-1.5 rounded-lg bg-ipi-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+      className="flex items-center gap-1.5 rounded-lg bg-ipi-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-ipi-800 disabled:opacity-40 disabled:hover:bg-ipi-900"
     >
       {children}
     </button>
@@ -169,7 +236,7 @@ export function SecondaryButton({
     <button
       type="button"
       onClick={onClick}
-      className="rounded-lg border border-ipi-100 px-4 py-2 text-sm font-medium text-ipi-900"
+      className="rounded-lg border border-hairline px-4 py-2 text-sm font-medium text-ipi-900 transition-colors hover:border-ipi-600 hover:bg-ipi-50"
     >
       {children}
     </button>
@@ -197,18 +264,20 @@ export function StepProgress({
               }`}
             >
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                  isCurrent || isDone
-                    ? 'bg-ipi-900 text-white'
-                    : 'border border-ipi-100 text-ipi-700/50'
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-xs transition-colors ${
+                  isCurrent
+                    ? 'bg-ipi-900 text-white ring-2 ring-ipi-100'
+                    : isDone
+                      ? 'bg-ipi-600 text-white'
+                      : 'border border-hairline text-ipi-700/50'
                 }`}
               >
-                {step.index}
+                {isDone ? '✓' : step.index}
               </span>
               {step.label}
             </div>
             {i < steps.length - 1 && (
-              <div className="mx-2 h-px flex-1 bg-ipi-100" />
+              <div className={`mx-2 h-px flex-1 transition-colors ${isDone ? 'bg-ipi-600' : 'bg-hairline'}`} />
             )}
           </div>
         )

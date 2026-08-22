@@ -3,7 +3,7 @@ import { calculateCertify } from './calc/certify'
 import { calculateQualify } from './calc/qualify'
 import { calculateQuantify } from './calc/quantify'
 import { calculateVerify } from './calc/verify'
-import { StepProgress } from './components/ui'
+import { Badge, PageHeader, StepProgress } from './components/ui'
 import {
   createDefaultQuantifyInput,
   createDefaultVerifyInput,
@@ -39,12 +39,11 @@ export function AssessmentWizard({
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm text-ipi-700/70">{assessment.accountName}</div>
-        <div className="rounded-full bg-ipi-50 px-3 py-1 text-xs text-ipi-700/70">
-          Step {STEPS.find((s) => s.key === assessment.step)?.index} of 4
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Component 1 — Frozen Backend"
+        title={assessment.accountName}
+        actions={<Badge>Step {STEPS.find((s) => s.key === assessment.step)?.index} of 4</Badge>}
+      />
 
       <StepProgress steps={STEPS} currentStep={assessment.step} />
 

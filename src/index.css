@@ -2,6 +2,7 @@
 
 @theme {
   --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --color-ipi-950: #0a2a1e;
   --color-ipi-900: #0d3d2c;
@@ -10,6 +11,9 @@
   --color-ipi-600: #1f7350;
   --color-ipi-100: #e7efe9;
   --color-ipi-50: #f4f7f5;
+
+  --color-amber-600: #a15d12;
+  --color-amber-100: #f6ead4;
 
   --color-ink: #0e1f17;
   --color-hairline: #e3e8e5;
@@ -23,4 +27,21 @@ body {
   margin: 0;
   background: var(--color-ipi-50);
   color: var(--color-ink);
+}
+
+::selection {
+  background: var(--color-ipi-100);
+  color: var(--color-ipi-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ipi-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

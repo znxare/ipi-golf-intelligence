@@ -51,8 +51,8 @@ export function QualifyStep({
               key={c.type}
               type="button"
               onClick={() => onChange({ ...input, customerType: c.type })}
-              className={`rounded-xl border p-3 text-left ${
-                selected ? 'border-ipi-900 bg-ipi-100' : 'border-ipi-100 bg-white'
+              className={`rounded-xl border p-3 text-left transition-colors ${
+                selected ? 'border-ipi-900 bg-ipi-100' : 'border-hairline bg-white hover:border-ipi-600'
               }`}
             >
               <div className="text-sm font-medium text-ink">{c.title}</div>
@@ -63,10 +63,15 @@ export function QualifyStep({
         })}
       </div>
 
-      <div className="mb-5 rounded-xl border border-ipi-100 bg-white">
-        <div className="border-b border-ipi-100 px-4 py-3">
-          <div className="text-sm font-medium text-ink">Customer Input Card</div>
-          <div className="mt-0.5 text-xs text-ipi-700/60">Filled by the sales person</div>
+      <div className="mb-5 rounded-xl border border-hairline bg-white shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
+        <div className="flex items-center justify-between border-b border-hairline bg-ipi-50/60 px-4 py-3">
+          <div>
+            <div className="text-sm font-medium text-ink">Customer Input Card</div>
+            <div className="mt-0.5 text-xs text-ipi-700/60">Filled by the sales person</div>
+          </div>
+          <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-ipi-700/60 shadow-[0_0_0_1px_var(--color-hairline)]">
+            Frozen Backend · Section 1
+          </span>
         </div>
 
         <div className="px-4 pt-4">
