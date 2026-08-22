@@ -102,6 +102,55 @@ export function TextField({
   )
 }
 
+export function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string
+  value: number
+  onChange: (value: number) => void
+  options: number[]
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs text-ipi-700/70">{label}</span>
+      <span className="flex items-center rounded-lg border border-hairline bg-white px-2 py-1.5 transition-colors focus-within:border-ipi-600">
+        <select
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="font-data w-full bg-transparent tabular-nums outline-none"
+        >
+          {options.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      </span>
+    </label>
+  )
+}
+
+export function FixedField({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <div className="block">
+      <span className="mb-1 block text-xs text-ipi-700/70">{label}</span>
+      <span className="flex items-center justify-between rounded-lg border border-dashed border-hairline bg-ipi-50/60 px-2 py-1.5">
+        <span className="font-data tabular-nums text-ipi-700/80">{value}</span>
+        <span className="text-[10px] uppercase tracking-wide text-ipi-700/40">Fixed</span>
+      </span>
+    </div>
+  )
+}
+
 export function IntelRow({
   label,
   value,

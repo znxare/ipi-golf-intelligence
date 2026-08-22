@@ -1,6 +1,14 @@
+import { SLOT_INTERVAL_MINUTES, TANKER_CAPACITY_LITERS } from '../calc/constants'
 import { calculateQualify } from '../calc/qualify'
 import type { CustomerType, QualifyInput } from '../calc/types'
-import { Card, Field, PrimaryButton, SectionLabel, StatCard, TextField } from '../components/ui'
+import {
+  Field,
+  FixedField,
+  PrimaryButton,
+  SectionLabel,
+  SelectField,
+  TextField,
+} from '../components/ui'
 import { formatNumber, formatRupeesCompact } from '../format'
 
 const CUSTOMER_TYPES: {
@@ -28,6 +36,51 @@ const CUSTOMER_TYPES: {
     outcome: 'Project feasibility path → stop',
   },
 ]
+
+const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i + 1)
+
+function Icon({ path }: { path: string }) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <path d={path} />
+    </svg>
+  )
+}
+
+const ICON_PATHS = {
+  players: 'M4 19a5 5 0 0 1 10 0M9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM14 19a4 4 0 0 1 7 0M17.5 10a2.5 2.5 0 1 0 0-5',
+  calendar: 'M4 6h16v14H4zM4 10h16M8 4v4M16 4v4',
+  revenue: 'M12 4v16M9 8h4.5a2 2 0 1 1 0 4H10a2 2 0 1 0 0 4h5',
+  cost: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM8.5 12h7',
+  target: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 12h.01',
+}
+
+function OpportunityStat({
+  icon,
+  label,
+  value,
+  sublabel,
+  first = false,
+}: {
+  icon: string
+  label: string
+  value: string
+  sublabel: string
+  first?: boolean
+}) {
+  return (
+    <div className={`flex-1 px-4 py-4 ${first ? '' : 'border-l border-hairline'}`}>
+      <div className="mb-2 flex items-center gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ipi-100 text-ipi-700">
+          <Icon path={icon} />
+        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ipi-700/60">{label}</span>
+      </div>
+      <div className="font-data text-2xl font-semibold tabular-nums text-ink">{value}</div>
+      <div className="mt-0.5 text-xs text-ipi-700/50">{sublabel}</div>
+    </div>
+  )
+}
 
 export function QualifyStep({
   input,
@@ -78,10 +131,10 @@ export function QualifyStep({
           <SectionLabel>Course</SectionLabel>
           <div className="mb-5 grid grid-cols-2 gap-3">
             <TextField
-              label="Customer / Course code"
-              value={input.courseCode}
-              onChange={(v) => onChange({ ...input, courseCode: v })}
-              placeholder="18H / P72 / 7.5K YD"
+              label="Course name"
+              value={input.courseName}
+              onChange={(v) => onChange({ ...input, courseName: v })}
+              placeholder="e.g. Kharghar Golf Course"
             />
             <TextField
               label="Location / Google Maps"
@@ -89,10 +142,21 @@ export function QualifyStep({
               onChange={(v) => onChange({ ...input, location: v })}
               placeholder="Maps link or address"
             />
+          </div>
+
+          <SectionLabel>Capacity</SectionLabel>
+          <div className="mb-5 grid grid-cols-4 gap-3">
+            <FixedField label="Slot interval" value={`${SLOT_INTERVAL_MINUTES} min`} />
+            <SelectField
+              label="Playable hours / day"
+              value={input.playableHoursPerDay}
+              onChange={(v) => onChange({ ...input, playableHoursPerDay: v })}
+              options={HOURS_OPTIONS}
+            />
             <Field
-              label="Playable days"
-              value={input.daysOpenPerYear}
-              onChange={(v) => onChange({ ...input, daysOpenPerYear: v })}
+              label="Potential players / day"
+              value={input.potentialPlayersPerDay}
+              onChange={(v) => onChange({ ...input, potentialPlayersPerDay: v })}
             />
             <Field
               label="Avg green fee"
@@ -102,34 +166,18 @@ export function QualifyStep({
             />
           </div>
 
-          <SectionLabel>Players &amp; spend</SectionLabel>
-          <div className="mb-5 grid grid-cols-3 gap-3">
+          <SectionLabel>Costs</SectionLabel>
+          <div className="mb-5 grid grid-cols-2 gap-3">
             <Field
-              label="Potential players / day"
-              value={input.potentialPlayersPerDay}
-              onChange={(v) => onChange({ ...input, potentialPlayersPerDay: v })}
-            />
-            <Field
-              label="Actual players / day"
-              value={input.actualPlayersPerDay}
-              onChange={(v) => onChange({ ...input, actualPlayersPerDay: v })}
-            />
-            <Field
-              label="Salary cost / day"
-              value={input.salaryCostPerDay}
-              onChange={(v) => onChange({ ...input, salaryCostPerDay: v })}
+              label="Expenses / day"
+              value={input.expensesPerDay}
+              onChange={(v) => onChange({ ...input, expensesPerDay: v })}
               suffix="₹"
             />
             <Field
-              label="Potential maintenance spend / day"
-              value={input.potentialMaintenanceSpendPerDay}
-              onChange={(v) => onChange({ ...input, potentialMaintenanceSpendPerDay: v })}
-              suffix="₹"
-            />
-            <Field
-              label="Actual customer spend / month"
-              value={input.actualCustomerSpendPerMonth}
-              onChange={(v) => onChange({ ...input, actualCustomerSpendPerMonth: v })}
+              label="Salaries / month"
+              value={input.salariesPerMonth}
+              onChange={(v) => onChange({ ...input, salariesPerMonth: v })}
               suffix="₹"
             />
           </div>
@@ -137,34 +185,18 @@ export function QualifyStep({
           <SectionLabel>Water</SectionLabel>
           <div className="mb-5 grid grid-cols-3 gap-3">
             <Field
-              label="Water requirement / day — potential"
-              value={input.waterRequirementPotentialPerDay}
-              onChange={(v) => onChange({ ...input, waterRequirementPotentialPerDay: v })}
-              suffix="L"
-            />
-            <Field
               label="Water reserve"
               value={input.waterReserve}
               onChange={(v) => onChange({ ...input, waterReserve: v })}
               suffix="L"
             />
             <Field
-              label="Tanker capacity"
-              value={input.tankerCapacity}
-              onChange={(v) => onChange({ ...input, tankerCapacity: v })}
-              suffix="L"
-            />
-            <Field
-              label="Tanker cost"
+              label="Water tanker cost"
               value={input.tankerCost}
               onChange={(v) => onChange({ ...input, tankerCost: v })}
               suffix="₹"
             />
-            <Field
-              label="Reserve refills / year"
-              value={input.refillsPerYear}
-              onChange={(v) => onChange({ ...input, refillsPerYear: v })}
-            />
+            <FixedField label="Tanker capacity" value={`${formatNumber(TANKER_CAPACITY_LITERS)} L`} />
           </div>
 
           <SectionLabel>Customer team</SectionLabel>
@@ -203,21 +235,44 @@ export function QualifyStep({
         </div>
       </div>
 
-      <SectionLabel>Potential opportunity</SectionLabel>
-      <Card className="mb-5">
-        <div className="grid grid-cols-5 gap-3">
-          <StatCard label="Players / day" value={formatNumber(input.potentialPlayersPerDay)} sublabel="Potential" />
-          <StatCard label="Annual rounds" value={formatNumber(result.annualRounds)} sublabel="Potential" />
-          <StatCard label="Potential revenue" value={formatRupeesCompact(result.potentialRevenueAnnual)} sublabel="Annual" />
-          <StatCard label="Est. operating cost" value={formatRupeesCompact(result.estimatedOperatingCostAnnual)} sublabel="Annual" />
-          <StatCard
-            label="IPI opportunity"
+      <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
+        <div className="bg-ipi-900 py-2.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
+          Potential Opportunity
+        </div>
+        <div className="flex flex-wrap bg-white">
+          <OpportunityStat
+            icon={ICON_PATHS.players}
+            label="Players / Day"
+            value={formatNumber(input.potentialPlayersPerDay)}
+            sublabel="Potential"
+            first
+          />
+          <OpportunityStat
+            icon={ICON_PATHS.calendar}
+            label="Annual Rounds"
+            value={formatNumber(result.annualRounds)}
+            sublabel="Potential"
+          />
+          <OpportunityStat
+            icon={ICON_PATHS.revenue}
+            label="Potential Revenue"
+            value={formatRupeesCompact(result.potentialRevenueAnnual)}
+            sublabel="Annual"
+          />
+          <OpportunityStat
+            icon={ICON_PATHS.cost}
+            label="Estimated Operating Cost"
+            value={formatRupeesCompact(result.estimatedOperatingCostAnnual)}
+            sublabel="Annual"
+          />
+          <OpportunityStat
+            icon={ICON_PATHS.target}
+            label="IPI Opportunity"
             value={formatRupeesCompact(result.ipiOpportunityAnnual)}
             sublabel="Annual"
-            emphasis
           />
         </div>
-      </Card>
+      </div>
 
       <div className="flex justify-end">
         <PrimaryButton onClick={onNext}>

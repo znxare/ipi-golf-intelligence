@@ -3,21 +3,16 @@ import { calculateCommercialView } from './commercial'
 import type { QualifyInput } from './types'
 
 const EXAMPLE_CUSTOMER: QualifyInput = {
-  courseCode: '18H / P72 / 7.5K YD',
+  courseName: '18H / P72 / 7.5K YD',
   location: '',
   customerType: 'non_existing',
-  daysOpenPerYear: 336,
-  pricePerRound: 5_500,
+  playableHoursPerDay: 12,
   potentialPlayersPerDay: 192,
-  actualPlayersPerDay: 17,
-  potentialMaintenanceSpendPerDay: 300_000,
-  actualCustomerSpendPerMonth: 3_000_000,
-  salaryCostPerDay: 35_000,
-  waterRequirementPotentialPerDay: 2_000_000,
+  pricePerRound: 5_500,
+  expensesPerDay: 300_000,
+  salariesPerMonth: 980_000, // ₹1.176 Cr/year
   waterReserve: 500_000,
-  tankerCapacity: 20_000,
   tankerCost: 1_000,
-  refillsPerYear: 12,
   superintendent: '',
   directorOfOperations: '',
   procurementHead: '',
@@ -25,8 +20,10 @@ const EXAMPLE_CUSTOMER: QualifyInput = {
   ipiAccountOwner: '',
 }
 
+const ACTUAL = { actualPlayersPerDay: 17, actualSpendPerDay: 300_000 }
+
 describe('calculateCommercialView', () => {
-  const result = calculateCommercialView(EXAMPLE_CUSTOMER)
+  const result = calculateCommercialView(EXAMPLE_CUSTOMER, ACTUAL)
 
   it('matches the worked example on the actual-side figures', () => {
     expect(result.annualPlayersActual).toBe(5_712)
@@ -34,17 +31,16 @@ describe('calculateCommercialView', () => {
     expect(result.breakEvenPlayersPerDay).toBe(55)
     expect(result.gapToBreakEvenPlayers).toBe(38)
     expect(result.annualSalaryCost).toBe(11_760_000) // ₹1.176 Cr
-    expect(result.annualWaterCostActual).toBe(300_000) // ₹3.00 L
-    expect(result.revenueSpendActualAnnual).toBe(36_000_000) // ₹3.60 Cr
-    expect(result.ipiOpportunityActualAnnual).toBeCloseTo(23_940_000, -2) // ₹2.39 Cr
+    expect(result.revenueSpendActualAnnual).toBe(100_800_000) // actualSpendPerDay × 336
   })
 
-  it('computes the potential side from the Customer Input Card consistently', () => {
+  it('computes the potential side from the Customer Input Card', () => {
     expect(result.annualPlayersPotential).toBe(64_512)
-    // Note: at a single ₹5,500 Avg Green Fee for potential and actual, this is
-    // ₹35.48 Cr — higher than the ₹16.10 Cr in the pasted worked example,
-    // which implies a lower potential-only rate (~₹2,500) not currently
-    // captured as an input. Flagged for the user rather than guessed at.
     expect(result.revenueSpendPotentialAnnual).toBe(354_816_000)
+  })
+
+  it('derives water cost from reserve, tanker cost and the fixed tanker capacity', () => {
+    // 500,000L reserve / 20,000L tanker × ₹1,000 = ₹25,000
+    expect(result.annualWaterCost).toBe(25_000)
   })
 })

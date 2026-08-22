@@ -1,3 +1,4 @@
+import { PLAYABLE_DAYS_PER_YEAR } from './constants'
 import type { QualifyInput, QualifyResult } from './types'
 
 /**
@@ -8,9 +9,9 @@ import type { QualifyInput, QualifyResult } from './types'
 export const DEFAULT_IPI_OPPORTUNITY_RATE = 0.14
 
 export function calculateQualify(input: QualifyInput): QualifyResult {
-  const annualRounds = input.potentialPlayersPerDay * input.daysOpenPerYear
+  const annualRounds = input.potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
   const potentialRevenueAnnual = annualRounds * input.pricePerRound
-  const estimatedOperatingCostAnnual = input.potentialMaintenanceSpendPerDay * input.daysOpenPerYear
+  const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
   const ipiOpportunityAnnual = estimatedOperatingCostAnnual * DEFAULT_IPI_OPPORTUNITY_RATE
 
   return { annualRounds, potentialRevenueAnnual, estimatedOperatingCostAnnual, ipiOpportunityAnnual }

@@ -57,9 +57,7 @@ export function AssessmentWizard({
               ...assessment,
               qualifyResult,
               step: isNewBuild ? 'certify' : 'quantify',
-              quantifyInput:
-                assessment.quantifyInput ??
-                createDefaultQuantifyInput(assessment.qualifyInput.actualPlayersPerDay),
+              quantifyInput: assessment.quantifyInput ?? createDefaultQuantifyInput(),
             })
           }}
         />

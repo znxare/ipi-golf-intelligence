@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
 import { calculateCommercialView, calculateDraftSowTotal } from './calc/commercial'
+import { EQUIPMENT_DOWNTIME_TARGET, PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
 import { Card, IntelRow, PotentialActualRow, StatCard } from './components/ui'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment } from './domain/assessment'
-import { formatLiters, formatNumber, formatRupees, formatRupeesCompact } from './format'
+import { formatNumber, formatRupees, formatRupeesCompact } from './format'
 
 const CUSTOMER_TYPE_LABEL: Record<string, string> = {
   existing: 'Existing IPI',
@@ -26,8 +27,11 @@ function Section({ n, title, children }: { n: number; title: string; children: R
 }
 
 export function CommercialView({ assessment }: { assessment: Assessment }) {
-  const { qualifyInput } = assessment
-  const commercial = calculateCommercialView(qualifyInput)
+  const { qualifyInput, quantifyInput } = assessment
+  const commercial = calculateCommercialView(qualifyInput, {
+    actualPlayersPerDay: quantifyInput?.actualPlayersPerDay ?? 0,
+    actualSpendPerDay: quantifyInput?.golfSpendPerDay ?? 0,
+  })
   const { pricedTotal, hasUnpriced } = calculateDraftSowTotal(EQUIPMENT_CATALOG)
 
   return (
@@ -35,17 +39,17 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
       <div className="mb-5 rounded-xl border border-ipi-900 bg-ipi-100 px-4 py-3">
         <div className="text-xs text-ipi-700/70">Pre-Negotiation Intelligence</div>
         <div className="font-data text-sm font-medium text-ipi-900">
-          {qualifyInput.courseCode || '—'}
+          {qualifyInput.courseName || '—'}
         </div>
       </div>
 
       <Section n={1} title="Customer & Course">
         <Card>
-          <IntelRow label="Customer / Course Code" value={qualifyInput.courseCode || '—'} />
+          <IntelRow label="Course Name" value={qualifyInput.courseName || '—'} />
           <IntelRow label="Customer Type" value={CUSTOMER_TYPE_LABEL[qualifyInput.customerType]} />
           <IntelRow label="Location / Google Maps" value={qualifyInput.location || '—'} />
-          <IntelRow label="Playable Days" value={formatNumber(qualifyInput.daysOpenPerYear)} mono />
-          <IntelRow label="Equipment Downtime Target" value="≤ 24 hrs" mono />
+          <IntelRow label="Playable Days" value={formatNumber(PLAYABLE_DAYS_PER_YEAR)} mono />
+          <IntelRow label="Equipment Downtime Target" value={EQUIPMENT_DOWNTIME_TARGET} mono />
         </Card>
       </Section>
 
@@ -69,24 +73,28 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
           <PotentialActualRow
             label="Players / Day"
             potential={formatNumber(qualifyInput.potentialPlayersPerDay)}
-            actual={formatNumber(qualifyInput.actualPlayersPerDay)}
+            actual={quantifyInput ? formatNumber(quantifyInput.actualPlayersPerDay) : '—'}
           />
           <PotentialActualRow
             label="Annual Players"
             potential={formatNumber(commercial.annualPlayersPotential)}
-            actual={formatNumber(commercial.annualPlayersActual)}
+            actual={quantifyInput ? formatNumber(commercial.annualPlayersActual) : '—'}
           />
           <PotentialActualRow
             label="Avg Green Fee"
             potential={formatRupees(qualifyInput.pricePerRound)}
             actual={formatRupees(qualifyInput.pricePerRound)}
           />
-          <PotentialActualRow label="Actual Revenue / Day" potential="—" actual={formatRupees(commercial.actualRevenuePerDay)} />
+          <PotentialActualRow
+            label="Actual Revenue / Day"
+            potential="—"
+            actual={quantifyInput ? formatRupees(commercial.actualRevenuePerDay) : '—'}
+          />
           <PotentialActualRow label="Break-even Players / Day" potential="—" actual={formatNumber(commercial.breakEvenPlayersPerDay)} />
           <PotentialActualRow
             label="Gap to Break-even"
             potential="—"
-            actual={`${formatNumber(commercial.gapToBreakEvenPlayers)}/day`}
+            actual={quantifyInput ? `${formatNumber(commercial.gapToBreakEvenPlayers)}/day` : '—'}
           />
         </Card>
       </Section>
@@ -101,7 +109,7 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
           <PotentialActualRow
             label="Revenue / Customer Spend"
             potential={`${formatRupeesCompact(commercial.revenueSpendPotentialAnnual)}/yr`}
-            actual={`${formatRupeesCompact(commercial.revenueSpendActualAnnual)}/yr`}
+            actual={quantifyInput ? `${formatRupeesCompact(commercial.revenueSpendActualAnnual)}/yr` : '—'}
           />
           <PotentialActualRow
             label="Annual Salary Cost"
@@ -110,18 +118,14 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
           />
           <PotentialActualRow
             label="Annual Water Cost"
-            potential={formatRupeesCompact(commercial.annualWaterCostPotential)}
-            actual={formatRupeesCompact(commercial.annualWaterCostActual)}
+            potential={formatRupeesCompact(commercial.annualWaterCost)}
+            actual={formatRupeesCompact(commercial.annualWaterCost)}
           />
           <PotentialActualRow
             label="IPI Opportunity / Year"
             potential={formatRupeesCompact(commercial.ipiOpportunityPotentialAnnual)}
-            actual={formatRupeesCompact(commercial.ipiOpportunityActualAnnual)}
+            actual={quantifyInput ? formatRupeesCompact(commercial.ipiOpportunityActualAnnual) : '—'}
           />
-          <div className="mt-2 border-t border-hairline pt-2 text-xs text-ipi-700/60">
-            Water requirement: {formatLiters(qualifyInput.waterRequirementPotentialPerDay)}/day potential ·{' '}
-            {formatLiters(qualifyInput.waterReserve)} reserve × {qualifyInput.refillsPerYear}/year actual
-          </div>
         </Card>
       </Section>
 
@@ -134,14 +138,14 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
           />
           <StatCard
             label="Actual IPI Opportunity"
-            value={`${formatRupeesCompact(commercial.ipiOpportunityActualAnnual)}/yr`}
+            value={quantifyInput ? `${formatRupeesCompact(commercial.ipiOpportunityActualAnnual)}/yr` : '—'}
             emphasis
           />
         </div>
         <Card>
           <IntelRow label="IPI Equipment Requirement" value="Verified" />
-          <IntelRow label="Playable-Day Objective" value={formatNumber(qualifyInput.daysOpenPerYear)} mono />
-          <IntelRow label="Equipment Downtime Target" value="≤ 24 hrs" mono />
+          <IntelRow label="Playable-Day Objective" value={formatNumber(PLAYABLE_DAYS_PER_YEAR)} mono />
+          <IntelRow label="Equipment Downtime Target" value={EQUIPMENT_DOWNTIME_TARGET} mono />
           <IntelRow label="Currently Priced Draft SOW" value={formatRupeesCompact(pricedTotal)} mono />
           <IntelRow label="Unpriced SOW" value={hasUnpriced ? 'TBD' : '—'} mono />
           <IntelRow

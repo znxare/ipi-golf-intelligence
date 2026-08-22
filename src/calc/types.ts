@@ -8,21 +8,16 @@ export type CertifyPath =
   | 'project_feasibility_stop'
 
 export interface QualifyInput {
-  courseCode: string
+  courseName: string
   location: string
   customerType: CustomerType
-  daysOpenPerYear: number
-  pricePerRound: number
+  playableHoursPerDay: number
   potentialPlayersPerDay: number
-  actualPlayersPerDay: number
-  potentialMaintenanceSpendPerDay: number
-  actualCustomerSpendPerMonth: number
-  salaryCostPerDay: number
-  waterRequirementPotentialPerDay: number
+  pricePerRound: number
+  expensesPerDay: number
+  salariesPerMonth: number
   waterReserve: number
-  tankerCapacity: number
   tankerCost: number
-  refillsPerYear: number
   superintendent: string
   directorOfOperations: string
   procurementHead: string
@@ -91,8 +86,7 @@ export interface CommercialViewData {
   revenueSpendPotentialAnnual: number
   revenueSpendActualAnnual: number
   annualSalaryCost: number
-  annualWaterCostPotential: number
-  annualWaterCostActual: number
+  annualWaterCost: number
   ipiOpportunityPotentialAnnual: number
   ipiOpportunityActualAnnual: number
 }
