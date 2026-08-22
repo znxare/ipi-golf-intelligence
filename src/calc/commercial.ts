@@ -1,5 +1,6 @@
 import type { EquipmentCatalogItem } from '../data/equipmentCatalog'
 import { PLAYABLE_DAYS_PER_YEAR, TANKER_CAPACITY_LITERS } from './constants'
+import { derivePotentialPlayersPerDay } from './qualify'
 import type { CommercialViewData, QualifyInput } from './types'
 
 export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
@@ -32,7 +33,7 @@ export function calculateCommercialView(
   input: QualifyInput,
   actual: { actualPlayersPerDay: number; actualSpendPerMonth: number },
 ): CommercialViewData {
-  const annualPlayersPotential = input.potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
+  const annualPlayersPotential = derivePotentialPlayersPerDay(input.playableHoursPerDay) * PLAYABLE_DAYS_PER_YEAR
   const annualPlayersActual = actual.actualPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
 
   const actualRevenuePerDay = actual.actualPlayersPerDay * input.pricePerRound

@@ -21,7 +21,6 @@ export interface QualifyInput {
   location: string
   customerType: CustomerType
   playableHoursPerDay: number
-  potentialPlayersPerDay: number
   pricePerRound: number
   expensesPerDay: number
   salariesPerMonth: number
@@ -37,6 +36,7 @@ export interface QualifyInput {
 }
 
 export interface QualifyResult {
+  potentialPlayersPerDay: number
   annualRounds: number
   potentialRevenueAnnual: number
   estimatedOperatingCostAnnual: number

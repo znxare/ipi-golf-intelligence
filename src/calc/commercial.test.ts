@@ -6,8 +6,7 @@ const EXAMPLE_CUSTOMER: QualifyInput = {
   courseName: '18H / P72 / 7.5K YD',
   location: '',
   customerType: 'non_existing',
-  playableHoursPerDay: 12,
-  potentialPlayersPerDay: 192,
+  playableHoursPerDay: 20, // 20h × 60 / 10min slots = 120 players/day
   pricePerRound: 5_500,
   expensesPerDay: 300_000,
   salariesPerMonth: 980_000, // ₹1.176 Cr/year
@@ -36,8 +35,8 @@ describe('calculateCommercialView', () => {
   })
 
   it('computes the potential side from the Customer Input Card', () => {
-    expect(result.annualPlayersPotential).toBe(64_512)
-    expect(result.revenueSpendPotentialAnnual).toBe(354_816_000)
+    expect(result.annualPlayersPotential).toBe(40_320) // 120/day × 336
+    expect(result.revenueSpendPotentialAnnual).toBe(221_760_000)
   })
 
   it('derives water cost from reserve, tanker cost and the fixed tanker capacity', () => {

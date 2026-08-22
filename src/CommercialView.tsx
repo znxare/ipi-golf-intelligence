@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { calculateCommercialView, calculateDraftSowTotal } from './calc/commercial'
 import { EQUIPMENT_DOWNTIME_TARGET, PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
+import { derivePotentialPlayersPerDay } from './calc/qualify'
 import { Card, IntelRow, PotentialActualRow, StatCard } from './components/ui'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment } from './domain/assessment'
@@ -72,7 +73,7 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
           </div>
           <PotentialActualRow
             label="Players / Day"
-            potential={formatNumber(qualifyInput.potentialPlayersPerDay)}
+            potential={formatNumber(derivePotentialPlayersPerDay(qualifyInput.playableHoursPerDay))}
             actual={quantifyInput ? formatNumber(quantifyInput.actualPlayersPerDay) : '—'}
           />
           <PotentialActualRow

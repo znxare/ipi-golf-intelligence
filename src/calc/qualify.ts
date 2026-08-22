@@ -1,4 +1,4 @@
-import { PLAYABLE_DAYS_PER_YEAR } from './constants'
+import { PLAYABLE_DAYS_PER_YEAR, SLOT_INTERVAL_MINUTES } from './constants'
 import type { QualifyInput, QualifyResult } from './types'
 
 /**
@@ -8,11 +8,23 @@ import type { QualifyInput, QualifyResult } from './types'
  */
 export const DEFAULT_IPI_OPPORTUNITY_RATE = 0.14
 
+/** Tee-sheet capacity: one player-unit per bookable slot at the fixed slot interval. */
+export function derivePotentialPlayersPerDay(playableHoursPerDay: number): number {
+  return Math.round((playableHoursPerDay * 60) / SLOT_INTERVAL_MINUTES)
+}
+
 export function calculateQualify(input: QualifyInput): QualifyResult {
-  const annualRounds = input.potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
+  const potentialPlayersPerDay = derivePotentialPlayersPerDay(input.playableHoursPerDay)
+  const annualRounds = potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
   const potentialRevenueAnnual = annualRounds * input.pricePerRound
   const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
   const ipiOpportunityAnnual = estimatedOperatingCostAnnual * DEFAULT_IPI_OPPORTUNITY_RATE
 
-  return { annualRounds, potentialRevenueAnnual, estimatedOperatingCostAnnual, ipiOpportunityAnnual }
+  return {
+    potentialPlayersPerDay,
+    annualRounds,
+    potentialRevenueAnnual,
+    estimatedOperatingCostAnnual,
+    ipiOpportunityAnnual,
+  }
 }

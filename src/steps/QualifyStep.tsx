@@ -112,18 +112,13 @@ export function QualifyStep({
           </div>
 
           <SectionLabel>Capacity</SectionLabel>
-          <div className="mb-5 grid grid-cols-4 gap-3">
+          <div className="mb-5 grid grid-cols-3 gap-3">
             <FixedField label="Slot interval" value={`${SLOT_INTERVAL_MINUTES} min`} />
             <SelectField
               label="Playable hours / day"
               value={input.playableHoursPerDay}
               onChange={(v) => onChange({ ...input, playableHoursPerDay: v })}
               options={HOURS_OPTIONS}
-            />
-            <Field
-              label="Potential players / day"
-              value={input.potentialPlayersPerDay}
-              onChange={(v) => onChange({ ...input, potentialPlayersPerDay: v })}
             />
             <Field
               label="Avg green fee"

@@ -38,7 +38,6 @@ export function createDefaultQualifyInput(): QualifyInput {
     location: '',
     customerType: 'non_existing',
     playableHoursPerDay: 12,
-    potentialPlayersPerDay: 192,
     pricePerRound: 5_500,
     expensesPerDay: 300_000,
     salariesPerMonth: 980_000,
