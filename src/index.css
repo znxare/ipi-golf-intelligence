@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+
+  --color-ipi-950: #0a2a1e;
+  --color-ipi-900: #0d3d2c;
+  --color-ipi-800: #124832;
+  --color-ipi-700: #185a3f;
+  --color-ipi-600: #1f7350;
+  --color-ipi-100: #e7efe9;
+  --color-ipi-50: #f4f7f5;
+
+  --color-ink: #0e1f17;
+  --color-hairline: #e3e8e5;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ipi-50);
+  color: var(--color-ink);
+}
