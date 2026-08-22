@@ -2,11 +2,13 @@ import { SLOT_INTERVAL_MINUTES, TANKER_CAPACITY_LITERS } from '../calc/constants
 import { calculateQualify } from '../calc/qualify'
 import type { CustomerType, QualifyInput } from '../calc/types'
 import {
+  BarStat,
   Field,
   FixedField,
   PrimaryButton,
   SectionLabel,
   SelectField,
+  StatBar,
   TextField,
 } from '../components/ui'
 import { EquipmentAudit } from './EquipmentAudit'
@@ -40,46 +42,11 @@ const CUSTOMER_TYPES: {
 
 const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i + 1)
 
-function Icon({ path }: { path: string }) {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d={path} />
-    </svg>
-  )
-}
-
 const ICON_PATHS = {
   calendar: 'M4 6h16v14H4zM4 10h16M8 4v4M16 4v4',
   revenue: 'M12 4v16M9 8h4.5a2 2 0 1 1 0 4H10a2 2 0 1 0 0 4h5',
   cost: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM8.5 12h7',
   target: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 12h.01',
-}
-
-function OpportunityStat({
-  icon,
-  label,
-  value,
-  sublabel,
-  first = false,
-}: {
-  icon: string
-  label: string
-  value: string
-  sublabel: string
-  first?: boolean
-}) {
-  return (
-    <div className={`flex-1 px-4 py-4 ${first ? '' : 'border-l border-hairline'}`}>
-      <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-100 text-mint-600">
-          <Icon path={icon} />
-        </span>
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-ipi-700/60">{label}</span>
-      </div>
-      <div className="font-data text-2xl font-semibold tabular-nums text-ink">{value}</div>
-      <div className="mt-0.5 text-xs text-ipi-700/50">{sublabel}</div>
-    </div>
-  )
 }
 
 export function QualifyStep({
@@ -242,38 +209,33 @@ export function QualifyStep({
         />
       )}
 
-      <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
-        <div className="bg-ipi-900 py-2.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
-          Potential Opportunity
-        </div>
-        <div className="flex flex-wrap bg-white">
-          <OpportunityStat
-            icon={ICON_PATHS.calendar}
-            label="Annual Rounds"
-            value={formatNumber(result.annualRounds)}
-            sublabel="Potential"
-            first
-          />
-          <OpportunityStat
-            icon={ICON_PATHS.revenue}
-            label="Potential Revenue"
-            value={formatRupeesCompact(result.potentialRevenueAnnual)}
-            sublabel="Annual"
-          />
-          <OpportunityStat
-            icon={ICON_PATHS.cost}
-            label="Estimated Operating Cost"
-            value={formatRupeesCompact(result.estimatedOperatingCostAnnual)}
-            sublabel="Annual"
-          />
-          <OpportunityStat
-            icon={ICON_PATHS.target}
-            label="IPI Opportunity"
-            value={formatRupeesCompact(result.ipiOpportunityAnnual)}
-            sublabel="Annual"
-          />
-        </div>
-      </div>
+      <StatBar title="Potential Opportunity">
+        <BarStat
+          icon={ICON_PATHS.calendar}
+          label="Annual Rounds"
+          value={formatNumber(result.annualRounds)}
+          sublabel="Potential"
+          first
+        />
+        <BarStat
+          icon={ICON_PATHS.revenue}
+          label="Potential Revenue"
+          value={formatRupeesCompact(result.potentialRevenueAnnual)}
+          sublabel="Annual"
+        />
+        <BarStat
+          icon={ICON_PATHS.cost}
+          label="Estimated Operating Cost"
+          value={formatRupeesCompact(result.estimatedOperatingCostAnnual)}
+          sublabel="Annual"
+        />
+        <BarStat
+          icon={ICON_PATHS.target}
+          label="IPI Opportunity"
+          value={formatRupeesCompact(result.ipiOpportunityAnnual)}
+          sublabel="Annual"
+        />
+      </StatBar>
 
       <div className="flex justify-end">
         <PrimaryButton onClick={onNext}>

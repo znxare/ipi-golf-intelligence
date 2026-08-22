@@ -1,7 +1,14 @@
 import { calculateQuantify } from '../calc/quantify'
 import type { QuantifyInput } from '../calc/types'
-import { Card, Field, PrimaryButton, SecondaryButton, SectionLabel, StatCard } from '../components/ui'
-import { formatRupees, formatRupeesCompact } from '../format'
+import { BarDivider, BarStat, Field, PrimaryButton, SecondaryButton, SectionLabel, StatBar } from '../components/ui'
+import { formatRupeesCompact } from '../format'
+
+const ICON_PATHS = {
+  equipment: 'M12 3v3M12 18v3M3 12h3M18 12h3M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+  irrigation: 'M12 3c-3 4-6 7-6 10a6 6 0 0 0 12 0c0-3-3-6-6-10Z',
+  maintenance: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM9 9l6 6M15 9l-6 6',
+  total: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 12h.01',
+}
 
 export function QuantifyStep({
   input,
@@ -21,7 +28,7 @@ export function QuantifyStep({
       <SectionLabel>Actuals for this course</SectionLabel>
       <div className="mb-5 grid grid-cols-5 gap-3">
         <Field
-          label="Price / round"
+          label="Avg price"
           value={input.pricePerRound}
           onChange={(v) => onChange({ ...input, pricePerRound: v })}
           suffix="₹"
@@ -32,84 +39,72 @@ export function QuantifyStep({
           onChange={(v) => onChange({ ...input, actualPlayersPerDay: v })}
         />
         <Field
-          label="Golf spend / day"
-          value={input.golfSpendPerDay}
-          onChange={(v) => onChange({ ...input, golfSpendPerDay: v })}
+          label="Golf course spend / month"
+          value={input.golfSpendPerMonth}
+          onChange={(v) => onChange({ ...input, golfSpendPerMonth: v })}
           suffix="₹"
         />
         <Field
-          label="Salaries / day"
-          value={input.salariesPerDay}
-          onChange={(v) => onChange({ ...input, salariesPerDay: v })}
+          label="Salaries / month"
+          value={input.salariesPerMonth}
+          onChange={(v) => onChange({ ...input, salariesPerMonth: v })}
           suffix="₹"
         />
         <Field
-          label="Water / day"
-          value={input.waterPerDay}
-          onChange={(v) => onChange({ ...input, waterPerDay: v })}
+          label="Water / month"
+          value={input.waterPerMonth}
+          onChange={(v) => onChange({ ...input, waterPerMonth: v })}
           suffix="₹"
         />
       </div>
 
-      <SectionLabel>Establish economic opportunity</SectionLabel>
-      <Card className="mb-4">
-        <div className="grid grid-cols-5 gap-3">
-          <StatCard
-            label="BE players / day"
-            value={String(result.breakEvenPlayersPerDay)}
-            sublabel="Break-even"
-          />
-          <StatCard
-            label="Actual players / day"
-            value={String(input.actualPlayersPerDay)}
-            sublabel="Current average"
-          />
-          <StatCard label="Revenue / day" value={formatRupees(result.revenuePerDay)} sublabel="Actual" />
-          <StatCard label="Golf spend / day" value={formatRupeesCompact(input.golfSpendPerDay)} sublabel="Actual" />
-          <StatCard
-            label="IPI opportunity / day"
-            value={formatRupeesCompact(result.ipiOpportunityPerDay)}
-            sublabel="Available for IPI"
-            emphasis
-          />
-        </div>
-        <div className="font-data mt-3 flex flex-wrap gap-x-6 gap-y-1 border-t border-hairline pt-3 text-xs tabular-nums text-ipi-700/70">
-          <span>Current revenue/day: {formatRupees(result.revenuePerDay)}</span>
-          <span>Revenue at BE: {formatRupeesCompact(result.revenueAtBreakEven)}</span>
-          <span>Gap to BE: {result.gapToBreakEvenPlayers} players/day</span>
-        </div>
-      </Card>
+      <StatBar title="IPI Opportunity Breakdown (Annual)">
+        <BarStat
+          icon={ICON_PATHS.equipment}
+          label="Equipment"
+          value={formatRupeesCompact(input.breakdown.equipment)}
+          first
+          editable={{
+            value: input.breakdown.equipment,
+            onChange: (v) => onChange({ ...input, breakdown: { ...input.breakdown, equipment: v } }),
+          }}
+        />
+        <BarStat
+          icon={ICON_PATHS.irrigation}
+          label="Irrigation"
+          value={formatRupeesCompact(input.breakdown.irrigation)}
+          editable={{
+            value: input.breakdown.irrigation,
+            onChange: (v) => onChange({ ...input, breakdown: { ...input.breakdown, irrigation: v } }),
+          }}
+        />
+        <BarStat
+          icon={ICON_PATHS.maintenance}
+          label="Maintenance"
+          value={formatRupeesCompact(input.breakdown.maintenance)}
+          editable={{
+            value: input.breakdown.maintenance,
+            onChange: (v) => onChange({ ...input, breakdown: { ...input.breakdown, maintenance: v } }),
+          }}
+        />
+        <BarDivider />
+        <BarStat
+          icon={ICON_PATHS.total}
+          label="Total IPI Opportunity"
+          value={formatRupeesCompact(result.totalIpiOpportunity)}
+          emphasis
+        />
+      </StatBar>
 
-      <SectionLabel>IPI opportunity breakdown</SectionLabel>
-      <Card className="mb-5">
-        <div className="grid grid-cols-5 gap-3">
-          <Field
-            label="Equipment"
-            value={input.breakdown.equipment}
-            onChange={(v) => onChange({ ...input, breakdown: { ...input.breakdown, equipment: v } })}
-            suffix="₹"
-          />
-          <Field
-            label="Irrigation"
-            value={input.breakdown.irrigation}
-            onChange={(v) => onChange({ ...input, breakdown: { ...input.breakdown, irrigation: v } })}
-            suffix="₹"
-          />
-          <Field
-            label="Maintenance"
-            value={input.breakdown.maintenance}
-            onChange={(v) => onChange({ ...input, breakdown: { ...input.breakdown, maintenance: v } })}
-            suffix="₹"
-          />
-          <Field
-            label="Management"
-            value={input.breakdown.management}
-            onChange={(v) => onChange({ ...input, breakdown: { ...input.breakdown, management: v } })}
-            suffix="₹"
-          />
-          <StatCard label="Total IPI opportunity" value={formatRupeesCompact(result.totalIpiOpportunity)} emphasis />
-        </div>
-      </Card>
+      <div className="mb-5 flex gap-2 rounded-lg border border-hairline bg-ipi-50/60 px-3 py-2.5 text-xs text-ipi-700/70">
+        <span className="flex h-4 w-4 flex-none items-center justify-center rounded-full bg-ipi-700 text-[10px] font-semibold text-white">
+          i
+        </span>
+        <span>
+          IPI Opportunity = Equipment + Irrigation + Maintenance. This is the annual opportunity available for
+          IPI Scope of Work, subject to verification.
+        </span>
+      </div>
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>

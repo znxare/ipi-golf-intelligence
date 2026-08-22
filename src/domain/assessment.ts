@@ -57,14 +57,13 @@ export function createDefaultQuantifyInput(actualPlayersPerDay = 17): QuantifyIn
   return {
     pricePerRound: 5_500,
     actualPlayersPerDay,
-    golfSpendPerDay: 300_000,
-    salariesPerDay: 100_000,
-    waterPerDay: 40_000,
+    golfSpendPerMonth: 8_400_000,
+    salariesPerMonth: 2_800_000,
+    waterPerMonth: 1_120_000,
     breakdown: {
       equipment: 4_000_000,
       irrigation: 2_000_000,
       maintenance: 3_000_000,
-      management: 5_000_000,
     },
   }
 }

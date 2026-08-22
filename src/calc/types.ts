@@ -46,23 +46,18 @@ export interface QualifyResult {
 export interface QuantifyInput {
   pricePerRound: number
   actualPlayersPerDay: number
-  golfSpendPerDay: number
-  salariesPerDay: number
-  waterPerDay: number
+  golfSpendPerMonth: number
+  salariesPerMonth: number
+  waterPerMonth: number
   breakdown: {
     equipment: number
     irrigation: number
     maintenance: number
-    management: number
   }
 }
 
 export interface QuantifyResult {
   breakEvenPlayersPerDay: number
-  revenuePerDay: number
-  ipiOpportunityPerDay: number
-  revenueAtBreakEven: number
-  gapToBreakEvenPlayers: number
   totalIpiOpportunity: number
 }
 

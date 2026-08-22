@@ -21,7 +21,7 @@ const EXAMPLE_CUSTOMER: QualifyInput = {
   equipmentAudit: [],
 }
 
-const ACTUAL = { actualPlayersPerDay: 17, actualSpendPerDay: 300_000 }
+const ACTUAL = { actualPlayersPerDay: 17, actualSpendPerMonth: 8_400_000 }
 
 describe('calculateCommercialView', () => {
   const result = calculateCommercialView(EXAMPLE_CUSTOMER, ACTUAL)
@@ -32,7 +32,7 @@ describe('calculateCommercialView', () => {
     expect(result.breakEvenPlayersPerDay).toBe(55)
     expect(result.gapToBreakEvenPlayers).toBe(38)
     expect(result.annualSalaryCost).toBe(11_760_000) // ₹1.176 Cr
-    expect(result.revenueSpendActualAnnual).toBe(100_800_000) // actualSpendPerDay × 336
+    expect(result.revenueSpendActualAnnual).toBe(100_800_000) // actualSpendPerMonth × 12
   })
 
   it('computes the potential side from the Customer Input Card', () => {

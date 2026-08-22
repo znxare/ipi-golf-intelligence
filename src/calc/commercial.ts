@@ -30,7 +30,7 @@ export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
  */
 export function calculateCommercialView(
   input: QualifyInput,
-  actual: { actualPlayersPerDay: number; actualSpendPerDay: number },
+  actual: { actualPlayersPerDay: number; actualSpendPerMonth: number },
 ): CommercialViewData {
   const annualPlayersPotential = input.potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
   const annualPlayersActual = actual.actualPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
@@ -40,7 +40,7 @@ export function calculateCommercialView(
   const gapToBreakEvenPlayers = breakEvenPlayersPerDay - actual.actualPlayersPerDay
 
   const revenueSpendPotentialAnnual = annualPlayersPotential * input.pricePerRound
-  const revenueSpendActualAnnual = actual.actualSpendPerDay * PLAYABLE_DAYS_PER_YEAR
+  const revenueSpendActualAnnual = actual.actualSpendPerMonth * 12
 
   const annualSalaryCost = input.salariesPerMonth * 12
 
