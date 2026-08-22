@@ -65,6 +65,7 @@ export function createDefaultQuantifyInput(actualPlayersPerDay = 17): QuantifyIn
       irrigation: 2_000_000,
       maintenance: 3_000_000,
     },
+    equipmentVerification: {},
   }
 }
 

@@ -1,6 +1,7 @@
 import { calculateQuantify } from '../calc/quantify'
 import type { QuantifyInput } from '../calc/types'
 import { BarDivider, BarStat, Field, PrimaryButton, SecondaryButton, SectionLabel, StatBar } from '../components/ui'
+import { EquipmentVerification } from './EquipmentVerification'
 import { formatRupeesCompact } from '../format'
 
 const ICON_PATHS = {
@@ -57,6 +58,11 @@ export function QuantifyStep({
           suffix="₹"
         />
       </div>
+
+      <EquipmentVerification
+        lines={input.equipmentVerification}
+        onChange={(equipmentVerification) => onChange({ ...input, equipmentVerification })}
+      />
 
       <StatBar title="IPI Opportunity Breakdown (Annual)">
         <BarStat

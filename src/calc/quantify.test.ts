@@ -14,6 +14,7 @@ describe('calculateQuantify', () => {
         irrigation: 2_000_000,
         maintenance: 3_000_000,
       },
+      equipmentVerification: {},
     })
 
     expect(result.breakEvenPlayersPerDay).toBe(55)

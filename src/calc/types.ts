@@ -43,6 +43,13 @@ export interface QualifyResult {
   ipiOpportunityAnnual: number
 }
 
+export interface EquipmentVerificationLine {
+  /** Rep confirms the template quantity is correct as-is. */
+  confirmed: boolean
+  /** Only meaningful when not confirmed — the rep's override. */
+  sowQty: string
+}
+
 export interface QuantifyInput {
   pricePerRound: number
   actualPlayersPerDay: number
@@ -54,6 +61,8 @@ export interface QuantifyInput {
     irrigation: number
     maintenance: number
   }
+  /** Keyed by equipment catalog id. */
+  equipmentVerification: Record<string, EquipmentVerificationLine>
 }
 
 export interface QuantifyResult {
