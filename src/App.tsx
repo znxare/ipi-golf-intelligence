@@ -7,14 +7,11 @@ import type { Assessment } from './domain/assessment'
 function Sidebar() {
   return (
     <div className="flex w-48 flex-col gap-4 bg-ipi-900 px-3 py-4">
-      <div className="flex items-center gap-2 px-1.5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-ipi-600 font-data text-xs font-semibold text-white">
-          IPI
+      <div className="px-1">
+        <div className="overflow-hidden rounded-lg bg-white p-1.5">
+          <img src="/ipi-logo.jpg" alt="IPI" className="block h-14 w-full rounded object-cover" />
         </div>
-        <div>
-          <div className="text-sm font-medium leading-tight text-white">Golf Intelligence</div>
-          <div className="text-[10px] leading-tight text-white/45">Transaction Platform</div>
-        </div>
+        <div className="mt-1.5 text-center text-[10px] tracking-wide text-white/45">Transaction Platform</div>
       </div>
       <div className="flex items-center gap-2 rounded-md bg-white/15 px-2.5 py-2 text-sm text-white">
         Transaction

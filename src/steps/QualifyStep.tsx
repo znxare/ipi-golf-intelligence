@@ -48,7 +48,6 @@ function Icon({ path }: { path: string }) {
 }
 
 const ICON_PATHS = {
-  players: 'M4 19a5 5 0 0 1 10 0M9 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM14 19a4 4 0 0 1 7 0M17.5 10a2.5 2.5 0 1 0 0-5',
   calendar: 'M4 6h16v14H4zM4 10h16M8 4v4M16 4v4',
   revenue: 'M12 4v16M9 8h4.5a2 2 0 1 1 0 4H10a2 2 0 1 0 0 4h5',
   cost: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM8.5 12h7',
@@ -71,7 +70,7 @@ function OpportunityStat({
   return (
     <div className={`flex-1 px-4 py-4 ${first ? '' : 'border-l border-hairline'}`}>
       <div className="mb-2 flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ipi-100 text-ipi-700">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-100 text-mint-600">
           <Icon path={icon} />
         </span>
         <span className="text-[11px] font-semibold uppercase tracking-wide text-ipi-700/60">{label}</span>
@@ -241,17 +240,11 @@ export function QualifyStep({
         </div>
         <div className="flex flex-wrap bg-white">
           <OpportunityStat
-            icon={ICON_PATHS.players}
-            label="Players / Day"
-            value={formatNumber(input.potentialPlayersPerDay)}
-            sublabel="Potential"
-            first
-          />
-          <OpportunityStat
             icon={ICON_PATHS.calendar}
             label="Annual Rounds"
             value={formatNumber(result.annualRounds)}
             sublabel="Potential"
+            first
           />
           <OpportunityStat
             icon={ICON_PATHS.revenue}
