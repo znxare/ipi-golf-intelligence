@@ -1,6 +1,7 @@
 import { calculateVerify } from '../calc/verify'
-import type { AbilityToPay, QuantifyResult, VerifyInput } from '../calc/types'
+import type { AbilityToPay, QualifyInput, QuantifyInput, QuantifyResult, VerifyInput } from '../calc/types'
 import { Card, Field, PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
+import { CustomerAssumptionCard } from '../CustomerAssumptionCard'
 import { formatRupeesCompact } from '../format'
 
 const CLASSIFICATION: Record<AbilityToPay, { title: string; traits: string[] }> = {
@@ -22,12 +23,16 @@ export function VerifyStep({
   input,
   onChange,
   quantifyResult,
+  qualifyInput,
+  quantifyInput,
   onNext,
   onBack,
 }: {
   input: VerifyInput
   onChange: (input: VerifyInput) => void
   quantifyResult: QuantifyResult
+  qualifyInput: QualifyInput
+  quantifyInput: QuantifyInput
   onNext: () => void
   onBack: () => void
 }) {
@@ -36,6 +41,11 @@ export function VerifyStep({
 
   return (
     <div>
+      <SectionLabel>Customer Assumption Card — results generated from customer inputs</SectionLabel>
+      <div className="mb-5">
+        <CustomerAssumptionCard qualifyInput={qualifyInput} quantifyInput={quantifyInput} />
+      </div>
+
       <SectionLabel>Verify operational and financial viability</SectionLabel>
       <Card className="mb-5">
         <div className="mb-3 text-sm">

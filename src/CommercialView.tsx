@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import { calculateCommercialView, calculateDraftSowTotal } from './calc/commercial'
 import { EQUIPMENT_DOWNTIME_TARGET, PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
-import { derivePotentialPlayersPerDay } from './calc/qualify'
-import { Card, IntelRow, PotentialActualRow, StatCard } from './components/ui'
+import { Card, IntelRow, StatCard } from './components/ui'
+import { CustomerAssumptionCard } from './CustomerAssumptionCard'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment } from './domain/assessment'
-import { formatNumber, formatRupees, formatRupeesCompact } from './format'
+import { formatNumber, formatRupeesCompact } from './format'
 
 const CUSTOMER_TYPE_LABEL: Record<string, string> = {
   existing: 'Existing IPI',
@@ -64,73 +64,11 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
         </Card>
       </Section>
 
-      <Section n={3} title="Playing & Revenue Intelligence">
-        <Card>
-          <div className="mb-1 grid grid-cols-[1fr_auto_auto] gap-4 text-xs text-ipi-700/50">
-            <span />
-            <span className="w-28 text-right">Potential</span>
-            <span className="w-28 text-right">Actual</span>
-          </div>
-          <PotentialActualRow
-            label="Players / Day"
-            potential={formatNumber(derivePotentialPlayersPerDay(qualifyInput.playableHoursPerDay))}
-            actual={quantifyInput ? formatNumber(quantifyInput.actualPlayersPerDay) : '—'}
-          />
-          <PotentialActualRow
-            label="Annual Players"
-            potential={formatNumber(commercial.annualPlayersPotential)}
-            actual={quantifyInput ? formatNumber(commercial.annualPlayersActual) : '—'}
-          />
-          <PotentialActualRow
-            label="Avg Green Fee"
-            potential={formatRupees(qualifyInput.pricePerRound)}
-            actual={formatRupees(qualifyInput.pricePerRound)}
-          />
-          <PotentialActualRow
-            label="Actual Revenue / Day"
-            potential="—"
-            actual={quantifyInput ? formatRupees(commercial.actualRevenuePerDay) : '—'}
-          />
-          <PotentialActualRow label="Break-even Players / Day" potential="—" actual={formatNumber(commercial.breakEvenPlayersPerDay)} />
-          <PotentialActualRow
-            label="Gap to Break-even"
-            potential="—"
-            actual={quantifyInput ? `${formatNumber(commercial.gapToBreakEvenPlayers)}/day` : '—'}
-          />
-        </Card>
+      <Section n={3} title="Customer Assumption Card">
+        <CustomerAssumptionCard qualifyInput={qualifyInput} quantifyInput={quantifyInput} />
       </Section>
 
-      <Section n={4} title="Commercial Intelligence">
-        <Card>
-          <div className="mb-1 grid grid-cols-[1fr_auto_auto] gap-4 text-xs text-ipi-700/50">
-            <span />
-            <span className="w-28 text-right">Potential</span>
-            <span className="w-28 text-right">Actual</span>
-          </div>
-          <PotentialActualRow
-            label="Revenue / Customer Spend"
-            potential={`${formatRupeesCompact(commercial.revenueSpendPotentialAnnual)}/yr`}
-            actual={quantifyInput ? `${formatRupeesCompact(commercial.revenueSpendActualAnnual)}/yr` : '—'}
-          />
-          <PotentialActualRow
-            label="Annual Salary Cost"
-            potential={formatRupeesCompact(commercial.annualSalaryCost)}
-            actual={formatRupeesCompact(commercial.annualSalaryCost)}
-          />
-          <PotentialActualRow
-            label="Annual Water Cost"
-            potential={formatRupeesCompact(commercial.annualWaterCost)}
-            actual={formatRupeesCompact(commercial.annualWaterCost)}
-          />
-          <PotentialActualRow
-            label="IPI Opportunity / Year"
-            potential={formatRupeesCompact(commercial.ipiOpportunityPotentialAnnual)}
-            actual={quantifyInput ? formatRupeesCompact(commercial.ipiOpportunityActualAnnual) : '—'}
-          />
-        </Card>
-      </Section>
-
-      <Section n={5} title="Commercial Position">
+      <Section n={4} title="Commercial Position">
         <div className="mb-3 grid grid-cols-2 gap-3">
           <StatCard
             label="Potential IPI Opportunity"
