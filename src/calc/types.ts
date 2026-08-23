@@ -68,7 +68,7 @@ export interface QuantifyInput {
 
 export interface QuantifyResult {
   breakEvenPlayersPerDay: number
-  totalIpiOpportunity: number
+  actualIpiOpportunity: number
 }
 
 export interface CertifyResult {

@@ -1,21 +1,23 @@
 import { calculateQuantify } from '../calc/quantify'
-import type { QuantifyInput } from '../calc/types'
+import type { QualifyInput, QuantifyInput } from '../calc/types'
 import { Field, PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
 import { EquipmentVerification } from './EquipmentVerification'
 import { IpiOpportunityBreakdown } from '../IpiOpportunityBreakdown'
 
 export function QuantifyStep({
+  qualifyInput,
   input,
   onChange,
   onNext,
   onBack,
 }: {
+  qualifyInput: QualifyInput
   input: QuantifyInput
   onChange: (input: QuantifyInput) => void
   onNext: () => void
   onBack: () => void
 }) {
-  const result = calculateQuantify(input)
+  const result = calculateQuantify(qualifyInput, input)
 
   return (
     <div>
@@ -59,7 +61,7 @@ export function QuantifyStep({
 
       <IpiOpportunityBreakdown
         breakdown={input.breakdown}
-        total={result.totalIpiOpportunity}
+        total={result.actualIpiOpportunity}
         onChange={(breakdown) => onChange({ ...input, breakdown })}
       />
 

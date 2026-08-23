@@ -75,7 +75,7 @@ export function AssessmentsList({ onOpen }: { onOpen: (assessment: Assessment) =
               <div className="flex items-center gap-4">
                 {a.quantifyResult && (
                   <div className="font-data text-sm font-medium tabular-nums text-ipi-900">
-                    {formatRupeesCompact(a.quantifyResult.totalIpiOpportunity)}
+                    {formatRupeesCompact(a.quantifyResult.actualIpiOpportunity)}
                   </div>
                 )}
                 <Badge variant={STATUS_VARIANT[a.status]}>{STATUS_LABEL[a.status]}</Badge>

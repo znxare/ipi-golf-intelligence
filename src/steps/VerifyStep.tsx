@@ -15,7 +15,7 @@ export function VerifyStep({
   onNext: () => void
   onBack: () => void
 }) {
-  const quantifyResult = calculateQuantify(quantifyInput)
+  const quantifyResult = calculateQuantify(qualifyInput, quantifyInput)
 
   return (
     <div>
@@ -24,7 +24,7 @@ export function VerifyStep({
         <CustomerAssumptionCard qualifyInput={qualifyInput} quantifyInput={quantifyInput} />
       </div>
 
-      <IpiOpportunityBreakdown breakdown={quantifyInput.breakdown} total={quantifyResult.totalIpiOpportunity} />
+      <IpiOpportunityBreakdown breakdown={quantifyInput.breakdown} total={quantifyResult.actualIpiOpportunity} />
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>

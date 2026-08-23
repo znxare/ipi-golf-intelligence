@@ -15,9 +15,12 @@ export interface EquipmentBreakdown {
 }
 
 /**
- * Shared with Quantify — the bannered Equipment + Irrigation + Maintenance
- * = Total stat bar. Editable there (pass onChange); read-only elsewhere
- * (e.g. Verify, reviewing what Quantify already set) when omitted.
+ * Shared with Quantify — the bannered Equipment / Irrigation / Maintenance
+ * SOW pricing breakdown, alongside Actual IPI Opportunity (revenue minus
+ * actual cost of operations, from calculateQuantify — not a sum of the
+ * three breakdown fields). Breakdown is editable there (pass onChange);
+ * read-only elsewhere (e.g. Verify, reviewing what Quantify already set)
+ * when omitted.
  */
 export function IpiOpportunityBreakdown({
   breakdown,
@@ -51,7 +54,7 @@ export function IpiOpportunityBreakdown({
           editable={onChange ? { value: breakdown.maintenance, onChange: (v) => onChange({ ...breakdown, maintenance: v }) } : undefined}
         />
         <BarDivider />
-        <BarStat icon={ICON_PATHS.total} label="Total IPI Opportunity" value={formatRupeesCompact(total)} emphasis />
+        <BarStat icon={ICON_PATHS.total} label="Actual IPI Opportunity" value={formatRupeesCompact(total)} emphasis />
       </StatBar>
 
       <div className="mb-5 flex gap-2 rounded-lg border border-hairline bg-ipi-50/60 px-3 py-2.5 text-xs text-ipi-700/70">
@@ -59,8 +62,9 @@ export function IpiOpportunityBreakdown({
           i
         </span>
         <span>
-          IPI Opportunity = Equipment + Irrigation + Maintenance. This is the annual opportunity available for
-          IPI Scope of Work, subject to verification.
+          Actual IPI Opportunity = actual revenue (players/day × avg green fee × 336 days) minus actual cost of
+          operations (golf spend + salaries + water, per month × 12). Equipment / Irrigation / Maintenance below is
+          the itemized SOW pricing breakdown, priced independently.
         </span>
       </div>
     </div>
