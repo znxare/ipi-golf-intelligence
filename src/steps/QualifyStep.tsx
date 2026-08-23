@@ -43,6 +43,7 @@ const CUSTOMER_TYPES: {
 const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i + 1)
 
 const ICON_PATHS = {
+  players: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M11 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M17.5 3.13a4 4 0 0 1 0 7.75',
   calendar: 'M4 6h16v14H4zM4 10h16M8 4v4M16 4v4',
   revenue: 'M12 4v16M9 8h4.5a2 2 0 1 1 0 4H10a2 2 0 1 0 0 4h5',
   cost: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16ZM8.5 12h7',
@@ -206,11 +207,17 @@ export function QualifyStep({
 
       <StatBar title="Potential Opportunity">
         <BarStat
-          icon={ICON_PATHS.calendar}
-          label="Annual Rounds"
-          value={formatNumber(result.annualRounds)}
+          icon={ICON_PATHS.players}
+          label="Players / Day"
+          value={formatNumber(result.potentialPlayersPerDay)}
           sublabel="Potential"
           first
+        />
+        <BarStat
+          icon={ICON_PATHS.calendar}
+          label="Annual Players"
+          value={formatNumber(result.annualRounds)}
+          sublabel="Potential"
         />
         <BarStat
           icon={ICON_PATHS.revenue}
@@ -220,9 +227,9 @@ export function QualifyStep({
         />
         <BarStat
           icon={ICON_PATHS.cost}
-          label="Estimated Operating Cost"
-          value={formatRupeesCompact(result.estimatedOperatingCostAnnual)}
-          sublabel="Annual"
+          label="Total Cost of Operations"
+          value={formatRupeesCompact(result.totalCostOfOperations)}
+          sublabel="Expenses + Salary + Water · Annual"
         />
         <BarStat
           icon={ICON_PATHS.target}

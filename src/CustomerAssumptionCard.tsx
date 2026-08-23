@@ -75,6 +75,11 @@ export function CustomerAssumptionCard({
           actual={quantifyInput ? `${formatRupeesCompact(commercial.revenueSpendActualAnnual)}/yr` : '—'}
         />
         <PotentialActualRow
+          label="Annual Operating Cost"
+          potential={formatRupeesCompact(commercial.estimatedOperatingCostAnnual)}
+          actual={formatRupeesCompact(commercial.estimatedOperatingCostAnnual)}
+        />
+        <PotentialActualRow
           label="Annual Salary Cost"
           potential={formatRupeesCompact(commercial.annualSalaryCost)}
           actual={formatRupeesCompact(commercial.annualSalaryCost)}
@@ -83,6 +88,11 @@ export function CustomerAssumptionCard({
           label="Annual Water Cost"
           potential={formatRupeesCompact(commercial.annualWaterCost)}
           actual={formatRupeesCompact(commercial.annualWaterCost)}
+        />
+        <PotentialActualRow
+          label="Total Cost of Operations"
+          potential={formatRupeesCompact(commercial.totalCostOfOperations)}
+          actual={formatRupeesCompact(commercial.totalCostOfOperations)}
         />
         <PotentialActualRow
           label="IPI Opportunity / Year"
@@ -97,6 +107,7 @@ export function CustomerAssumptionCard({
             Qualify — Potential IPI Opportunity
           </div>
           <WaterfallLine label="Revenue / Customer Spend" value={formatRupeesCompact(commercial.revenueSpendPotentialAnnual)} />
+          <WaterfallLine label="− Annual Operating Cost" value={formatRupeesCompact(commercial.estimatedOperatingCostAnnual)} />
           <WaterfallLine label="− Annual Salary Cost" value={formatRupeesCompact(commercial.annualSalaryCost)} />
           <WaterfallLine label="− Annual Water Cost" value={formatRupeesCompact(commercial.annualWaterCost)} />
           <WaterfallLine label="= IPI Opportunity / Year" value={formatRupeesCompact(commercial.ipiOpportunityPotentialAnnual)} isTotal />
@@ -108,6 +119,7 @@ export function CustomerAssumptionCard({
           {quantifyInput ? (
             <>
               <WaterfallLine label="Revenue / Customer Spend" value={formatRupeesCompact(commercial.revenueSpendActualAnnual)} />
+              <WaterfallLine label="− Annual Operating Cost" value={formatRupeesCompact(commercial.estimatedOperatingCostAnnual)} />
               <WaterfallLine label="− Annual Salary Cost" value={formatRupeesCompact(commercial.annualSalaryCost)} />
               <WaterfallLine label="− Annual Water Cost" value={formatRupeesCompact(commercial.annualWaterCost)} />
               <WaterfallLine label="= IPI Opportunity / Year" value={formatRupeesCompact(commercial.ipiOpportunityActualAnnual)} isTotal />

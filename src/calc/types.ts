@@ -38,6 +38,9 @@ export interface QualifyResult {
   annualRounds: number
   potentialRevenueAnnual: number
   estimatedOperatingCostAnnual: number
+  annualWaterCost: number
+  annualSalaryCost: number
+  totalCostOfOperations: number
   ipiOpportunityAnnual: number
 }
 
@@ -87,8 +90,10 @@ export interface CommercialViewData {
   gapToBreakEvenPlayers: number
   revenueSpendPotentialAnnual: number
   revenueSpendActualAnnual: number
+  estimatedOperatingCostAnnual: number
   annualSalaryCost: number
   annualWaterCost: number
+  totalCostOfOperations: number
   ipiOpportunityPotentialAnnual: number
   ipiOpportunityActualAnnual: number
 }

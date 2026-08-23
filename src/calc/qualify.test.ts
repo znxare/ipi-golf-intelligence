@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { calculateQualify } from './qualify'
 
 describe('calculateQualify', () => {
-  it('derives potential players/day from playable hours and the fixed slot interval', () => {
+  it('derives potential players/day from playable hours, the fixed slot interval, and 4 players per tee time', () => {
     const result = calculateQualify({
       courseName: 'Test Course',
       location: '',
       customerType: 'non_existing',
-      playableHoursPerDay: 20, // 20h × 60 / 10min slots = 120 players/day
+      playableHoursPerDay: 20, // 20h × 60 / 10min slots = 120 tee times/day × 4 players = 480 players/day
       pricePerRound: 2500,
       expensesPerDay: 300_000, // ₹3.00 L/day → ₹10.08 Cr/year
       salariesPerMonth: 980_000,
@@ -21,9 +21,14 @@ describe('calculateQualify', () => {
       equipmentAudit: [],
     })
 
-    expect(result.potentialPlayersPerDay).toBe(120)
-    expect(result.annualRounds).toBe(40_320)
-    expect(result.potentialRevenueAnnual).toBe(100_800_000) // ₹10.08 Cr
-    expect(result.ipiOpportunityAnnual).toBeCloseTo(14_112_000, -2) // ₹1.4 Cr
+    expect(result.potentialPlayersPerDay).toBe(480)
+    expect(result.annualRounds).toBe(161_280)
+    expect(result.potentialRevenueAnnual).toBe(403_200_000) // ₹40.32 Cr
+    expect(result.estimatedOperatingCostAnnual).toBe(100_800_000) // ₹10.08 Cr
+    // 500,000L / 20,000L = 25 tankers/refill × ₹1,000 = ₹25,000/refill, × (365/15) refills/yr
+    expect(result.annualWaterCost).toBeCloseTo(608_333.33, 2)
+    expect(result.annualSalaryCost).toBe(11_760_000) // ₹1.176 Cr
+    expect(result.totalCostOfOperations).toBeCloseTo(113_168_333.33, 2)
+    expect(result.ipiOpportunityAnnual).toBeCloseTo(290_031_666.67, 2)
   })
 })

@@ -1,5 +1,6 @@
 import type { EquipmentCatalogItem } from '../data/equipmentCatalog'
-import { PLAYABLE_DAYS_PER_YEAR, TANKER_CAPACITY_LITERS } from './constants'
+import { PLAYABLE_DAYS_PER_YEAR } from './constants'
+import { deriveAnnualSalaryCost, deriveAnnualWaterCost } from './costs'
 import { derivePotentialPlayersPerDay } from './qualify'
 import type { CommercialViewData, QualifyInput } from './types'
 
@@ -20,14 +21,17 @@ export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
 }
 
 /**
- * IPI opportunity = the customer's spend/revenue capacity, minus the two
- * fixed costs (salary, water) they carry regardless of who services the
- * course. What's left is the budget IPI's scope of work can address.
+ * IPI opportunity = the customer's spend/revenue capacity, minus the total
+ * cost of operations (day-to-day expenses + salary + water refills) they
+ * carry regardless of who services the course. What's left is the budget
+ * IPI's scope of work can address.
  *
  * Qualify's Customer Input Card only captures potential/structural facts —
  * actuals (players, spend) come from Quantify once it's been run. For a
  * New Build course Quantify never runs, so `actual` is all zeros, which is
- * correct: there's no current operation to measure yet.
+ * correct: there's no current operation to measure yet. The cost side is
+ * always drawn from the frozen Customer Input Card, so it's the same for
+ * both the potential and actual opportunity figures.
  */
 export function calculateCommercialView(
   input: QualifyInput,
@@ -43,14 +47,13 @@ export function calculateCommercialView(
   const revenueSpendPotentialAnnual = annualPlayersPotential * input.pricePerRound
   const revenueSpendActualAnnual = actual.actualSpendPerMonth * 12
 
-  const annualSalaryCost = input.salariesPerMonth * 12
+  const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
+  const annualSalaryCost = deriveAnnualSalaryCost(input.salariesPerMonth)
+  const annualWaterCost = deriveAnnualWaterCost(input.waterReserve, input.tankerCost)
+  const totalCostOfOperations = estimatedOperatingCostAnnual + annualSalaryCost + annualWaterCost
 
-  // One reserve refill's cost — recurring frequency isn't captured anymore,
-  // so this is shown as a single figure rather than split potential/actual.
-  const annualWaterCost = (input.waterReserve / TANKER_CAPACITY_LITERS) * input.tankerCost
-
-  const ipiOpportunityPotentialAnnual = revenueSpendPotentialAnnual - annualSalaryCost - annualWaterCost
-  const ipiOpportunityActualAnnual = revenueSpendActualAnnual - annualSalaryCost - annualWaterCost
+  const ipiOpportunityPotentialAnnual = revenueSpendPotentialAnnual - totalCostOfOperations
+  const ipiOpportunityActualAnnual = revenueSpendActualAnnual - totalCostOfOperations
 
   return {
     annualPlayersPotential,
@@ -60,8 +63,10 @@ export function calculateCommercialView(
     gapToBreakEvenPlayers,
     revenueSpendPotentialAnnual,
     revenueSpendActualAnnual,
+    estimatedOperatingCostAnnual,
     annualSalaryCost,
     annualWaterCost,
+    totalCostOfOperations,
     ipiOpportunityPotentialAnnual,
     ipiOpportunityActualAnnual,
   }

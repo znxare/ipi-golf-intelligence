@@ -1,16 +1,11 @@
-import { PLAYABLE_DAYS_PER_YEAR, SLOT_INTERVAL_MINUTES } from './constants'
+import { PLAYABLE_DAYS_PER_YEAR, PLAYERS_PER_TEE_TIME, SLOT_INTERVAL_MINUTES } from './constants'
+import { deriveAnnualSalaryCost, deriveAnnualWaterCost } from './costs'
 import type { QualifyInput, QualifyResult } from './types'
 
-/**
- * Rough share of estimated operating cost typically available for IPI scope
- * at the Qualify stage, before account-specific data exists. Refined by the
- * real Quantify/Verify numbers once gathered — tune this as IPI learns.
- */
-export const DEFAULT_IPI_OPPORTUNITY_RATE = 0.14
-
-/** Tee-sheet capacity: one player-unit per bookable slot at the fixed slot interval. */
+/** Tee-sheet capacity: tee times per day at the fixed slot interval, × 4 players per tee time. */
 export function derivePotentialPlayersPerDay(playableHoursPerDay: number): number {
-  return Math.round((playableHoursPerDay * 60) / SLOT_INTERVAL_MINUTES)
+  const teeTimesPerDay = (playableHoursPerDay * 60) / SLOT_INTERVAL_MINUTES
+  return Math.round(teeTimesPerDay * PLAYERS_PER_TEE_TIME)
 }
 
 export function calculateQualify(input: QualifyInput): QualifyResult {
@@ -18,13 +13,19 @@ export function calculateQualify(input: QualifyInput): QualifyResult {
   const annualRounds = potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
   const potentialRevenueAnnual = annualRounds * input.pricePerRound
   const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
-  const ipiOpportunityAnnual = estimatedOperatingCostAnnual * DEFAULT_IPI_OPPORTUNITY_RATE
+  const annualWaterCost = deriveAnnualWaterCost(input.waterReserve, input.tankerCost)
+  const annualSalaryCost = deriveAnnualSalaryCost(input.salariesPerMonth)
+  const totalCostOfOperations = estimatedOperatingCostAnnual + annualWaterCost + annualSalaryCost
+  const ipiOpportunityAnnual = potentialRevenueAnnual - totalCostOfOperations
 
   return {
     potentialPlayersPerDay,
     annualRounds,
     potentialRevenueAnnual,
     estimatedOperatingCostAnnual,
+    annualWaterCost,
+    annualSalaryCost,
+    totalCostOfOperations,
     ipiOpportunityAnnual,
   }
 }
