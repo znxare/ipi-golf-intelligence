@@ -35,7 +35,7 @@ export interface QualifyInput {
 
 export interface QualifyResult {
   potentialPlayersPerDay: number
-  annualRounds: number
+  annualPlayers: number
   potentialRevenueAnnual: number
   estimatedOperatingCostAnnual: number
   annualWaterCost: number

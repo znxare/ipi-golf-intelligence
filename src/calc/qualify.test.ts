@@ -22,7 +22,7 @@ describe('calculateQualify', () => {
     })
 
     expect(result.potentialPlayersPerDay).toBe(480)
-    expect(result.annualRounds).toBe(161_280)
+    expect(result.annualPlayers).toBe(161_280)
     expect(result.potentialRevenueAnnual).toBe(403_200_000) // ₹40.32 Cr
     expect(result.estimatedOperatingCostAnnual).toBe(100_800_000) // ₹10.08 Cr
     // 500,000L / 20,000L = 25 tankers/refill × ₹1,000 = ₹25,000/refill, × (365/15) refills/yr

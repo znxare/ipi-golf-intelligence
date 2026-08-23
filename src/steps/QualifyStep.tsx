@@ -216,7 +216,7 @@ export function QualifyStep({
         <BarStat
           icon={ICON_PATHS.calendar}
           label="Annual Players"
-          value={formatNumber(result.annualRounds)}
+          value={formatNumber(result.annualPlayers)}
           sublabel="Potential"
         />
         <BarStat

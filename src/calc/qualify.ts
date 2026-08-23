@@ -10,8 +10,8 @@ export function derivePotentialPlayersPerDay(playableHoursPerDay: number): numbe
 
 export function calculateQualify(input: QualifyInput): QualifyResult {
   const potentialPlayersPerDay = derivePotentialPlayersPerDay(input.playableHoursPerDay)
-  const annualRounds = potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
-  const potentialRevenueAnnual = annualRounds * input.pricePerRound
+  const annualPlayers = potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
+  const potentialRevenueAnnual = annualPlayers * input.pricePerRound
   const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
   const annualWaterCost = deriveAnnualWaterCost(input.waterReserve, input.tankerCost)
   const annualSalaryCost = deriveAnnualSalaryCost(input.salariesPerMonth)
@@ -20,7 +20,7 @@ export function calculateQualify(input: QualifyInput): QualifyResult {
 
   return {
     potentialPlayersPerDay,
-    annualRounds,
+    annualPlayers,
     potentialRevenueAnnual,
     estimatedOperatingCostAnnual,
     annualWaterCost,
