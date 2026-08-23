@@ -21,21 +21,27 @@ export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
 }
 
 /**
- * IPI opportunity = the customer's spend/revenue capacity, minus the total
- * cost of operations (day-to-day expenses + salary + water refills) they
- * carry regardless of who services the course. What's left is the budget
- * IPI's scope of work can address.
+ * IPI opportunity = the customer's revenue capacity, minus the total cost of
+ * operations (day-to-day expenses + salary + water) they carry regardless of
+ * who services the course. What's left is the budget IPI's scope of work can
+ * address.
  *
- * Qualify's Customer Input Card only captures potential/structural facts —
- * actuals (players, spend) come from Quantify once it's been run. For a
- * New Build course Quantify never runs, so `actual` is all zeros, which is
- * correct: there's no current operation to measure yet. The cost side is
- * always drawn from the frozen Customer Input Card, so it's the same for
- * both the potential and actual opportunity figures.
+ * Potential draws entirely from Qualify's frozen Customer Input Card
+ * (structural estimates: expenses/day, salary/month, water reserve on a
+ * refill cycle). Actual draws entirely from Quantify's own monthly actuals
+ * once it's been run — golf course spend, salaries and water are each
+ * reported directly per month there, so they're annualized by ×12 rather
+ * than re-derived. For a New Build course Quantify never runs, so `actual`
+ * is all zeros, which is correct: there's no current operation to measure.
  */
 export function calculateCommercialView(
   input: QualifyInput,
-  actual: { actualPlayersPerDay: number; actualSpendPerMonth: number },
+  actual: {
+    actualPlayersPerDay: number
+    actualGolfSpendPerMonth: number
+    actualSalariesPerMonth: number
+    actualWaterPerMonth: number
+  },
 ): CommercialViewData {
   const annualPlayersPotential = derivePotentialPlayersPerDay(input.playableHoursPerDay) * PLAYABLE_DAYS_PER_YEAR
   const annualPlayersActual = actual.actualPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
@@ -45,15 +51,20 @@ export function calculateCommercialView(
   const gapToBreakEvenPlayers = breakEvenPlayersPerDay - actual.actualPlayersPerDay
 
   const revenueSpendPotentialAnnual = annualPlayersPotential * input.pricePerRound
-  const revenueSpendActualAnnual = actual.actualSpendPerMonth * 12
+  const revenueSpendActualAnnual = actualRevenuePerDay * PLAYABLE_DAYS_PER_YEAR
 
   const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
   const annualSalaryCost = deriveAnnualSalaryCost(input.salariesPerMonth)
   const annualWaterCost = deriveAnnualWaterCost(input.waterReserve, input.tankerCost)
   const totalCostOfOperations = estimatedOperatingCostAnnual + annualSalaryCost + annualWaterCost
 
+  const actualOperatingCostAnnual = actual.actualGolfSpendPerMonth * 12
+  const actualSalaryCostAnnual = actual.actualSalariesPerMonth * 12
+  const actualWaterCostAnnual = actual.actualWaterPerMonth * 12
+  const totalCostOfOperationsActual = actualOperatingCostAnnual + actualSalaryCostAnnual + actualWaterCostAnnual
+
   const ipiOpportunityPotentialAnnual = revenueSpendPotentialAnnual - totalCostOfOperations
-  const ipiOpportunityActualAnnual = revenueSpendActualAnnual - totalCostOfOperations
+  const ipiOpportunityActualAnnual = revenueSpendActualAnnual - totalCostOfOperationsActual
 
   return {
     annualPlayersPotential,
@@ -67,6 +78,10 @@ export function calculateCommercialView(
     annualSalaryCost,
     annualWaterCost,
     totalCostOfOperations,
+    actualOperatingCostAnnual,
+    actualSalaryCostAnnual,
+    actualWaterCostAnnual,
+    totalCostOfOperationsActual,
     ipiOpportunityPotentialAnnual,
     ipiOpportunityActualAnnual,
   }

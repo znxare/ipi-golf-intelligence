@@ -94,6 +94,10 @@ export interface CommercialViewData {
   annualSalaryCost: number
   annualWaterCost: number
   totalCostOfOperations: number
+  actualOperatingCostAnnual: number
+  actualSalaryCostAnnual: number
+  actualWaterCostAnnual: number
+  totalCostOfOperationsActual: number
   ipiOpportunityPotentialAnnual: number
   ipiOpportunityActualAnnual: number
 }

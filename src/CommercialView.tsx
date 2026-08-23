@@ -31,7 +31,9 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
   const { qualifyInput, quantifyInput } = assessment
   const commercial = calculateCommercialView(qualifyInput, {
     actualPlayersPerDay: quantifyInput?.actualPlayersPerDay ?? 0,
-    actualSpendPerMonth: quantifyInput?.golfSpendPerMonth ?? 0,
+    actualGolfSpendPerMonth: quantifyInput?.golfSpendPerMonth ?? 0,
+    actualSalariesPerMonth: quantifyInput?.salariesPerMonth ?? 0,
+    actualWaterPerMonth: quantifyInput?.waterPerMonth ?? 0,
   })
   const { pricedTotal, hasUnpriced } = calculateDraftSowTotal(EQUIPMENT_CATALOG)
 
