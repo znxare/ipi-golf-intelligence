@@ -39,8 +39,16 @@ describe('calculateCommercialView', () => {
   })
 
   it('computes the potential side from the Customer Input Card', () => {
+    expect(result.potentialPlayersPerDay).toBe(480)
     expect(result.annualPlayersPotential).toBe(161_280) // 480/day × 336
+    expect(result.potentialRevenuePerDay).toBe(2_640_000) // 480/day × ₹5,500
     expect(result.revenueSpendPotentialAnnual).toBe(887_040_000)
+  })
+
+  it('shares one break-even threshold across both columns, and derives each gap from its own capacity', () => {
+    expect(result.breakEvenPlayersPerDay).toBe(55) // round(300,000 / 5,500), same for potential and actual
+    expect(result.gapToBreakEvenPlayersPotential).toBe(425) // 480 potential players/day − 55 break-even
+    expect(result.gapToBreakEvenPlayers).toBe(38) // 55 break-even − 17 actual players/day
   })
 
   it('derives potential water cost from reserve, tanker cost, and refills across a calendar year', () => {

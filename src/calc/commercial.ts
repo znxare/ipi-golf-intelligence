@@ -43,11 +43,16 @@ export function calculateCommercialView(
     actualWaterPerMonth: number
   },
 ): CommercialViewData {
-  const annualPlayersPotential = derivePotentialPlayersPerDay(input.playableHoursPerDay) * PLAYABLE_DAYS_PER_YEAR
+  const potentialPlayersPerDay = derivePotentialPlayersPerDay(input.playableHoursPerDay)
+  const annualPlayersPotential = potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
   const annualPlayersActual = actual.actualPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
 
+  const potentialRevenuePerDay = potentialPlayersPerDay * input.pricePerRound
   const actualRevenuePerDay = actual.actualPlayersPerDay * input.pricePerRound
+  // Break-even is a structural threshold from Qualify's expenses/day and green fee —
+  // the same figure for both columns, not something that differs potential vs actual.
   const breakEvenPlayersPerDay = Math.round(input.expensesPerDay / input.pricePerRound)
+  const gapToBreakEvenPlayersPotential = potentialPlayersPerDay - breakEvenPlayersPerDay
   const gapToBreakEvenPlayers = breakEvenPlayersPerDay - actual.actualPlayersPerDay
 
   const revenueSpendPotentialAnnual = annualPlayersPotential * input.pricePerRound
@@ -67,10 +72,13 @@ export function calculateCommercialView(
   const ipiOpportunityActualAnnual = revenueSpendActualAnnual - totalCostOfOperationsActual
 
   return {
+    potentialPlayersPerDay,
     annualPlayersPotential,
     annualPlayersActual,
+    potentialRevenuePerDay,
     actualRevenuePerDay,
     breakEvenPlayersPerDay,
+    gapToBreakEvenPlayersPotential,
     gapToBreakEvenPlayers,
     revenueSpendPotentialAnnual,
     revenueSpendActualAnnual,

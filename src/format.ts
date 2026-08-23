@@ -14,6 +14,17 @@ export function formatNumber(value: number): string {
   return Math.round(value).toLocaleString('en-IN')
 }
 
+/** Indian-comma display for an editable number input; empty string while unset/mid-clear. */
+export function formatEditableNumber(value: number): string {
+  return Number.isNaN(value) ? '' : value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+}
+
+/** Inverse of formatEditableNumber — strips the comma grouping back out before parsing. */
+export function parseEditableNumber(raw: string): number {
+  const cleaned = raw.replace(/,/g, '').trim()
+  return cleaned === '' ? NaN : Number(cleaned)
+}
+
 /** Formats liter quantities in K/M, matching the mockups (e.g. 2.0M L, 500K L). */
 export function formatLiters(value: number): string {
   const abs = Math.abs(value)

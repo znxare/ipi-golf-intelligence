@@ -61,14 +61,18 @@ export function CustomerAssumptionCard({
           actual={formatRupees(qualifyInput.pricePerRound)}
         />
         <PotentialActualRow
-          label="Actual Revenue / Day"
-          potential="—"
+          label="Revenue / Day"
+          potential={formatRupees(commercial.potentialRevenuePerDay)}
           actual={quantifyInput ? formatRupees(commercial.actualRevenuePerDay) : '—'}
         />
-        <PotentialActualRow label="Break-even Players / Day" potential="—" actual={formatNumber(commercial.breakEvenPlayersPerDay)} />
+        <PotentialActualRow
+          label="Break-even Players / Day"
+          potential={formatNumber(commercial.breakEvenPlayersPerDay)}
+          actual={formatNumber(commercial.breakEvenPlayersPerDay)}
+        />
         <PotentialActualRow
           label="Gap to Break-even"
-          potential="—"
+          potential={`${formatNumber(commercial.gapToBreakEvenPlayersPotential)}/day`}
           actual={quantifyInput ? `${formatNumber(commercial.gapToBreakEvenPlayers)}/day` : '—'}
         />
         <PotentialActualRow

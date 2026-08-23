@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { formatEditableNumber, parseEditableNumber } from '../format'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
@@ -64,9 +65,10 @@ export function Field({
       <span className="mb-1 block text-xs text-ipi-700/70">{label}</span>
       <span className="flex items-center gap-1 rounded-lg border border-hairline bg-white px-2 py-1.5 transition-colors focus-within:border-ipi-600">
         <input
-          type="number"
-          value={Number.isNaN(value) ? '' : value}
-          onChange={(e) => onChange(e.target.valueAsNumber)}
+          type="text"
+          inputMode="decimal"
+          value={formatEditableNumber(value)}
+          onChange={(e) => onChange(parseEditableNumber(e.target.value))}
           className="font-data w-full tabular-nums outline-none"
         />
         {suffix && <span className="text-xs text-ipi-700/50">{suffix}</span>}
@@ -201,9 +203,10 @@ export function BarStat({
       </div>
       {editable ? (
         <input
-          type="number"
-          value={Number.isNaN(editable.value) ? '' : editable.value}
-          onChange={(e) => editable.onChange(e.target.valueAsNumber)}
+          type="text"
+          inputMode="decimal"
+          value={formatEditableNumber(editable.value)}
+          onChange={(e) => editable.onChange(parseEditableNumber(e.target.value))}
           className="font-data w-full border-b border-dashed border-hairline bg-transparent text-2xl font-semibold tabular-nums text-ink outline-none focus:border-ipi-600"
         />
       ) : (

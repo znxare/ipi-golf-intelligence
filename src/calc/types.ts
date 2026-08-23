@@ -83,10 +83,13 @@ export interface CertifyResult {
  * never writes to it.
  */
 export interface CommercialViewData {
+  potentialPlayersPerDay: number
   annualPlayersPotential: number
   annualPlayersActual: number
+  potentialRevenuePerDay: number
   actualRevenuePerDay: number
   breakEvenPlayersPerDay: number
+  gapToBreakEvenPlayersPotential: number
   gapToBreakEvenPlayers: number
   revenueSpendPotentialAnnual: number
   revenueSpendActualAnnual: number
