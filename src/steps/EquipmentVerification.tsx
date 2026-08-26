@@ -31,7 +31,7 @@ export function EquipmentVerification({
       </div>
 
       <div className="max-h-[420px] overflow-auto">
-        <table className="w-full min-w-[640px] border-collapse text-sm">
+        <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead className="sticky top-0 z-10 bg-white shadow-[0_1px_0_var(--color-hairline)]">
             <tr className="text-left text-xs text-ipi-700/60">
               <th className="px-4 py-2 font-medium">Equipment</th>
@@ -39,7 +39,6 @@ export function EquipmentVerification({
               <th className="w-12 px-4 py-2 text-center font-medium">✓</th>
               <th className="px-4 py-2 text-right font-medium">SOW Qty</th>
               <th className="px-4 py-2 text-right font-medium">Unit Price</th>
-              <th className="px-4 py-2 text-right font-medium">Line Total</th>
             </tr>
           </thead>
           <tbody>
@@ -47,7 +46,6 @@ export function EquipmentVerification({
               const line = lineFor(item.id)
               const qty = deriveVerifiedQty(item, line)
               const selected = qty > 0
-              const lineTotal = item.unitPriceINR === null ? null : item.unitPriceINR * qty
               return (
                 <tr
                   key={item.id}
@@ -83,15 +81,6 @@ export function EquipmentVerification({
                       <span className="text-amber-600">TBD</span>
                     ) : (
                       formatRupees(item.unitPriceINR)
-                    )}
-                  </td>
-                  <td className="font-data px-4 py-2 text-right font-medium tabular-nums text-ink">
-                    {!selected ? (
-                      <span className="text-ipi-700/30">—</span>
-                    ) : lineTotal === null ? (
-                      <span className="text-amber-600">TBD</span>
-                    ) : (
-                      formatRupees(lineTotal)
                     )}
                   </td>
                 </tr>
