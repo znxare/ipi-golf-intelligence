@@ -10,8 +10,9 @@ const QUALIFY_INPUT: QualifyInput = {
   pricePerRound: 5_500, // Qualify sheet's avg green fee — used for actual revenue too
   expensesPerDay: 300_000,
   salariesPerMonth: 980_000,
-  waterReserve: 500_000,
+  waterRequiredPerDay: 500_000,
   tankerCost: 1_000,
+  tankerCapacity: 20_000,
   superintendent: '',
   directorOfOperations: '',
   procurementHead: '',

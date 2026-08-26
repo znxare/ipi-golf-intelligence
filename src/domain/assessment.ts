@@ -1,3 +1,4 @@
+import { TANKER_CAPACITY_LITERS } from '../calc/constants'
 import type {
   CertifyResult,
   QualifyInput,
@@ -37,8 +38,9 @@ export function createDefaultQualifyInput(): QualifyInput {
     pricePerRound: 5_500,
     expensesPerDay: 300_000,
     salariesPerMonth: 980_000,
-    waterReserve: 500_000,
+    waterRequiredPerDay: 200_000,
     tankerCost: 1_000,
+    tankerCapacity: TANKER_CAPACITY_LITERS,
     superintendent: '',
     directorOfOperations: '',
     procurementHead: '',

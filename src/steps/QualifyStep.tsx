@@ -1,4 +1,4 @@
-import { SLOT_INTERVAL_MINUTES, TANKER_CAPACITY_LITERS } from '../calc/constants'
+import { SLOT_INTERVAL_MINUTES } from '../calc/constants'
 import { calculateQualify } from '../calc/qualify'
 import type { CustomerType, QualifyInput } from '../calc/types'
 import {
@@ -148,9 +148,9 @@ export function QualifyStep({
           <SectionLabel>Water</SectionLabel>
           <div className="mb-5 grid grid-cols-3 gap-3">
             <Field
-              label="Water reserve"
-              value={input.waterReserve}
-              onChange={(v) => onChange({ ...input, waterReserve: v })}
+              label="Potential water required / day"
+              value={input.waterRequiredPerDay}
+              onChange={(v) => onChange({ ...input, waterRequiredPerDay: v })}
               suffix="L"
             />
             <Field
@@ -159,7 +159,12 @@ export function QualifyStep({
               onChange={(v) => onChange({ ...input, tankerCost: v })}
               suffix="₹"
             />
-            <FixedField label="Tanker capacity" value={`${formatNumber(TANKER_CAPACITY_LITERS)} L`} />
+            <Field
+              label="Tanker capacity"
+              value={input.tankerCapacity}
+              onChange={(v) => onChange({ ...input, tankerCapacity: v })}
+              suffix="L"
+            />
           </div>
 
           <SectionLabel>Customer team</SectionLabel>

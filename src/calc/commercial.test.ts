@@ -10,8 +10,9 @@ const EXAMPLE_CUSTOMER: QualifyInput = {
   pricePerRound: 5_500,
   expensesPerDay: 300_000,
   salariesPerMonth: 980_000, // ₹1.176 Cr/year
-  waterReserve: 500_000,
+  waterRequiredPerDay: 500_000,
   tankerCost: 1_000,
+  tankerCapacity: 20_000,
   superintendent: '',
   directorOfOperations: '',
   procurementHead: '',
@@ -51,16 +52,17 @@ describe('calculateCommercialView', () => {
     expect(result.gapToBreakEvenPlayers).toBe(38) // 55 break-even − 17 actual players/day
   })
 
-  it('derives potential water cost from reserve, tanker cost, and refills across a calendar year', () => {
-    // 500,000L / 20,000L = 25 tankers/refill × ₹1,000 = ₹25,000/refill, × (365/15) refills/yr
-    expect(result.annualWaterCost).toBeCloseTo(608_333.33, 2)
+  it('derives potential water cost from daily requirement, tanker cost, and refills across a calendar year', () => {
+    // 500,000L/day × 15-day cycle = 7,500,000L reserve ÷ 20,000L = 375 tankers/refill
+    // × ₹1,000 = ₹375,000/refill, × (365/15) refills/yr
+    expect(result.annualWaterCost).toBe(9_125_000)
     expect(result.annualSalaryCost).toBe(11_760_000) // ₹1.176 Cr
   })
 
   it('nets potential total cost of operations (expenses + salary + water) against potential revenue', () => {
     expect(result.estimatedOperatingCostAnnual).toBe(100_800_000)
-    expect(result.totalCostOfOperations).toBeCloseTo(113_168_333.33, 2)
-    expect(result.ipiOpportunityPotentialAnnual).toBeCloseTo(773_871_666.67, 2)
+    expect(result.totalCostOfOperations).toBe(121_685_000)
+    expect(result.ipiOpportunityPotentialAnnual).toBe(765_355_000)
   })
 
   it("annualizes Quantify's own monthly actuals (×12, no refill math) for the actual cost side", () => {

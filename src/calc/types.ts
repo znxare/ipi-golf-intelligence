@@ -22,8 +22,9 @@ export interface QualifyInput {
   pricePerRound: number
   expensesPerDay: number
   salariesPerMonth: number
-  waterReserve: number
+  waterRequiredPerDay: number
   tankerCost: number
+  tankerCapacity: number
   superintendent: string
   directorOfOperations: string
   procurementHead: string

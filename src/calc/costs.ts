@@ -1,13 +1,23 @@
-import { DAYS_PER_YEAR, TANKER_CAPACITY_LITERS, WATER_REFILL_INTERVAL_DAYS } from './constants'
+import { DAYS_PER_YEAR, WATER_REFILL_INTERVAL_DAYS } from './constants'
 
-/** Tankers needed to fill the reserve in one refill run. */
-export function deriveTankersPerRefill(waterReserveLiters: number): number {
-  return Math.ceil(waterReserveLiters / TANKER_CAPACITY_LITERS)
+/** Reserve needed per refill cycle, from the customer's daily water requirement. */
+export function deriveWaterReserveLiters(waterRequiredPerDayLiters: number): number {
+  return waterRequiredPerDayLiters * WATER_REFILL_INTERVAL_DAYS
 }
 
-/** Reserve refilled every WATER_REFILL_INTERVAL_DAYS, annualized over a calendar year. */
-export function deriveAnnualWaterCost(waterReserveLiters: number, tankerCost: number): number {
-  const costPerRefill = deriveTankersPerRefill(waterReserveLiters) * tankerCost
+/** Tankers needed to fill the reserve in one refill run. */
+export function deriveTankersPerRefill(waterReserveLiters: number, tankerCapacityLiters: number): number {
+  return Math.ceil(waterReserveLiters / tankerCapacityLiters)
+}
+
+/** Daily requirement × refill cycle = reserve per refill, annualized over a calendar year. */
+export function deriveAnnualWaterCost(
+  waterRequiredPerDayLiters: number,
+  tankerCost: number,
+  tankerCapacityLiters: number,
+): number {
+  const waterReserveLiters = deriveWaterReserveLiters(waterRequiredPerDayLiters)
+  const costPerRefill = deriveTankersPerRefill(waterReserveLiters, tankerCapacityLiters) * tankerCost
   const refillsPerYear = DAYS_PER_YEAR / WATER_REFILL_INTERVAL_DAYS
   return costPerRefill * refillsPerYear
 }

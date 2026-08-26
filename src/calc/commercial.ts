@@ -27,8 +27,8 @@ export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
  * address.
  *
  * Potential draws entirely from Qualify's frozen Customer Input Card
- * (structural estimates: expenses/day, salary/month, water reserve on a
- * refill cycle). Actual draws entirely from Quantify's own monthly actuals
+ * (structural estimates: expenses/day, salary/month, water required/day
+ * annualized across refill cycles). Actual draws entirely from Quantify's own monthly actuals
  * once it's been run — golf course spend, salaries and water are each
  * reported directly per month there, so they're annualized by ×12 rather
  * than re-derived. For a New Build course Quantify never runs, so `actual`
@@ -60,7 +60,7 @@ export function calculateCommercialView(
 
   const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
   const annualSalaryCost = deriveAnnualSalaryCost(input.salariesPerMonth)
-  const annualWaterCost = deriveAnnualWaterCost(input.waterReserve, input.tankerCost)
+  const annualWaterCost = deriveAnnualWaterCost(input.waterRequiredPerDay, input.tankerCost, input.tankerCapacity)
   const totalCostOfOperations = estimatedOperatingCostAnnual + annualSalaryCost + annualWaterCost
 
   const actualOperatingCostAnnual = actual.actualGolfSpendPerMonth * 12

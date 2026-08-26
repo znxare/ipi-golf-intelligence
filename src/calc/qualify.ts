@@ -13,7 +13,7 @@ export function calculateQualify(input: QualifyInput): QualifyResult {
   const annualPlayers = potentialPlayersPerDay * PLAYABLE_DAYS_PER_YEAR
   const potentialRevenueAnnual = annualPlayers * input.pricePerRound
   const estimatedOperatingCostAnnual = input.expensesPerDay * PLAYABLE_DAYS_PER_YEAR
-  const annualWaterCost = deriveAnnualWaterCost(input.waterReserve, input.tankerCost)
+  const annualWaterCost = deriveAnnualWaterCost(input.waterRequiredPerDay, input.tankerCost, input.tankerCapacity)
   const annualSalaryCost = deriveAnnualSalaryCost(input.salariesPerMonth)
   const totalCostOfOperations = estimatedOperatingCostAnnual + annualWaterCost + annualSalaryCost
   const ipiOpportunityAnnual = potentialRevenueAnnual - totalCostOfOperations
