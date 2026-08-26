@@ -1,9 +1,17 @@
-import { deriveVerifiedQty } from './calc/commercial'
+import { calculateCommercialView, deriveVerifiedQty } from './calc/commercial'
 import { deriveEquipmentPriceINR } from './calc/pricing'
+import { BarStat, StatBar } from './components/ui'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment, NegotiationLine } from './domain/assessment'
 import { formatRupeesCompact } from './format'
 import { useUsdInrRate } from './hooks/useUsdInrRate'
+
+const ICON_PATHS = {
+  potential: 'M12 4v16M9 8h4.5a2 2 0 1 1 0 4H10a2 2 0 1 0 0 4h5',
+  draft: 'M7 3h7l4 4v14H7zM14 3v4h4',
+  negotiated: 'M20 6 9 17l-5-5',
+  future: 'M3 17l6-6 4 4 8-8M15 7h6v6',
+}
 
 function money(value: number | null): string {
   return value === null ? 'TBD' : formatRupeesCompact(value)
@@ -17,7 +25,8 @@ export function NegotiationTable({
   onChange: (negotiation: Record<string, NegotiationLine>) => void
 }) {
   const negotiation = assessment.negotiation ?? {}
-  const equipmentVerification = assessment.quantifyInput?.equipmentVerification ?? {}
+  const quantifyInput = assessment.quantifyInput
+  const equipmentVerification = quantifyInput?.equipmentVerification ?? {}
   const { rate: usdInrRate } = useUsdInrRate()
 
   function lineFor(id: string): NegotiationLine {
@@ -28,24 +37,65 @@ export function NegotiationTable({
     onChange({ ...negotiation, [id]: { ...lineFor(id), ...patch } })
   }
 
-  const verifiedItems = EQUIPMENT_CATALOG.map((item) => ({
-    item,
-    verifiedQty: deriveVerifiedQty(item, equipmentVerification[item.id]),
-  })).filter(({ verifiedQty }) => verifiedQty > 0)
+  const negotiationLines = EQUIPMENT_CATALOG.map((item) => {
+    const verifiedQty = deriveVerifiedQty(item, equipmentVerification[item.id])
+    const line = lineFor(item.id)
+    const unitPrice = item.usdMsrp === null ? null : deriveEquipmentPriceINR(item.usdMsrp, usdInrRate)
+    const draftValue = unitPrice === null ? null : unitPrice * verifiedQty
+    const negotiatedValue = unitPrice === null ? null : unitPrice * line.negotiatedQty
+    const gapValue = unitPrice === null ? null : unitPrice * Math.max(verifiedQty - line.negotiatedQty, 0)
+    return { item, verifiedQty, line, unitPrice, draftValue, negotiatedValue, gapValue }
+  }).filter(({ verifiedQty }) => verifiedQty > 0)
 
-  let draftTotal = 0
-  let negotiatedTotal = 0
-  let gapTotal = 0
-  let hasUnpriced = false
+  const draftTotal = negotiationLines.reduce((sum, l) => sum + (l.draftValue ?? 0), 0)
+  const negotiatedTotal = negotiationLines.reduce((sum, l) => sum + (l.negotiatedValue ?? 0), 0)
+  const gapTotal = negotiationLines.reduce((sum, l) => sum + (l.gapValue ?? 0), 0)
+  const hasUnpriced = negotiationLines.some((l) => l.unitPrice === null)
+
+  const commercial = calculateCommercialView(assessment.qualifyInput, {
+    actualPlayersPerDay: quantifyInput?.actualPlayersPerDay ?? 0,
+    actualGolfSpendPerMonth: quantifyInput?.golfSpendPerMonth ?? 0,
+    actualSalariesPerMonth: quantifyInput?.salariesPerMonth ?? 0,
+    actualWaterPerMonth: quantifyInput?.waterPerMonth ?? 0,
+  })
 
   return (
     <div>
+      <StatBar title="Potential, Draft, Negotiated & Future Opportunity">
+        <BarStat
+          icon={ICON_PATHS.potential}
+          label="Potential"
+          value={formatRupeesCompact(commercial.ipiOpportunityPotentialAnnual)}
+          sublabel="Annual · Qualify"
+          first
+        />
+        <BarStat
+          icon={ICON_PATHS.draft}
+          label="Draft"
+          value={hasUnpriced ? `${formatRupeesCompact(draftTotal)} + TBD` : formatRupeesCompact(draftTotal)}
+          sublabel="Verified SOW"
+        />
+        <BarStat
+          icon={ICON_PATHS.negotiated}
+          label="Negotiated"
+          value={hasUnpriced ? `${formatRupeesCompact(negotiatedTotal)} + TBD` : formatRupeesCompact(negotiatedTotal)}
+          sublabel="Agreed so far"
+        />
+        <BarStat
+          icon={ICON_PATHS.future}
+          label="Future Opportunity"
+          value={hasUnpriced ? `${formatRupeesCompact(gapTotal)} + TBD` : formatRupeesCompact(gapTotal)}
+          sublabel="Draft − Negotiated"
+          emphasis
+        />
+      </StatBar>
+
       <div className="mb-3 text-xs text-ipi-700/60">
         The verified SOW is never overwritten — only Negotiated Qty and Notes are entered here. Negotiated Value
         is calculated automatically.
       </div>
 
-      {verifiedItems.length === 0 ? (
+      {negotiationLines.length === 0 ? (
         <div className="rounded-xl border border-dashed border-hairline p-10 text-center">
           <div className="text-sm font-medium text-ink">No verified equipment yet</div>
           <div className="mt-1 text-sm text-ipi-700/60">
@@ -68,18 +118,7 @@ export function NegotiationTable({
                 </tr>
               </thead>
               <tbody>
-                {verifiedItems.map(({ item, verifiedQty }) => {
-                  const line = lineFor(item.id)
-                  const unitPrice = item.usdMsrp === null ? null : deriveEquipmentPriceINR(item.usdMsrp, usdInrRate)
-                  const draftValue = unitPrice === null ? null : unitPrice * verifiedQty
-                  const negotiatedValue = unitPrice === null ? null : unitPrice * line.negotiatedQty
-                  const gapValue = unitPrice === null ? null : unitPrice * Math.max(verifiedQty - line.negotiatedQty, 0)
-
-                  if (draftValue === null) hasUnpriced = true
-                  else draftTotal += draftValue
-                  if (negotiatedValue !== null) negotiatedTotal += negotiatedValue
-                  if (gapValue !== null) gapTotal += gapValue
-
+                {negotiationLines.map(({ item, verifiedQty, line, unitPrice, draftValue, negotiatedValue }) => {
                   const isNegotiated = line.negotiatedQty > 0
 
                   return (
