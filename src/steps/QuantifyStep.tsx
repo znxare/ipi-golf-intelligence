@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { calculateSelectedEquipmentTotal } from '../calc/commercial'
 import { calculateQuantify } from '../calc/quantify'
 import type { QualifyInput, QuantifyInput } from '../calc/types'
@@ -6,6 +6,7 @@ import { Field, PrimaryButton, SecondaryButton, SectionLabel } from '../componen
 import { EQUIPMENT_CATALOG } from '../data/equipmentCatalog'
 import { EquipmentVerification } from './EquipmentVerification'
 import { IpiOpportunityBreakdown } from '../IpiOpportunityBreakdown'
+import { SelectedEquipmentDetail } from './SelectedEquipmentDetail'
 
 export function QuantifyStep({
   qualifyInput,
@@ -21,6 +22,7 @@ export function QuantifyStep({
   onBack: () => void
 }) {
   const result = calculateQuantify(qualifyInput, input)
+  const [showEquipmentDetail, setShowEquipmentDetail] = useState(false)
 
   const { pricedTotal: equipmentTotal } = calculateSelectedEquipmentTotal(
     EQUIPMENT_CATALOG,
@@ -82,7 +84,10 @@ export function QuantifyStep({
         total={result.actualIpiOpportunity}
         onChange={(breakdown) => onChange({ ...input, breakdown })}
         equipmentAuto
+        onEquipmentClick={() => setShowEquipmentDetail((v) => !v)}
       />
+
+      {showEquipmentDetail && <SelectedEquipmentDetail lines={input.equipmentVerification} />}
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>

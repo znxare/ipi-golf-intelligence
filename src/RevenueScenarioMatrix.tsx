@@ -154,7 +154,7 @@ export function RevenueScenarioMatrix({
                 const isBreakEvenRow = courseBreakEven?.band === row.capacityPct
                 const rowClass = courseBreakEven
                   ? isBreakEvenRow
-                    ? 'bg-ipi-100 ring-1 ring-inset ring-ipi-600'
+                    ? 'ring-1 ring-inset ring-ipi-600'
                     : ''
                   : STATUS_ROW_BG[row.status]
                 return (
@@ -244,7 +244,7 @@ export function RevenueScenarioMatrix({
                 return (
                   <tr
                     key={spend}
-                    className={`border-t border-hairline ${isNearestSpendRow ? 'bg-ipi-100/60' : ''}`}
+                    className={`border-t border-hairline ${isNearestSpendRow ? 'ring-1 ring-inset ring-ipi-600' : ''}`}
                   >
                     <td
                       className={`font-data px-3 py-2 font-medium tabular-nums ${
@@ -265,11 +265,7 @@ export function RevenueScenarioMatrix({
                         <td key={fee} className="border-l border-hairline px-3 py-2 text-center">
                           <span
                             className={`font-data inline-block rounded-md px-2 py-1 text-xs font-semibold tabular-nums ${
-                              isMatch
-                                ? 'bg-ipi-600 text-white ring-1 ring-inset ring-ipi-600'
-                                : courseBreakEven
-                                  ? 'bg-ipi-50 text-ipi-700/60'
-                                  : 'bg-amber-100 text-amber-600'
+                              isMatch ? 'bg-ipi-600 text-white' : 'bg-white text-ipi-700/70'
                             }`}
                           >
                             {cell.band !== null ? `${cell.band}% / ${cell.playersNeeded}` : `>100% / ${cell.playersNeeded}`}

@@ -180,6 +180,7 @@ export function BarStat({
   first = false,
   emphasis = false,
   editable,
+  onClick,
 }: {
   icon: string
   label: string
@@ -188,9 +189,10 @@ export function BarStat({
   first?: boolean
   emphasis?: boolean
   editable?: { value: number; onChange: (value: number) => void }
+  onClick?: () => void
 }) {
-  return (
-    <div className={`flex-1 px-4 py-4 ${first ? '' : 'border-l border-hairline'} ${emphasis ? 'bg-ipi-50' : ''}`}>
+  const body = (
+    <>
       <div className="mb-2 flex items-center gap-2">
         <span
           className={`flex h-8 w-8 items-center justify-center rounded-full ${
@@ -213,6 +215,24 @@ export function BarStat({
         <div className="font-data text-2xl font-semibold tabular-nums text-ink">{value}</div>
       )}
       {sublabel && <div className="mt-0.5 text-xs text-ipi-700/50">{sublabel}</div>}
+    </>
+  )
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`flex-1 px-4 py-4 text-left transition-colors hover:bg-ipi-50 ${first ? '' : 'border-l border-hairline'} ${emphasis ? 'bg-ipi-50' : ''}`}
+      >
+        {body}
+      </button>
+    )
+  }
+
+  return (
+    <div className={`flex-1 px-4 py-4 ${first ? '' : 'border-l border-hairline'} ${emphasis ? 'bg-ipi-50' : ''}`}>
+      {body}
     </div>
   )
 }
