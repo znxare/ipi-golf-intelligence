@@ -46,8 +46,10 @@ export interface QualifyResult {
 }
 
 export interface EquipmentVerificationLine {
-  /** Qty the rep needs for this SOW; blank/zero means not selected. */
-  qty: string
+  /** Rep confirms the template quantity is correct as-is. */
+  confirmed: boolean
+  /** Only meaningful when not confirmed — the rep's override. */
+  sowQty: string
 }
 
 export interface QuantifyInput {

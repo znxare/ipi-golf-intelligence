@@ -3,6 +3,7 @@ import type { QualifyInput, QuantifyInput } from '../calc/types'
 import { PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
 import { CustomerAssumptionCard } from '../CustomerAssumptionCard'
 import { IpiOpportunityBreakdown } from '../IpiOpportunityBreakdown'
+import { SelectedEquipmentDetail } from './SelectedEquipmentDetail'
 
 export function VerifyStep({
   qualifyInput,
@@ -25,6 +26,8 @@ export function VerifyStep({
       </div>
 
       <IpiOpportunityBreakdown breakdown={quantifyInput.breakdown} total={quantifyResult.actualIpiOpportunity} />
+
+      <SelectedEquipmentDetail lines={quantifyInput.equipmentVerification} />
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>

@@ -11,7 +11,7 @@ import { useUsdInrRate } from '../hooks/useUsdInrRate'
  */
 export function SelectedEquipmentDetail({ lines }: { lines: Record<string, EquipmentVerificationLine> }) {
   const { rate } = useUsdInrRate()
-  const selected = EQUIPMENT_CATALOG.map((item) => ({ item, qty: deriveVerifiedQty(lines[item.id]) })).filter(
+  const selected = EQUIPMENT_CATALOG.map((item) => ({ item, qty: deriveVerifiedQty(item, lines[item.id]) })).filter(
     ({ qty }) => qty > 0,
   )
   const { pricedTotal, hasUnpriced } = calculateSelectedEquipmentTotal(EQUIPMENT_CATALOG, lines, rate)

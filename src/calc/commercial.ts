@@ -5,10 +5,12 @@ import { deriveEquipmentPriceINR } from './pricing'
 import { derivePotentialPlayersPerDay } from './qualify'
 import type { CommercialViewData, EquipmentVerificationLine, QualifyInput } from './types'
 
-/** Qty the rep has actually put on the SOW for this line — blank/zero means not selected. */
-export function deriveVerifiedQty(line: EquipmentVerificationLine | undefined): number {
-  const qty = Number(line?.qty)
-  return Number.isFinite(qty) && qty > 0 ? qty : 0
+/** Qty the rep has actually put on the SOW for this line: template qty if confirmed, else their typed override. */
+export function deriveVerifiedQty(item: EquipmentCatalogItem, line: EquipmentVerificationLine | undefined): number {
+  if (!line) return 0
+  if (line.confirmed) return item.templateQtyNumeric
+  const override = Number(line.sowQty)
+  return Number.isFinite(override) ? override : 0
 }
 
 /**
@@ -26,7 +28,7 @@ export function calculateSelectedEquipmentTotal(
   let pricedTotal = 0
   let hasUnpriced = false
   for (const item of catalog) {
-    const qty = deriveVerifiedQty(lines[item.id])
+    const qty = deriveVerifiedQty(item, lines[item.id])
     if (qty <= 0) continue
     if (item.usdMsrp === null) {
       hasUnpriced = true

@@ -30,7 +30,7 @@ export function NegotiationTable({
 
   const verifiedItems = EQUIPMENT_CATALOG.map((item) => ({
     item,
-    verifiedQty: deriveVerifiedQty(equipmentVerification[item.id]),
+    verifiedQty: deriveVerifiedQty(item, equipmentVerification[item.id]),
   })).filter(({ verifiedQty }) => verifiedQty > 0)
 
   let draftTotal = 0
