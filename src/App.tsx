@@ -2,9 +2,18 @@ import { useState } from 'react'
 import { AssessmentsList } from './AssessmentsList'
 import { AssessmentWizard } from './AssessmentWizard'
 import { CommercialLayer } from './CommercialLayer'
+import { Dashboard } from './Dashboard'
 import type { Assessment } from './domain/assessment'
 
-function Sidebar() {
+type Tab = 'dashboard' | 'transaction'
+
+function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => void }) {
+  function navItemClass(active: boolean) {
+    return `flex items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors ${
+      active ? 'bg-white/15 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+    }`
+  }
+
   return (
     <div className="flex w-48 flex-col gap-4 bg-ipi-900 px-3 py-4">
       <div className="px-1">
@@ -13,19 +22,31 @@ function Sidebar() {
         </div>
         <div className="mt-1.5 text-center text-[10px] tracking-wide text-white/45">Transaction Platform</div>
       </div>
-      <div className="flex items-center gap-2 rounded-md bg-white/15 px-2.5 py-2 text-sm text-white">
-        Transaction
+      <div className="flex flex-col gap-1">
+        <button type="button" onClick={() => onTabChange('dashboard')} className={navItemClass(tab === 'dashboard')}>
+          Dashboard
+        </button>
+        <button type="button" onClick={() => onTabChange('transaction')} className={navItemClass(tab === 'transaction')}>
+          Transaction
+        </button>
       </div>
     </div>
   )
 }
 
 function App() {
+  const [tab, setTab] = useState<Tab>('dashboard')
   const [openAssessment, setOpenAssessment] = useState<Assessment | null>(null)
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar
+        tab={tab}
+        onTabChange={(next) => {
+          setTab(next)
+          setOpenAssessment(null)
+        }}
+      />
       <div className="flex-1 bg-ipi-50 p-6">
         <div className="mx-auto max-w-5xl">
           {openAssessment && openAssessment.status === 'in_progress' && (
@@ -34,7 +55,8 @@ function App() {
           {openAssessment && openAssessment.status !== 'in_progress' && (
             <CommercialLayer assessment={openAssessment} onBack={() => setOpenAssessment(null)} />
           )}
-          {!openAssessment && <AssessmentsList onOpen={setOpenAssessment} />}
+          {!openAssessment && tab === 'dashboard' && <Dashboard />}
+          {!openAssessment && tab === 'transaction' && <AssessmentsList onOpen={setOpenAssessment} />}
         </div>
       </div>
     </div>

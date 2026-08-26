@@ -2,7 +2,7 @@ import type { EquipmentCatalogItem } from '../data/equipmentCatalog'
 import { PLAYABLE_DAYS_PER_YEAR } from './constants'
 import { deriveAnnualSalaryCost, deriveAnnualWaterCost } from './costs'
 import { derivePotentialPlayersPerDay } from './qualify'
-import type { CommercialViewData, QualifyInput } from './types'
+import type { CommercialViewData, EquipmentVerificationLine, QualifyInput } from './types'
 
 export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
   pricedTotal: number
@@ -15,6 +15,38 @@ export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
       hasUnpriced = true
     } else {
       pricedTotal += item.unitPriceINR * item.sowQtyNumeric
+    }
+  }
+  return { pricedTotal, hasUnpriced }
+}
+
+/** Qty the rep has actually put on the SOW for this line: template qty if confirmed, else their typed override. */
+export function deriveVerifiedQty(item: EquipmentCatalogItem, line: EquipmentVerificationLine | undefined): number {
+  if (!line) return 0
+  if (line.confirmed) return item.sowQtyNumeric
+  const override = Number(line.sowQty)
+  return Number.isFinite(override) ? override : 0
+}
+
+/**
+ * Live equipment price total from what the rep has actually checked off (or
+ * overridden) in the Equipment Template — not the full catalog like
+ * calculateDraftSowTotal. Feeds the Equipment figure in the IPI Opportunity
+ * Breakdown as selections change, before Verify.
+ */
+export function calculateSelectedEquipmentTotal(
+  catalog: EquipmentCatalogItem[],
+  lines: Record<string, EquipmentVerificationLine>,
+): { pricedTotal: number; hasUnpriced: boolean } {
+  let pricedTotal = 0
+  let hasUnpriced = false
+  for (const item of catalog) {
+    const qty = deriveVerifiedQty(item, lines[item.id])
+    if (qty <= 0) continue
+    if (item.unitPriceINR === null) {
+      hasUnpriced = true
+    } else {
+      pricedTotal += item.unitPriceINR * qty
     }
   }
   return { pricedTotal, hasUnpriced }

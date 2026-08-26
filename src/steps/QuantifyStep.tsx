@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
+import { calculateSelectedEquipmentTotal } from '../calc/commercial'
 import { calculateQuantify } from '../calc/quantify'
 import type { QualifyInput, QuantifyInput } from '../calc/types'
 import { Field, PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
+import { EQUIPMENT_CATALOG } from '../data/equipmentCatalog'
 import { EquipmentVerification } from './EquipmentVerification'
 import { IpiOpportunityBreakdown } from '../IpiOpportunityBreakdown'
 
@@ -18,6 +21,21 @@ export function QuantifyStep({
   onBack: () => void
 }) {
   const result = calculateQuantify(qualifyInput, input)
+
+  const { pricedTotal: equipmentTotal } = calculateSelectedEquipmentTotal(
+    EQUIPMENT_CATALOG,
+    input.equipmentVerification,
+  )
+
+  // Keep breakdown.equipment synced to the Equipment Template selection at all
+  // times — including on first load, before the rep has touched a checkbox —
+  // so Verify (which reads this same stored value read-only) never shows a
+  // stale manually-typed figure from before this was wired to the catalog.
+  useEffect(() => {
+    if (input.breakdown.equipment !== equipmentTotal) {
+      onChange({ ...input, breakdown: { ...input.breakdown, equipment: equipmentTotal } })
+    }
+  }, [equipmentTotal])
 
   return (
     <div>
@@ -63,6 +81,7 @@ export function QuantifyStep({
         breakdown={input.breakdown}
         total={result.actualIpiOpportunity}
         onChange={(breakdown) => onChange({ ...input, breakdown })}
+        equipmentAuto
       />
 
       <div className="flex justify-between">

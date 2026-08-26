@@ -26,10 +26,13 @@ export function IpiOpportunityBreakdown({
   breakdown,
   total,
   onChange,
+  equipmentAuto = false,
 }: {
   breakdown: EquipmentBreakdown
   total: number
   onChange?: (breakdown: EquipmentBreakdown) => void
+  /** When true, Equipment is synced live from the Equipment Template above and shown read-only. */
+  equipmentAuto?: boolean
 }) {
   return (
     <div>
@@ -38,8 +41,13 @@ export function IpiOpportunityBreakdown({
           icon={ICON_PATHS.equipment}
           label="Equipment"
           value={formatRupeesCompact(breakdown.equipment)}
+          sublabel={equipmentAuto ? 'Synced from Equipment Template' : undefined}
           first
-          editable={onChange ? { value: breakdown.equipment, onChange: (v) => onChange({ ...breakdown, equipment: v }) } : undefined}
+          editable={
+            onChange && !equipmentAuto
+              ? { value: breakdown.equipment, onChange: (v) => onChange({ ...breakdown, equipment: v }) }
+              : undefined
+          }
         />
         <BarStat
           icon={ICON_PATHS.irrigation}

@@ -6,6 +6,7 @@ import { CustomerAssumptionCard } from './CustomerAssumptionCard'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment } from './domain/assessment'
 import { formatNumber, formatRupeesCompact } from './format'
+import { IpiOpportunityWaterfall } from './IpiOpportunityWaterfall'
 
 const CUSTOMER_TYPE_LABEL: Record<string, string> = {
   existing: 'Existing IPI',
@@ -68,6 +69,7 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
 
       <Section n={3} title="Customer Assumption Card">
         <CustomerAssumptionCard qualifyInput={qualifyInput} quantifyInput={quantifyInput} />
+        <IpiOpportunityWaterfall qualifyInput={qualifyInput} quantifyInput={quantifyInput} />
       </Section>
 
       <Section n={4} title="Commercial Position">
