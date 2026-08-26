@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { calculateCommercialView, calculateSelectedEquipmentTotal } from './calc/commercial'
 import { EQUIPMENT_DOWNTIME_TARGET, PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
-import { Card, IntelRow, StatCard } from './components/ui'
+import { Card, Icon, IntelRow, StatCard } from './components/ui'
 import { CustomerAssumptionCard } from './CustomerAssumptionCard'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment } from './domain/assessment'
@@ -16,15 +16,29 @@ const CUSTOMER_TYPE_LABEL: Record<string, string> = {
 }
 
 function Section({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+  const [expanded, setExpanded] = useState(true)
+
   return (
     <div className="mb-5">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="font-data flex h-5 w-5 items-center justify-center rounded-full bg-ipi-600 text-[11px] font-semibold text-white">
-          {n}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="mb-2 flex w-full items-center justify-between gap-2 text-left"
+      >
+        <span className="flex items-center gap-2">
+          <span className="font-data flex h-5 w-5 items-center justify-center rounded-full bg-ipi-600 text-[11px] font-semibold text-white">
+            {n}
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ipi-700/60">{title}</span>
         </span>
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-ipi-700/60">{title}</span>
-      </div>
-      {children}
+        <span className="flex items-center gap-1 text-[11px] font-medium text-ipi-700/50">
+          {expanded ? 'Minimise' : 'Expand'}
+          <span className={`transition-transform ${expanded ? 'rotate-180' : ''}`}>
+            <Icon path="M6 9l6 6 6-6" />
+          </span>
+        </span>
+      </button>
+      {expanded && children}
     </div>
   )
 }
