@@ -26,11 +26,11 @@ describe('calculateQualify', () => {
     expect(result.annualPlayers).toBe(161_280)
     expect(result.potentialRevenueAnnual).toBe(403_200_000) // ₹40.32 Cr
     expect(result.estimatedOperatingCostAnnual).toBe(100_800_000) // ₹10.08 Cr
-    // 500,000L/day × 15-day cycle = 7,500,000L reserve ÷ 20,000L = 375 tankers/refill
-    // × ₹1,000 = ₹375,000/refill, × (365/15) refills/yr
-    expect(result.annualWaterCost).toBe(9_125_000)
+    // 500,000L / 20,000L = 25 tankers/day × ₹1,000 = ₹25,000/day
+    // × (20 playable hrs/day × 336 playable days/yr = 6,720) = ₹168,000,000/yr
+    expect(result.annualWaterCost).toBe(168_000_000)
     expect(result.annualSalaryCost).toBe(11_760_000) // ₹1.176 Cr
-    expect(result.totalCostOfOperations).toBe(121_685_000)
-    expect(result.ipiOpportunityAnnual).toBe(281_515_000)
+    expect(result.totalCostOfOperations).toBe(280_560_000)
+    expect(result.ipiOpportunityAnnual).toBe(122_640_000)
   })
 })

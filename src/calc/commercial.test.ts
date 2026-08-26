@@ -52,17 +52,17 @@ describe('calculateCommercialView', () => {
     expect(result.gapToBreakEvenPlayers).toBe(38) // 55 break-even − 17 actual players/day
   })
 
-  it('derives potential water cost from daily requirement, tanker cost, and refills across a calendar year', () => {
-    // 500,000L/day × 15-day cycle = 7,500,000L reserve ÷ 20,000L = 375 tankers/refill
-    // × ₹1,000 = ₹375,000/refill, × (365/15) refills/yr
-    expect(result.annualWaterCost).toBe(9_125_000)
+  it('derives potential water cost from daily requirement, tanker cost, and playable hours/day × 336 days/yr', () => {
+    // 500,000L / 20,000L = 25 tankers/day × ₹1,000 = ₹25,000/day
+    // × (20 playable hrs/day × 336 playable days/yr = 6,720) = ₹168,000,000/yr
+    expect(result.annualWaterCost).toBe(168_000_000)
     expect(result.annualSalaryCost).toBe(11_760_000) // ₹1.176 Cr
   })
 
   it('nets potential total cost of operations (expenses + salary + water) against potential revenue', () => {
     expect(result.estimatedOperatingCostAnnual).toBe(100_800_000)
-    expect(result.totalCostOfOperations).toBe(121_685_000)
-    expect(result.ipiOpportunityPotentialAnnual).toBe(765_355_000)
+    expect(result.totalCostOfOperations).toBe(280_560_000)
+    expect(result.ipiOpportunityPotentialAnnual).toBe(606_480_000)
   })
 
   it("annualizes Quantify's own monthly actuals (×12, no refill math) for the actual cost side", () => {
