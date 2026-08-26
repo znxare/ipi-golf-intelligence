@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
+import { Icon } from './components/ui'
 import {
   BASE_PLAYERS_PER_DAY,
   CART_CAPEX,
@@ -26,6 +28,41 @@ const STATUS_ROW_BG: Record<CapacityStatus, string> = {
   above: 'bg-mint-100/40',
 }
 
+function nearest(values: readonly number[], target: number): number {
+  return values.reduce((best, v) => (Math.abs(v - target) < Math.abs(best - target) ? v : best))
+}
+
+function ToggleHeader({
+  title,
+  subtitle,
+  expanded,
+  onToggle,
+}: {
+  title: string
+  subtitle?: string
+  expanded: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full items-center justify-between gap-3 bg-ipi-900 px-4 py-2.5 text-left text-white"
+    >
+      <span>
+        <span className="block text-sm font-semibold uppercase tracking-wide">{title}</span>
+        {subtitle && <span className="block text-[11px] text-white/60">{subtitle}</span>}
+      </span>
+      <span className="flex flex-none items-center gap-1 text-[11px] font-medium normal-case tracking-normal text-white/70">
+        {expanded ? 'Minimise' : 'Expand'}
+        <span className={`transition-transform ${expanded ? 'rotate-180' : ''}`}>
+          <Icon path="M6 9l6 6 6-6" />
+        </span>
+      </span>
+    </button>
+  )
+}
+
 /**
  * Frozen reference matrix (same for every course): golf + cart revenue at
  * each capacity band, and the break-even capacity band across a spread of
@@ -45,10 +82,14 @@ export function RevenueScenarioMatrix({
   avgGreenFee?: number
   expensesPerDay?: number
 }) {
+  const [revenueMatrixExpanded, setRevenueMatrixExpanded] = useState(true)
+  const [beBandExpanded, setBeBandExpanded] = useState(true)
   const rows = buildCapacityMatrix()
   const cartBE = deriveCartBreakEven()
   const courseBreakEven =
     avgGreenFee && expensesPerDay ? deriveBreakEvenCell(expensesPerDay, avgGreenFee) : null
+  const nearestSpendBand = expensesPerDay ? nearest(SPEND_PER_DAY_BANDS, expensesPerDay) : null
+  const nearestFeeScenario = avgGreenFee ? nearest(GREEN_FEE_SCENARIOS, avgGreenFee) : null
 
   return (
     <div className="mb-5">
@@ -58,19 +99,23 @@ export function RevenueScenarioMatrix({
       </div>
 
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
-        <div className="bg-ipi-900 py-2.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
-          Revenue Matrix (Frozen Numbers)
-        </div>
-        {courseBreakEven && (
-          <div className="border-b border-hairline bg-ipi-100 px-4 py-2 text-xs text-ipi-900">
-            <span className="font-semibold">This course's break-even:</span> {formatRupees(expensesPerDay!)}/day ÷{' '}
-            {formatRupees(avgGreenFee!)} green fee = {courseBreakEven.playersNeeded} players/day
-            {courseBreakEven.band !== null
-              ? ` — highlighted at the ${courseBreakEven.band}% capacity row below.`
-              : ' — not reached even at 100% capacity.'}
-          </div>
-        )}
-        <div className="overflow-x-auto">
+        <ToggleHeader
+          title="Revenue Matrix (Frozen Numbers)"
+          expanded={revenueMatrixExpanded}
+          onToggle={() => setRevenueMatrixExpanded((v) => !v)}
+        />
+        {revenueMatrixExpanded && (
+          <>
+            {courseBreakEven && (
+              <div className="border-b border-hairline bg-ipi-100 px-4 py-2 text-xs text-ipi-900">
+                <span className="font-semibold">This course's break-even:</span> {formatRupees(expensesPerDay!)}/day
+                ÷ {formatRupees(avgGreenFee!)} green fee = {courseBreakEven.playersNeeded} players/day
+                {courseBreakEven.band !== null
+                  ? ` — highlighted at the ${courseBreakEven.band}% capacity row below.`
+                  : ' — not reached even at 100% capacity.'}
+              </div>
+            )}
+            <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
               <tr className="bg-ipi-50/60 text-left text-xs text-ipi-700/60">
@@ -149,21 +194,43 @@ export function RevenueScenarioMatrix({
             </tbody>
           </table>
         </div>
+          </>
+        )}
       </div>
 
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
-        <div className="bg-ipi-900 px-4 py-2.5 text-center text-white">
-          <div className="text-sm font-semibold uppercase tracking-wide">BE Capacity Band — % / Players</div>
-          <div className="text-[11px] text-white/60">Players required to cover daily golf spend</div>
-        </div>
+        <ToggleHeader
+          title="BE Capacity Band — % / Players"
+          subtitle="Players required to cover daily golf spend"
+          expanded={beBandExpanded}
+          onToggle={() => setBeBandExpanded((v) => !v)}
+        />
+        {beBandExpanded && (
+          <>
+        {courseBreakEven && (
+          <div className="border-b border-hairline bg-ipi-100 px-4 py-2 text-xs text-ipi-900">
+            <span className="font-semibold">Nearest reference row/column</span> to this course's actual
+            expenses/day and avg green fee is highlighted below.
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[680px] border-collapse text-sm">
             <thead>
               <tr className="bg-ipi-50/60 text-left text-xs text-ipi-700/60">
                 <th className="px-3 py-2 font-medium">Spend/Day (₹)</th>
                 {GREEN_FEE_SCENARIOS.map((fee) => (
-                  <th key={fee} className="border-l border-hairline px-3 py-2 text-center font-medium">
+                  <th
+                    key={fee}
+                    className={`border-l border-hairline px-3 py-2 text-center font-medium ${
+                      nearestFeeScenario === fee ? 'text-ipi-900' : ''
+                    }`}
+                  >
                     ₹{fee / 1000}K
+                    {nearestFeeScenario === fee && (
+                      <span className="ml-1 rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                        BE
+                      </span>
+                    )}
                   </th>
                 ))}
                 <th className="border-l border-hairline px-3 py-2 text-center font-medium">
@@ -172,38 +239,64 @@ export function RevenueScenarioMatrix({
               </tr>
             </thead>
             <tbody>
-              {SPEND_PER_DAY_BANDS.map((spend) => (
-                <tr key={spend} className="border-t border-hairline">
-                  <td className="font-data px-3 py-2 font-medium tabular-nums text-ink">
-                    {formatRupeesCompact(spend)}
-                  </td>
-                  {GREEN_FEE_SCENARIOS.map((fee) => {
-                    const cell = deriveBreakEvenCell(spend, fee)
-                    return (
-                      <td key={fee} className="border-l border-hairline px-3 py-2 text-center">
-                        <span className="font-data inline-block rounded-md bg-amber-100 px-2 py-1 text-xs font-semibold tabular-nums text-amber-600">
-                          {cell.band !== null ? `${cell.band}% / ${cell.playersNeeded}` : `>100% / ${cell.playersNeeded}`}
+              {SPEND_PER_DAY_BANDS.map((spend) => {
+                const isNearestSpendRow = nearestSpendBand === spend
+                return (
+                  <tr
+                    key={spend}
+                    className={`border-t border-hairline ${isNearestSpendRow ? 'bg-ipi-100/60' : ''}`}
+                  >
+                    <td
+                      className={`font-data px-3 py-2 font-medium tabular-nums ${
+                        isNearestSpendRow ? 'text-ipi-900' : 'text-ink'
+                      }`}
+                    >
+                      {formatRupeesCompact(spend)}
+                      {isNearestSpendRow && (
+                        <span className="ml-1 rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                          BE
                         </span>
-                      </td>
-                    )
-                  })}
-                  <td className="border-l border-hairline px-3 py-2 text-center text-xs text-ipi-700/70">
-                    {formatNumber(cartBE.roundsToRecoverCapital)} Rds /{' '}
-                    {formatNumber(cartBE.playerRoundsToRecoverCapital)} Plyr /{' '}
-                    {formatNumber(cartBE.daysToRecoverCapital)} Days
-                  </td>
-                </tr>
-              ))}
+                      )}
+                    </td>
+                    {GREEN_FEE_SCENARIOS.map((fee) => {
+                      const cell = deriveBreakEvenCell(spend, fee)
+                      const isMatch = isNearestSpendRow && nearestFeeScenario === fee
+                      return (
+                        <td key={fee} className="border-l border-hairline px-3 py-2 text-center">
+                          <span
+                            className={`font-data inline-block rounded-md px-2 py-1 text-xs font-semibold tabular-nums ${
+                              isMatch
+                                ? 'bg-ipi-600 text-white ring-1 ring-inset ring-ipi-600'
+                                : courseBreakEven
+                                  ? 'bg-ipi-50 text-ipi-700/60'
+                                  : 'bg-amber-100 text-amber-600'
+                            }`}
+                          >
+                            {cell.band !== null ? `${cell.band}% / ${cell.playersNeeded}` : `>100% / ${cell.playersNeeded}`}
+                          </span>
+                        </td>
+                      )
+                    })}
+                    <td className="border-l border-hairline px-3 py-2 text-center text-xs text-ipi-700/70">
+                      {formatNumber(cartBE.roundsToRecoverCapital)} Rds /{' '}
+                      {formatNumber(cartBE.playerRoundsToRecoverCapital)} Plyr /{' '}
+                      {formatNumber(cartBE.daysToRecoverCapital)} Days
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
+          </>
+        )}
       </div>
 
       <div className="mb-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-xl border border-hairline bg-white px-4 py-2.5 text-xs text-ipi-700/70">
         {courseBreakEven ? (
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-ipi-600" /> Highlighted row = this course's break-even
-            capacity band (Expenses/day ÷ Avg green fee)
+            <span className="h-2.5 w-2.5 rounded-full bg-ipi-600" /> BE = this course's break-even (Expenses/day ÷
+            Avg green fee), highlighted in both tables above
           </span>
         ) : (
           <>

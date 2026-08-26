@@ -211,8 +211,6 @@ export function QualifyStep({
         />
       )}
 
-      <RevenueScenarioMatrix avgGreenFee={input.pricePerRound} expensesPerDay={input.expensesPerDay} />
-
       <StatBar title="Potential Opportunity">
         <BarStat
           icon={ICON_PATHS.players}
@@ -246,6 +244,8 @@ export function QualifyStep({
           sublabel="Annual"
         />
       </StatBar>
+
+      <RevenueScenarioMatrix avgGreenFee={input.pricePerRound} expensesPerDay={input.expensesPerDay} />
 
       <div className="flex justify-end">
         <PrimaryButton onClick={onNext}>
