@@ -1,18 +1,20 @@
 import { calculateSelectedEquipmentTotal, deriveVerifiedQty } from '../calc/commercial'
+import { deriveEquipmentPriceINR } from '../calc/pricing'
 import type { EquipmentVerificationLine } from '../calc/types'
 import { EQUIPMENT_CATALOG } from '../data/equipmentCatalog'
 import { formatRupees, formatRupeesCompact } from '../format'
+import { useUsdInrRate } from '../hooks/useUsdInrRate'
 
 /**
- * Pricing detail for what's checked off in the Equipment Template — hidden
- * there by default, revealed by clicking the Equipment stat in the IPI
- * Opportunity Breakdown so the price doesn't clutter the selection table.
+ * Pricing detail for what's checked off in the Equipment Template, revealed
+ * by clicking the Equipment stat in the IPI Opportunity Breakdown.
  */
 export function SelectedEquipmentDetail({ lines }: { lines: Record<string, EquipmentVerificationLine> }) {
-  const selected = EQUIPMENT_CATALOG.map((item) => ({ item, qty: deriveVerifiedQty(item, lines[item.id]) })).filter(
+  const { rate } = useUsdInrRate()
+  const selected = EQUIPMENT_CATALOG.map((item) => ({ item, qty: deriveVerifiedQty(lines[item.id]) })).filter(
     ({ qty }) => qty > 0,
   )
-  const { pricedTotal, hasUnpriced } = calculateSelectedEquipmentTotal(EQUIPMENT_CATALOG, lines)
+  const { pricedTotal, hasUnpriced } = calculateSelectedEquipmentTotal(EQUIPMENT_CATALOG, lines, rate)
 
   return (
     <div className="mb-5 overflow-hidden rounded-xl border border-hairline bg-white shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
@@ -39,17 +41,17 @@ export function SelectedEquipmentDetail({ lines }: { lines: Record<string, Equip
                 <td className="px-4 py-2 text-ink">{item.equipment}</td>
                 <td className="font-data px-4 py-2 text-right tabular-nums text-ink">{qty}</td>
                 <td className="font-data px-4 py-2 text-right tabular-nums text-ipi-700/70">
-                  {item.unitPriceINR === null ? (
+                  {item.usdMsrp === null ? (
                     <span className="text-amber-600">TBD</span>
                   ) : (
-                    formatRupees(item.unitPriceINR)
+                    formatRupees(deriveEquipmentPriceINR(item.usdMsrp, rate))
                   )}
                 </td>
                 <td className="font-data px-4 py-2 text-right font-medium tabular-nums text-ink">
-                  {item.unitPriceINR === null ? (
+                  {item.usdMsrp === null ? (
                     <span className="text-amber-600">TBD</span>
                   ) : (
-                    formatRupees(item.unitPriceINR * qty)
+                    formatRupees(deriveEquipmentPriceINR(item.usdMsrp, rate) * qty)
                   )}
                 </td>
               </tr>

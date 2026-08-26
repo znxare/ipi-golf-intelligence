@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
-import { calculateCommercialView, calculateDraftSowTotal } from './calc/commercial'
+import { calculateCommercialView, calculateSelectedEquipmentTotal } from './calc/commercial'
 import { EQUIPMENT_DOWNTIME_TARGET, PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
 import { Card, IntelRow, StatCard } from './components/ui'
 import { CustomerAssumptionCard } from './CustomerAssumptionCard'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
 import type { Assessment } from './domain/assessment'
 import { formatNumber, formatRupeesCompact } from './format'
+import { useUsdInrRate } from './hooks/useUsdInrRate'
 import { IpiOpportunityWaterfall } from './IpiOpportunityWaterfall'
 
 const CUSTOMER_TYPE_LABEL: Record<string, string> = {
@@ -36,7 +37,12 @@ export function CommercialView({ assessment }: { assessment: Assessment }) {
     actualSalariesPerMonth: quantifyInput?.salariesPerMonth ?? 0,
     actualWaterPerMonth: quantifyInput?.waterPerMonth ?? 0,
   })
-  const { pricedTotal, hasUnpriced } = calculateDraftSowTotal(EQUIPMENT_CATALOG)
+  const { rate: usdInrRate } = useUsdInrRate()
+  const { pricedTotal, hasUnpriced } = calculateSelectedEquipmentTotal(
+    EQUIPMENT_CATALOG,
+    quantifyInput?.equipmentVerification ?? {},
+    usdInrRate,
+  )
 
   return (
     <div>

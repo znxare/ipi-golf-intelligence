@@ -4,6 +4,7 @@ import { calculateQuantify } from '../calc/quantify'
 import type { QualifyInput, QuantifyInput } from '../calc/types'
 import { Field, PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
 import { EQUIPMENT_CATALOG } from '../data/equipmentCatalog'
+import { useUsdInrRate } from '../hooks/useUsdInrRate'
 import { EquipmentVerification } from './EquipmentVerification'
 import { IpiOpportunityBreakdown } from '../IpiOpportunityBreakdown'
 import { SelectedEquipmentDetail } from './SelectedEquipmentDetail'
@@ -23,16 +24,18 @@ export function QuantifyStep({
 }) {
   const result = calculateQuantify(qualifyInput, input)
   const [showEquipmentDetail, setShowEquipmentDetail] = useState(false)
+  const { rate: usdInrRate } = useUsdInrRate()
 
   const { pricedTotal: equipmentTotal } = calculateSelectedEquipmentTotal(
     EQUIPMENT_CATALOG,
     input.equipmentVerification,
+    usdInrRate,
   )
 
-  // Keep breakdown.equipment synced to the Equipment Template selection at all
-  // times — including on first load, before the rep has touched a checkbox —
-  // so Verify (which reads this same stored value read-only) never shows a
-  // stale manually-typed figure from before this was wired to the catalog.
+  // Keep breakdown.equipment synced to the Equipment Template selection (and
+  // the live rate) at all times — including on first load, before the rep
+  // has touched a qty field — so Verify (which reads this same stored value
+  // read-only) never shows a stale figure from before this was wired up.
   useEffect(() => {
     if (input.breakdown.equipment !== equipmentTotal) {
       onChange({ ...input, breakdown: { ...input.breakdown, equipment: equipmentTotal } })

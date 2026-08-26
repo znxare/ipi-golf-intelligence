@@ -1,52 +1,37 @@
 import type { EquipmentCatalogItem } from '../data/equipmentCatalog'
 import { PLAYABLE_DAYS_PER_YEAR } from './constants'
 import { deriveAnnualSalaryCost, deriveAnnualWaterCost } from './costs'
+import { deriveEquipmentPriceINR } from './pricing'
 import { derivePotentialPlayersPerDay } from './qualify'
 import type { CommercialViewData, EquipmentVerificationLine, QualifyInput } from './types'
 
-export function calculateDraftSowTotal(catalog: EquipmentCatalogItem[]): {
-  pricedTotal: number
-  hasUnpriced: boolean
-} {
-  let pricedTotal = 0
-  let hasUnpriced = false
-  for (const item of catalog) {
-    if (item.unitPriceINR === null) {
-      hasUnpriced = true
-    } else {
-      pricedTotal += item.unitPriceINR * item.sowQtyNumeric
-    }
-  }
-  return { pricedTotal, hasUnpriced }
-}
-
-/** Qty the rep has actually put on the SOW for this line: template qty if confirmed, else their typed override. */
-export function deriveVerifiedQty(item: EquipmentCatalogItem, line: EquipmentVerificationLine | undefined): number {
-  if (!line) return 0
-  if (line.confirmed) return item.sowQtyNumeric
-  const override = Number(line.sowQty)
-  return Number.isFinite(override) ? override : 0
+/** Qty the rep has actually put on the SOW for this line — blank/zero means not selected. */
+export function deriveVerifiedQty(line: EquipmentVerificationLine | undefined): number {
+  const qty = Number(line?.qty)
+  return Number.isFinite(qty) && qty > 0 ? qty : 0
 }
 
 /**
- * Live equipment price total from what the rep has actually checked off (or
- * overridden) in the Equipment Template — not the full catalog like
- * calculateDraftSowTotal. Feeds the Equipment figure in the IPI Opportunity
- * Breakdown as selections change, before Verify.
+ * Live equipment price total from what's checked off in the Equipment
+ * Template, using each item's Toro USD MSRP marked up and converted at the
+ * given USD→INR rate (see calc/pricing.ts). Feeds the Equipment figure in
+ * the IPI Opportunity Breakdown and the Draft SOW figure in the Commercial
+ * Layer.
  */
 export function calculateSelectedEquipmentTotal(
   catalog: EquipmentCatalogItem[],
   lines: Record<string, EquipmentVerificationLine>,
+  usdInrRate: number,
 ): { pricedTotal: number; hasUnpriced: boolean } {
   let pricedTotal = 0
   let hasUnpriced = false
   for (const item of catalog) {
-    const qty = deriveVerifiedQty(item, lines[item.id])
+    const qty = deriveVerifiedQty(lines[item.id])
     if (qty <= 0) continue
-    if (item.unitPriceINR === null) {
+    if (item.usdMsrp === null) {
       hasUnpriced = true
     } else {
-      pricedTotal += item.unitPriceINR * qty
+      pricedTotal += deriveEquipmentPriceINR(item.usdMsrp, usdInrRate) * qty
     }
   }
   return { pricedTotal, hasUnpriced }
