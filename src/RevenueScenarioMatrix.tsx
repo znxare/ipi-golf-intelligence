@@ -27,14 +27,28 @@ const STATUS_ROW_BG: Record<CapacityStatus, string> = {
 }
 
 /**
- * Frozen reference matrix (same for every course, not derived from this
- * assessment's Qualify inputs): golf + cart revenue at each capacity band,
- * and the break-even capacity band across a spread of daily-spend / green-fee
- * scenarios. Shown at Certify as a leave-behind sales reference.
+ * Frozen reference matrix (same for every course): golf + cart revenue at
+ * each capacity band, and the break-even capacity band across a spread of
+ * daily-spend / green-fee scenarios. Shown at Qualify and Certify as a
+ * leave-behind sales reference.
+ *
+ * When this course's own avg green fee and expenses/day are passed in, the
+ * capacity row matching THIS course's break-even (expenses/day ÷ avg green
+ * fee) is highlighted instead of the generic below/crossing/above banding —
+ * the frozen ₹3.5K/₹5K/₹7.5K columns stay as reference points, but the row
+ * highlight itself tracks the real numbers the rep just entered.
  */
-export function RevenueScenarioMatrix() {
+export function RevenueScenarioMatrix({
+  avgGreenFee,
+  expensesPerDay,
+}: {
+  avgGreenFee?: number
+  expensesPerDay?: number
+}) {
   const rows = buildCapacityMatrix()
   const cartBE = deriveCartBreakEven()
+  const courseBreakEven =
+    avgGreenFee && expensesPerDay ? deriveBreakEvenCell(expensesPerDay, avgGreenFee) : null
 
   return (
     <div className="mb-5">
@@ -47,6 +61,15 @@ export function RevenueScenarioMatrix() {
         <div className="bg-ipi-900 py-2.5 text-center text-sm font-semibold uppercase tracking-wide text-white">
           Revenue Matrix (Frozen Numbers)
         </div>
+        {courseBreakEven && (
+          <div className="border-b border-hairline bg-ipi-100 px-4 py-2 text-xs text-ipi-900">
+            <span className="font-semibold">This course's break-even:</span> {formatRupees(expensesPerDay!)}/day ÷{' '}
+            {formatRupees(avgGreenFee!)} green fee = {courseBreakEven.playersNeeded} players/day
+            {courseBreakEven.band !== null
+              ? ` — highlighted at the ${courseBreakEven.band}% capacity row below.`
+              : ' — not reached even at 100% capacity.'}
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-sm">
             <thead>
@@ -82,12 +105,28 @@ export function RevenueScenarioMatrix() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.capacityPct} className={`border-t border-hairline ${STATUS_ROW_BG[row.status]}`}>
+              {rows.map((row) => {
+                const isBreakEvenRow = courseBreakEven?.band === row.capacityPct
+                const rowClass = courseBreakEven
+                  ? isBreakEvenRow
+                    ? 'bg-ipi-100 ring-1 ring-inset ring-ipi-600'
+                    : ''
+                  : STATUS_ROW_BG[row.status]
+                return (
+                <tr key={row.capacityPct} className={`border-t border-hairline ${rowClass}`}>
                   <td className="px-3 py-2">
                     <span className="inline-flex items-center gap-1.5">
-                      <span className={`h-2 w-2 flex-none rounded-full ${STATUS_DOT[row.status]}`} />
-                      {row.capacityPct}%
+                      {courseBreakEven ? (
+                        isBreakEvenRow && <span className="h-2 w-2 flex-none rounded-full bg-ipi-600" />
+                      ) : (
+                        <span className={`h-2 w-2 flex-none rounded-full ${STATUS_DOT[row.status]}`} />
+                      )}
+                      <span className={isBreakEvenRow ? 'font-semibold text-ipi-900' : ''}>{row.capacityPct}%</span>
+                      {isBreakEvenRow && (
+                        <span className="rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                          BE
+                        </span>
+                      )}
                     </span>
                   </td>
                   <td className="font-data px-3 py-2 text-right tabular-nums text-ink">{row.playersPerDay}</td>
@@ -105,7 +144,8 @@ export function RevenueScenarioMatrix() {
                     {formatRupeesCompact(row.cartRevenue)}
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -160,15 +200,24 @@ export function RevenueScenarioMatrix() {
       </div>
 
       <div className="mb-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-xl border border-hairline bg-white px-4 py-2.5 text-xs text-ipi-700/70">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-risk-600" /> Below
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-600" /> Crossing (BE band)
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-mint-600" /> Above
-        </span>
+        {courseBreakEven ? (
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-ipi-600" /> Highlighted row = this course's break-even
+            capacity band (Expenses/day ÷ Avg green fee)
+          </span>
+        ) : (
+          <>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-risk-600" /> Below
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-600" /> Crossing (BE band)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-mint-600" /> Above
+            </span>
+          </>
+        )}
       </div>
 
       <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">

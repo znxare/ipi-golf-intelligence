@@ -211,7 +211,7 @@ export function QualifyStep({
         />
       )}
 
-      <RevenueScenarioMatrix />
+      <RevenueScenarioMatrix avgGreenFee={input.pricePerRound} expensesPerDay={input.expensesPerDay} />
 
       <StatBar title="Potential Opportunity">
         <BarStat

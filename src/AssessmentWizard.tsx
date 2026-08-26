@@ -83,6 +83,8 @@ export function AssessmentWizard({
       {assessment.step === 'certify' && (
         <CertifyStep
           customerType={assessment.qualifyInput.customerType}
+          avgGreenFee={assessment.qualifyInput.pricePerRound}
+          expensesPerDay={assessment.qualifyInput.expensesPerDay}
           onBack={() =>
             setAssessment({ ...assessment, step: isNewBuild ? 'qualify' : 'verify' })
           }

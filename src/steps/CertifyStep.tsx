@@ -11,10 +11,14 @@ const PATH_LABEL: Record<string, string> = {
 
 export function CertifyStep({
   customerType,
+  avgGreenFee,
+  expensesPerDay,
   onCertify,
   onBack,
 }: {
   customerType: CustomerType
+  avgGreenFee: number
+  expensesPerDay: number
   onCertify: () => void
   onBack: () => void
 }) {
@@ -36,7 +40,7 @@ export function CertifyStep({
         </div>
       </Card>
 
-      <RevenueScenarioMatrix />
+      <RevenueScenarioMatrix avgGreenFee={avgGreenFee} expensesPerDay={expensesPerDay} />
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>
