@@ -1,7 +1,6 @@
 import { calculateCertify } from '../calc/certify'
 import type { CustomerType } from '../calc/types'
 import { Card, PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
-import { RevenueScenarioMatrix } from '../RevenueScenarioMatrix'
 
 const PATH_LABEL: Record<string, string> = {
   maintain_recurring_sow: 'Maintain / recurring SOW',
@@ -11,14 +10,10 @@ const PATH_LABEL: Record<string, string> = {
 
 export function CertifyStep({
   customerType,
-  avgGreenFee,
-  expensesPerDay,
   onCertify,
   onBack,
 }: {
   customerType: CustomerType
-  avgGreenFee: number
-  expensesPerDay: number
   onCertify: () => void
   onBack: () => void
 }) {
@@ -39,8 +34,6 @@ export function CertifyStep({
           Outcome established with clear path and next action.
         </div>
       </Card>
-
-      <RevenueScenarioMatrix avgGreenFee={avgGreenFee} expensesPerDay={expensesPerDay} />
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>
