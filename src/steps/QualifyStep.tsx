@@ -13,6 +13,7 @@ import {
 } from '../components/ui'
 import { EquipmentAudit } from './EquipmentAudit'
 import { formatNumber, formatRupeesCompact } from '../format'
+import { RevenueScenarioMatrix } from '../RevenueScenarioMatrix'
 
 const CUSTOMER_TYPES: {
   type: CustomerType
@@ -209,6 +210,8 @@ export function QualifyStep({
           onChange={(equipmentAudit) => onChange({ ...input, equipmentAudit })}
         />
       )}
+
+      <RevenueScenarioMatrix />
 
       <StatBar title="Potential Opportunity">
         <BarStat
