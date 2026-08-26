@@ -18,7 +18,11 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
     <div className="flex w-48 flex-col gap-4 bg-ipi-900 px-3 py-4">
       <div className="px-1">
         <div className="overflow-hidden rounded-lg bg-white p-1.5">
-          <img src="/ipi-logo.jpg" alt="IPI" className="block h-auto w-full rounded object-contain" />
+          <img
+            src={`${import.meta.env.BASE_URL}ipi-logo.jpg`}
+            alt="IPI"
+            className="block h-auto w-full rounded object-contain"
+          />
         </div>
         <div className="mt-1.5 text-center text-[10px] tracking-wide text-white/45">Transaction Platform</div>
       </div>
