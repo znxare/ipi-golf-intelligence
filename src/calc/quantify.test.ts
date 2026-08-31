@@ -33,7 +33,7 @@ describe('calculateQuantify', () => {
       golfSpendPerMonth: 8_400_000, // ≈ ₹300,000/day annualized over 336 playable days
       salariesPerMonth: 2_800_000,
       waterPerMonth: 1_120_000,
-      breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000 },
+      breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000, golfCart: 0 },
       equipmentVerification: {},
     })
 
@@ -47,7 +47,7 @@ describe('calculateQuantify', () => {
       golfSpendPerMonth: 8_400_000,
       salariesPerMonth: 2_800_000,
       waterPerMonth: 1_120_000,
-      breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000 },
+      breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000, golfCart: 0 },
       equipmentVerification: {},
     })
 

@@ -18,23 +18,36 @@ const STORAGE_KEY = 'ipi.assessments.v1'
 /** Backfills cart-assumption fields onto assessments saved before they existed. */
 function withCartDefaults(assessment: Assessment): Assessment {
   const q = assessment.qualifyInput
-  if (
-    q.cartHoursPerTeeRound !== undefined &&
-    q.playersPerCart !== undefined &&
-    q.cartRevenuePerRound !== undefined &&
-    q.cartCost !== undefined
-  ) {
+  const needsQualifyBackfill =
+    q.cartHoursPerTeeRound === undefined ||
+    q.playersPerCart === undefined ||
+    q.cartRevenuePerRound === undefined ||
+    q.cartCost === undefined
+  const needsQuantifyBackfill =
+    assessment.quantifyInput !== undefined && assessment.quantifyInput.breakdown.golfCart === undefined
+
+  if (!needsQualifyBackfill && !needsQuantifyBackfill) {
     return assessment
   }
+
   return {
     ...assessment,
-    qualifyInput: {
-      ...q,
-      cartHoursPerTeeRound: q.cartHoursPerTeeRound ?? CART_HOURS_PER_TEE_ROUND_DEFAULT,
-      playersPerCart: q.playersPerCart ?? PLAYERS_PER_CART_DEFAULT,
-      cartRevenuePerRound: q.cartRevenuePerRound ?? CART_REVENUE_PER_ROUND_DEFAULT,
-      cartCost: q.cartCost ?? CART_COST_DEFAULT,
-    },
+    qualifyInput: needsQualifyBackfill
+      ? {
+          ...q,
+          cartHoursPerTeeRound: q.cartHoursPerTeeRound ?? CART_HOURS_PER_TEE_ROUND_DEFAULT,
+          playersPerCart: q.playersPerCart ?? PLAYERS_PER_CART_DEFAULT,
+          cartRevenuePerRound: q.cartRevenuePerRound ?? CART_REVENUE_PER_ROUND_DEFAULT,
+          cartCost: q.cartCost ?? CART_COST_DEFAULT,
+        }
+      : q,
+    quantifyInput:
+      needsQuantifyBackfill && assessment.quantifyInput
+        ? {
+            ...assessment.quantifyInput,
+            breakdown: { ...assessment.quantifyInput.breakdown, golfCart: 0 },
+          }
+        : assessment.quantifyInput,
   }
 }
 

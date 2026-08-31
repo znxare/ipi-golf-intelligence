@@ -71,6 +71,7 @@ export function createDefaultQuantifyInput(actualPlayersPerDay = 17): QuantifyIn
       equipment: 4_000_000,
       irrigation: 2_000_000,
       maintenance: 3_000_000,
+      golfCart: 0,
     },
     equipmentVerification: {},
   }

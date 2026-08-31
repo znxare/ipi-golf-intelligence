@@ -68,6 +68,7 @@ export interface QuantifyInput {
     equipment: number
     irrigation: number
     maintenance: number
+    golfCart: number
   }
   /** Keyed by equipment catalog id. */
   equipmentVerification: Record<string, EquipmentVerificationLine>
