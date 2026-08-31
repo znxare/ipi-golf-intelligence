@@ -2,12 +2,9 @@ import { useState } from 'react'
 import { PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
 import { Icon } from './components/ui'
 import {
-  buildCartCapacityMatrix,
   buildGolfCapacityMatrix,
-  deriveCartBreakEven,
   deriveFrozenCartBreakEven,
   deriveGolfBreakEvenCell,
-  deriveRoundsPerCartPerDay,
   FROZEN_CART_CAPEX,
   FROZEN_CART_REVENUE_PER_ROUND,
   FROZEN_PLAYERS_PER_CART,
@@ -74,14 +71,8 @@ function ToggleHeader({
  * BE Capacity Band) restored below it.
  */
 export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?: number; expensesPerDay?: number }) {
-  const [breakEvenExpanded, setBreakEvenExpanded] = useState(true)
   const [golfMatrixExpanded, setGolfMatrixExpanded] = useState(true)
   const [golfBeBandExpanded, setGolfBeBandExpanded] = useState(true)
-  const rows = buildCartCapacityMatrix(props)
-  const cartBE = deriveCartBreakEven(props)
-  const withinPlayableYear = cartBE.daysToRecoverCapital > 0 && cartBE.daysToRecoverCapital <= PLAYABLE_DAYS_PER_YEAR
-  const roundsPerCartPerDay = deriveRoundsPerCartPerDay(props.playableHoursPerDay, props.cartHoursPerTeeRound)
-  const at100 = rows[rows.length - 1]
 
   const golfRows = buildGolfCapacityMatrix()
   const frozenCartBE = deriveFrozenCartBreakEven()
@@ -93,92 +84,6 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
 
   return (
     <div className="mb-5">
-      <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
-        <ToggleHeader
-          title="Cart Break-even (Capital Recovery)"
-          subtitle="Rounds / players / days for cart revenue to cover cart cost"
-          expanded={breakEvenExpanded}
-          onToggle={() => setBreakEvenExpanded((v) => !v)}
-        />
-        {breakEvenExpanded && (
-          <div className="grid grid-cols-2 gap-px bg-hairline sm:grid-cols-5">
-            <div className="bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">Cart Cost</div>
-              <div className="font-data mt-1 text-xs font-semibold tabular-nums text-ink">
-                {formatRupees(props.cartCost)}
-              </div>
-            </div>
-            <div className="bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-                Revenue / Player / Cart Round
-              </div>
-              <div className="font-data mt-1 text-xs font-semibold tabular-nums text-ink">
-                {formatRupees(props.cartRevenuePerRound)}
-              </div>
-            </div>
-            <div className="bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-                Rounds to Break-even
-              </div>
-              <div className="font-data mt-1 text-xs font-semibold tabular-nums text-ink">
-                {formatNumber(cartBE.roundsToRecoverCapital)}
-              </div>
-            </div>
-            <div className="bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-                Players to Break-even
-              </div>
-              <div className="font-data mt-1 text-xs font-semibold tabular-nums text-ink">
-                {formatNumber(cartBE.playerRoundsToRecoverCapital)}
-              </div>
-            </div>
-            <div className="bg-white p-3">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-                Days to Break-even
-              </div>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className="font-data text-xs font-semibold tabular-nums text-ink">
-                  {formatNumber(cartBE.daysToRecoverCapital)}
-                </span>
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
-                    withinPlayableYear ? 'bg-mint-100 text-mint-600' : 'bg-amber-100 text-amber-600'
-                  }`}
-                >
-                  {withinPlayableYear ? '✓ Within year' : '⚠ Exceeds year'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-hairline bg-white p-3">
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-            At 100% Capacity (This Course)
-          </div>
-          <ul className="list-disc space-y-0.5 pl-4 text-[11px] text-ipi-700/70">
-            <li>{formatNumber(at100.playersPerDay)} players/day</li>
-            <li>{formatNumber(at100.cartRoundsPerDay)} cart rounds/day</li>
-            <li>{formatNumber(at100.cartsRequired)} physical carts required</li>
-            <li>{formatRupeesCompact(at100.cartRevenuePerDay)} cart revenue/day</li>
-            <li>{formatRupeesCompact(at100.cartRevenuePerDay * PLAYABLE_DAYS_PER_YEAR)} cart revenue/year</li>
-          </ul>
-        </div>
-        <div className="rounded-xl border border-hairline bg-white p-3">
-          <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-            Cart Assumptions
-          </div>
-          <ul className="list-disc space-y-0.5 pl-4 text-[11px] text-ipi-700/70">
-            <li>{props.playableHoursPerDay} playable hrs/day</li>
-            <li>{props.cartHoursPerTeeRound} hrs/tee round → {formatNumber(roundsPerCartPerDay)} rounds/cart/day</li>
-            <li>{props.playersPerCart} players/cart</li>
-            <li>{formatNumber(PLAYABLE_DAYS_PER_YEAR)} playable days/year</li>
-          </ul>
-        </div>
-      </div>
-
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
         <ToggleHeader
           title="Revenue Matrix (Frozen Numbers)"
