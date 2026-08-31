@@ -179,13 +179,6 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
         </div>
       </div>
 
-      <div className="mb-3 rounded-xl bg-ipi-900 px-4 py-3 text-white">
-        <div className="text-xs font-semibold uppercase tracking-wide">Golf + Cart Revenue Scenario (Frozen Reference)</div>
-        <div className="mt-0.5 text-[11px] text-white/60">
-          Original course-agnostic chart — same for every course, kept alongside the scenario above
-        </div>
-      </div>
-
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
         <ToggleHeader
           title="Revenue Matrix (Frozen Numbers)"
