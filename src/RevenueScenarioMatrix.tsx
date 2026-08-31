@@ -318,6 +318,10 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
         )}
       </div>
 
+      <div className="mb-5 flex flex-wrap items-center justify-center gap-2 rounded-xl bg-ipi-900 px-4 py-2 text-center text-[11px] font-medium uppercase tracking-wide text-white">
+        <span>More players. More cart rounds. More cart revenue.</span>
+      </div>
+
       <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-hairline bg-white p-3">
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
@@ -350,10 +354,6 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
             <li>{formatNumber(PLAYABLE_DAYS_PER_YEAR)} playable days</li>
           </ul>
         </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl bg-ipi-900 px-4 py-2 text-center text-[11px] font-medium uppercase tracking-wide text-white">
-        <span>More players. More cart rounds. More cart revenue.</span>
       </div>
     </div>
   )
