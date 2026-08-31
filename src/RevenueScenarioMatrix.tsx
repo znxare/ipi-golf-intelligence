@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
-import { Icon, IntelRow } from './components/ui'
+import { Icon } from './components/ui'
 import {
   buildGolfCapacityMatrix,
   deriveFrozenCartBreakEven,
@@ -202,6 +202,12 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
             )}
             <div className="overflow-x-auto">
               <table className="w-full min-w-[680px] border-collapse text-xs">
+                <colgroup>
+                  <col style={{ width: '28%' }} />
+                  <col style={{ width: '24%' }} />
+                  <col style={{ width: '24%' }} />
+                  <col style={{ width: '24%' }} />
+                </colgroup>
                 <thead>
                   <tr className="bg-ipi-50/60 text-left text-[11px] text-ipi-700/60">
                     <th className="px-3 py-1.5 font-medium">Spend/Day (₹)</th>
@@ -272,19 +278,38 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
               <div className="bg-ipi-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-white">
                 At 100% Capacity (Reference)
               </div>
-              <div className="bg-white px-4">
-                <IntelRow label="Players / Day" value={formatNumber(at100Golf.playersPerDay)} mono />
-                <IntelRow
-                  label={`Cart Rounds / Day (Players ÷ ${FROZEN_PLAYERS_PER_CART})`}
-                  value={formatNumber(at100Golf.roundsPerDay)}
-                  mono
-                />
-                <IntelRow
-                  label={`Physical Carts Required (Rounds ÷ ${FROZEN_ROUNDS_PER_CART_PER_DAY})`}
-                  value={formatNumber(at100Golf.carts)}
-                  mono
-                />
-                <IntelRow label="Cart Revenue / Day" value={formatRupeesCompact(at100Golf.cartRevenue)} mono />
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[680px] border-collapse text-xs">
+                  <colgroup>
+                    <col style={{ width: '28%' }} />
+                    <col style={{ width: '24%' }} />
+                    <col style={{ width: '24%' }} />
+                    <col style={{ width: '24%' }} />
+                  </colgroup>
+                  <tbody>
+                    {[
+                      { label: 'Players / Day', value: formatNumber(at100Golf.playersPerDay) },
+                      {
+                        label: `Cart Rounds / Day (Players ÷ ${FROZEN_PLAYERS_PER_CART})`,
+                        value: formatNumber(at100Golf.roundsPerDay),
+                      },
+                      {
+                        label: `Physical Carts Required (Rounds ÷ ${FROZEN_ROUNDS_PER_CART_PER_DAY})`,
+                        value: formatNumber(at100Golf.carts),
+                      },
+                      { label: 'Cart Revenue / Day', value: formatRupeesCompact(at100Golf.cartRevenue) },
+                    ].map((row, i) => (
+                      <tr key={row.label} className={i > 0 ? 'border-t border-hairline' : ''}>
+                        <td className="px-3 py-2 text-ipi-700/70">{row.label}</td>
+                        <td className="border-l border-hairline px-3 py-2" />
+                        <td className="font-data border-l border-hairline px-3 py-2 text-center font-semibold tabular-nums text-ink">
+                          {row.value}
+                        </td>
+                        <td className="border-l border-hairline px-3 py-2" />
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </>
