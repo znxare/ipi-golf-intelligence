@@ -212,12 +212,14 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
                           nearestFeeScenario === fee ? 'text-ipi-900' : ''
                         }`}
                       >
-                        ₹{fee / 1000}K
-                        {nearestFeeScenario === fee && (
-                          <span className="ml-1 rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-                            BE
-                          </span>
-                        )}
+                        <span className="inline-flex items-center justify-center gap-1">
+                          <span>₹{fee / 1000}K</span>
+                          {nearestFeeScenario === fee && (
+                            <span className="rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                              BE
+                            </span>
+                          )}
+                        </span>
                       </th>
                     ))}
                   </tr>
@@ -235,12 +237,14 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
                             isNearestSpendRow ? 'text-ipi-900' : 'text-ink'
                           }`}
                         >
-                          {formatRupeesCompact(spend)}
-                          {isNearestSpendRow && (
-                            <span className="ml-1 rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
-                              BE
-                            </span>
-                          )}
+                          <span className="inline-flex items-center gap-1">
+                            <span>{formatRupeesCompact(spend)}</span>
+                            {isNearestSpendRow && (
+                              <span className="rounded-full bg-ipi-600 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white">
+                                BE
+                              </span>
+                            )}
+                          </span>
                         </td>
                         {GREEN_FEE_SCENARIOS.map((fee) => {
                           const cell = deriveGolfBreakEvenCell(spend, fee)
@@ -263,28 +267,28 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
                 </tbody>
               </table>
             </div>
+
+            <div className="border-t border-hairline">
+              <div className="bg-ipi-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-white">
+                At 100% Capacity (Reference)
+              </div>
+              <div className="bg-white px-4">
+                <IntelRow label="Players / Day" value={formatNumber(at100Golf.playersPerDay)} mono />
+                <IntelRow
+                  label={`Cart Rounds / Day (Players ÷ ${FROZEN_PLAYERS_PER_CART})`}
+                  value={formatNumber(at100Golf.roundsPerDay)}
+                  mono
+                />
+                <IntelRow
+                  label={`Physical Carts Required (Rounds ÷ ${FROZEN_ROUNDS_PER_CART_PER_DAY})`}
+                  value={formatNumber(at100Golf.carts)}
+                  mono
+                />
+                <IntelRow label="Cart Revenue / Day" value={formatRupeesCompact(at100Golf.cartRevenue)} mono />
+              </div>
+            </div>
           </>
         )}
-      </div>
-
-      <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
-        <div className="bg-ipi-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-white">
-          At 100% Capacity (Reference)
-        </div>
-        <div className="bg-white px-4">
-          <IntelRow label="Players / Day" value={formatNumber(at100Golf.playersPerDay)} mono />
-          <IntelRow
-            label={`Cart Rounds / Day (Players ÷ ${FROZEN_PLAYERS_PER_CART})`}
-            value={formatNumber(at100Golf.roundsPerDay)}
-            mono
-          />
-          <IntelRow
-            label={`Physical Carts Required (Rounds ÷ ${FROZEN_ROUNDS_PER_CART_PER_DAY})`}
-            value={formatNumber(at100Golf.carts)}
-            mono
-          />
-          <IntelRow label="Cart Revenue / Day" value={formatRupeesCompact(at100Golf.cartRevenue)} mono />
-        </div>
       </div>
 
       <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
