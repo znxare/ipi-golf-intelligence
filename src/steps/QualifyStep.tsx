@@ -280,6 +280,8 @@ export function QualifyStep({
         playersPerCart={input.playersPerCart}
         cartRevenuePerRound={input.cartRevenuePerRound}
         cartCost={input.cartCost}
+        avgGreenFee={input.pricePerRound}
+        expensesPerDay={input.expensesPerDay}
       />
 
       <div className="flex justify-end">

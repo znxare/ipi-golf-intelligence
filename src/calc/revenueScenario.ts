@@ -88,3 +88,94 @@ export function deriveCartBreakEven(input: CartScenarioInput): CartBreakEven {
     daysToRecoverCapital: roundsPerCartPerDay > 0 ? roundsToRecoverCapital / roundsPerCartPerDay : 0,
   }
 }
+
+/**
+ * Frozen Golf Revenue reference — the original course-agnostic chart (same
+ * for every course): golf + cart revenue at each capacity band, and the
+ * capacity band that clears a given daily spend at a given green fee.
+ * Restored alongside the course-specific Cart Revenue Scenario above; kept
+ * separate/namespaced ("Frozen"/"Golf") since it uses its own fixed
+ * assumptions instead of this course's real cart inputs.
+ */
+export const FROZEN_BASE_PLAYERS_PER_DAY = 192
+export const FROZEN_PLAYERS_PER_CART = 2
+export const FROZEN_ROUNDS_PER_CART_PER_DAY = 2
+export const GREEN_FEE_SCENARIOS = [3_500, 5_000, 7_500] as const
+export const FROZEN_CART_REVENUE_PER_ROUND = 1_000
+export const SPEND_PER_DAY_BANDS = [100_000, 150_000, 200_000, 250_000, 300_000] as const
+export const FROZEN_CART_CAPEX = 800_000
+
+export type GolfCapacityStatus = 'below' | 'crossing' | 'above'
+
+export interface GolfCapacityRow {
+  capacityPct: number
+  playersPerDay: number
+  roundsPerDay: number
+  carts: number
+  golfRevenueByFee: number[]
+  cartRevenue: number
+  status: GolfCapacityStatus
+}
+
+function golfStatusForBand(pct: number): GolfCapacityStatus {
+  if (pct <= 20) return 'below'
+  if (pct <= 50) return 'crossing'
+  return 'above'
+}
+
+export function deriveGolfPlayersAtCapacity(capacityPct: number): number {
+  return Math.ceil((FROZEN_BASE_PLAYERS_PER_DAY * capacityPct) / 100)
+}
+
+export function deriveGolfRoundsAtCapacity(capacityPct: number): number {
+  return Math.ceil(deriveGolfPlayersAtCapacity(capacityPct) / FROZEN_PLAYERS_PER_CART)
+}
+
+export function deriveGolfCartsAtCapacity(capacityPct: number): number {
+  return Math.ceil(deriveGolfRoundsAtCapacity(capacityPct) / FROZEN_ROUNDS_PER_CART_PER_DAY)
+}
+
+export function buildGolfCapacityMatrix(): GolfCapacityRow[] {
+  return CAPACITY_BANDS.map((capacityPct) => {
+    const playersPerDay = deriveGolfPlayersAtCapacity(capacityPct)
+    const roundsPerDay = deriveGolfRoundsAtCapacity(capacityPct)
+    return {
+      capacityPct,
+      playersPerDay,
+      roundsPerDay,
+      carts: deriveGolfCartsAtCapacity(capacityPct),
+      golfRevenueByFee: GREEN_FEE_SCENARIOS.map((fee) => playersPerDay * fee),
+      cartRevenue: roundsPerDay * FROZEN_CART_REVENUE_PER_ROUND,
+      status: golfStatusForBand(capacityPct),
+    }
+  })
+}
+
+export interface GolfBreakEvenCell {
+  playersNeeded: number
+  /** First capacity band (from CAPACITY_BANDS) whose players/day clears playersNeeded; null if not cleared by 100%. */
+  band: number | null
+}
+
+/** Players needed to cover a day's spend at a given green fee, and the first capacity band that clears it. */
+export function deriveGolfBreakEvenCell(spendPerDay: number, greenFee: number): GolfBreakEvenCell {
+  const playersNeeded = Math.ceil(spendPerDay / greenFee)
+  const band = CAPACITY_BANDS.find((pct) => deriveGolfPlayersAtCapacity(pct) >= playersNeeded) ?? null
+  return { playersNeeded, band }
+}
+
+export interface FrozenCartBreakEven {
+  roundsToRecoverCapital: number
+  playerRoundsToRecoverCapital: number
+  daysToRecoverCapital: number
+}
+
+/** Fixed per-cart economics under the frozen assumptions — same for every spend/fee combination. */
+export function deriveFrozenCartBreakEven(): FrozenCartBreakEven {
+  const roundsToRecoverCapital = FROZEN_CART_CAPEX / FROZEN_CART_REVENUE_PER_ROUND
+  return {
+    roundsToRecoverCapital,
+    playerRoundsToRecoverCapital: roundsToRecoverCapital * FROZEN_PLAYERS_PER_CART,
+    daysToRecoverCapital: roundsToRecoverCapital / FROZEN_ROUNDS_PER_CART_PER_DAY,
+  }
+}
