@@ -74,7 +74,6 @@ function ToggleHeader({
  * BE Capacity Band) restored below it.
  */
 export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?: number; expensesPerDay?: number }) {
-  const [matrixExpanded, setMatrixExpanded] = useState(true)
   const [breakEvenExpanded, setBreakEvenExpanded] = useState(true)
   const [golfMatrixExpanded, setGolfMatrixExpanded] = useState(true)
   const [golfBeBandExpanded, setGolfBeBandExpanded] = useState(true)
@@ -94,71 +93,6 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
 
   return (
     <div className="mb-5">
-      <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
-        <ToggleHeader
-          title="Capacity Ramp"
-          subtitle="Players, cart rounds and cart revenue at each capacity band"
-          expanded={matrixExpanded}
-          onToggle={() => setMatrixExpanded((v) => !v)}
-        />
-        {matrixExpanded && (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] border-collapse text-xs">
-              <thead>
-                <tr className="bg-ipi-50/60 text-left text-[11px] text-ipi-700/60">
-                  <th className="px-3 py-1.5 font-medium">Cap.</th>
-                  <th className="px-3 py-1.5 text-right font-medium">Players/Day</th>
-                  <th className="px-3 py-1.5 text-right font-medium">Cart Rds/Day</th>
-                  <th className="px-3 py-1.5 text-right font-medium">Tee Rounds/Day</th>
-                  <th className="border-l border-hairline px-3 py-1.5 text-right font-medium">Cart Rev./Day (₹)</th>
-                  <th className="border-l border-hairline px-3 py-1.5 font-medium">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => {
-                  const isFull = row.capacityPct === 100
-                  const isCrossing = row.status === 'crossing'
-                  return (
-                    <tr
-                      key={row.capacityPct}
-                      className={`border-t border-hairline ${
-                        isCrossing ? 'bg-mint-100/50' : isFull ? 'bg-ipi-100/50' : ''
-                      }`}
-                    >
-                      <td className="px-3 py-1.5">
-                        <span className={isFull ? 'font-semibold text-ipi-900' : ''}>{row.capacityPct}%</span>
-                      </td>
-                      <td className="font-data px-3 py-1.5 text-right tabular-nums text-ink">{row.playersPerDay}</td>
-                      <td className="font-data px-3 py-1.5 text-right tabular-nums text-ink">{row.cartRoundsPerDay}</td>
-                      <td className="font-data px-3 py-1.5 text-right tabular-nums text-ink">{row.teeRoundsPerDay}</td>
-                      <td className="font-data border-l border-hairline px-3 py-1.5 text-right tabular-nums text-ink">
-                        {formatRupeesCompact(row.cartRevenuePerDay)}
-                      </td>
-                      <td className="border-l border-hairline px-3 py-1.5">
-                        {isCrossing ? (
-                          <span className="inline-flex items-center gap-1.5 font-semibold text-mint-600">
-                            <span className="flex h-4 w-4 flex-none items-center justify-center rounded-full bg-mint-600 text-white">
-                              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M20 6 9 17l-5-5" />
-                              </svg>
-                            </span>
-                            Breakeven crossed — {formatNumber(roundsPerCartPerDay)} rounds/cart/day
-                          </span>
-                        ) : (
-                          <span className="text-ipi-700/60">
-                            {row.status === 'below' ? 'Below Breakeven' : 'Above Breakeven'}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
         <ToggleHeader
           title="Cart Break-even (Capital Recovery)"
