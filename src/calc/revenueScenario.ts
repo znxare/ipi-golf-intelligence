@@ -1,80 +1,53 @@
 /**
- * Golf + Cart Revenue Scenario — a frozen reference matrix shown at Certify,
- * independent of any one course's Qualify inputs. It answers two sales
- * questions with fixed, course-agnostic assumptions: "what does golf + cart
- * revenue look like at each capacity band?" and "what capacity band clears a
- * given daily spend, at a given green fee?"
+ * Cart Revenue Scenario — capacity ramp and capital-recovery break-even for
+ * this course's own cart economics. Unlike the old frozen reference matrix,
+ * every number here is driven by the course's Customer Input Card: playable
+ * hours/day (tee-sheet capacity) and the cart assumptions (round time,
+ * players/cart, revenue/cart round, cart cost).
  */
+
+import { derivePotentialPlayersPerDay } from './qualify'
 
 export const CAPACITY_BANDS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as const
 
-/** 100%-capacity baseline: an 8-hour playable day → 48 tee times × 4 players/tee time. */
-export const BASE_PLAYERS_PER_DAY = 192
-export const PLAYERS_PER_CART = 2
-export const ROUNDS_PER_CART_PER_DAY = 2
+export interface CartScenarioInput {
+  playableHoursPerDay: number
+  cartHoursPerTeeRound: number
+  playersPerCart: number
+  cartRevenuePerRound: number
+  cartCost: number
+}
 
-export const GREEN_FEE_SCENARIOS = [3_500, 5_000, 7_500] as const
-export const CART_REVENUE_PER_ROUND = 1_000
-export const SPEND_PER_DAY_BANDS = [100_000, 150_000, 200_000, 250_000, 300_000] as const
-export const CART_CAPEX = 800_000
+/** Rounds a single cart can run per day: playable hours ÷ hours per tee round. */
+export function deriveRoundsPerCartPerDay(playableHoursPerDay: number, cartHoursPerTeeRound: number): number {
+  if (cartHoursPerTeeRound <= 0) return 0
+  return playableHoursPerDay / cartHoursPerTeeRound
+}
 
-export type CapacityStatus = 'below' | 'crossing' | 'above'
-
-export interface CapacityRow {
+export interface CartCapacityRow {
   capacityPct: number
   playersPerDay: number
-  roundsPerDay: number
-  carts: number
-  golfRevenueByFee: number[]
-  cartRevenue: number
-  status: CapacityStatus
+  cartRoundsPerDay: number
+  cartsRequired: number
+  cartRevenuePerDay: number
 }
 
-function statusForBand(pct: number): CapacityStatus {
-  if (pct <= 20) return 'below'
-  if (pct <= 50) return 'crossing'
-  return 'above'
-}
+export function buildCartCapacityMatrix(input: CartScenarioInput): CartCapacityRow[] {
+  const basePlayersPerDay = derivePotentialPlayersPerDay(input.playableHoursPerDay)
+  const roundsPerCartPerDay = deriveRoundsPerCartPerDay(input.playableHoursPerDay, input.cartHoursPerTeeRound)
 
-export function derivePlayersAtCapacity(capacityPct: number): number {
-  return Math.ceil((BASE_PLAYERS_PER_DAY * capacityPct) / 100)
-}
-
-export function deriveRoundsAtCapacity(capacityPct: number): number {
-  return Math.ceil(derivePlayersAtCapacity(capacityPct) / PLAYERS_PER_CART)
-}
-
-export function deriveCartsAtCapacity(capacityPct: number): number {
-  return Math.ceil(deriveRoundsAtCapacity(capacityPct) / ROUNDS_PER_CART_PER_DAY)
-}
-
-export function buildCapacityMatrix(): CapacityRow[] {
   return CAPACITY_BANDS.map((capacityPct) => {
-    const playersPerDay = derivePlayersAtCapacity(capacityPct)
-    const roundsPerDay = deriveRoundsAtCapacity(capacityPct)
+    const playersPerDay = Math.ceil((basePlayersPerDay * capacityPct) / 100)
+    const cartRoundsPerDay = input.playersPerCart > 0 ? Math.ceil(playersPerDay / input.playersPerCart) : 0
+    const cartsRequired = roundsPerCartPerDay > 0 ? Math.ceil(cartRoundsPerDay / roundsPerCartPerDay) : 0
     return {
       capacityPct,
       playersPerDay,
-      roundsPerDay,
-      carts: deriveCartsAtCapacity(capacityPct),
-      golfRevenueByFee: GREEN_FEE_SCENARIOS.map((fee) => playersPerDay * fee),
-      cartRevenue: roundsPerDay * CART_REVENUE_PER_ROUND,
-      status: statusForBand(capacityPct),
+      cartRoundsPerDay,
+      cartsRequired,
+      cartRevenuePerDay: cartRoundsPerDay * input.cartRevenuePerRound,
     }
   })
-}
-
-export interface BreakEvenCell {
-  playersNeeded: number
-  /** First capacity band (from CAPACITY_BANDS) whose players/day clears playersNeeded; null if not cleared by 100%. */
-  band: number | null
-}
-
-/** Players needed to cover a day's spend at a given green fee, and the first capacity band that clears it. */
-export function deriveBreakEvenCell(spendPerDay: number, greenFee: number): BreakEvenCell {
-  const playersNeeded = Math.ceil(spendPerDay / greenFee)
-  const band = CAPACITY_BANDS.find((pct) => derivePlayersAtCapacity(pct) >= playersNeeded) ?? null
-  return { playersNeeded, band }
 }
 
 export interface CartBreakEven {
@@ -83,12 +56,13 @@ export interface CartBreakEven {
   daysToRecoverCapital: number
 }
 
-/** Fixed per-cart economics — same for every spend/fee combination, so it isn't a function of either. */
-export function deriveCartBreakEven(): CartBreakEven {
-  const roundsToRecoverCapital = CART_CAPEX / CART_REVENUE_PER_ROUND
+/** Capital recovery for one cart: how many rounds/player-rounds/days until revenue covers cart cost. */
+export function deriveCartBreakEven(input: CartScenarioInput): CartBreakEven {
+  const roundsPerCartPerDay = deriveRoundsPerCartPerDay(input.playableHoursPerDay, input.cartHoursPerTeeRound)
+  const roundsToRecoverCapital = input.cartRevenuePerRound > 0 ? input.cartCost / input.cartRevenuePerRound : 0
   return {
     roundsToRecoverCapital,
-    playerRoundsToRecoverCapital: roundsToRecoverCapital * PLAYERS_PER_CART,
-    daysToRecoverCapital: roundsToRecoverCapital / ROUNDS_PER_CART_PER_DAY,
+    playerRoundsToRecoverCapital: roundsToRecoverCapital * input.playersPerCart,
+    daysToRecoverCapital: roundsPerCartPerDay > 0 ? roundsToRecoverCapital / roundsPerCartPerDay : 0,
   }
 }

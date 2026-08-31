@@ -10,3 +10,9 @@ export const PLAYERS_PER_TEE_TIME = 4
 /** Default tanker capacity seeded into a new Customer Input Card; editable per customer. */
 export const TANKER_CAPACITY_LITERS = 20_000
 export const EQUIPMENT_DOWNTIME_TARGET = '≤ 24 hrs'
+
+/** Cart-economics defaults seeded into a new Customer Input Card; all editable per customer. */
+export const CART_HOURS_PER_TEE_ROUND_DEFAULT = 4
+export const PLAYERS_PER_CART_DEFAULT = 2
+export const CART_REVENUE_PER_ROUND_DEFAULT = 1_000
+export const CART_COST_DEFAULT = 800_000

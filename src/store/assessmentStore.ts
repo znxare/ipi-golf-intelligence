@@ -1,3 +1,9 @@
+import {
+  CART_COST_DEFAULT,
+  CART_HOURS_PER_TEE_ROUND_DEFAULT,
+  CART_REVENUE_PER_ROUND_DEFAULT,
+  PLAYERS_PER_CART_DEFAULT,
+} from '../calc/constants'
 import type { Assessment } from '../domain/assessment'
 
 export interface AssessmentStore {
@@ -9,10 +15,33 @@ export interface AssessmentStore {
 
 const STORAGE_KEY = 'ipi.assessments.v1'
 
+/** Backfills cart-assumption fields onto assessments saved before they existed. */
+function withCartDefaults(assessment: Assessment): Assessment {
+  const q = assessment.qualifyInput
+  if (
+    q.cartHoursPerTeeRound !== undefined &&
+    q.playersPerCart !== undefined &&
+    q.cartRevenuePerRound !== undefined &&
+    q.cartCost !== undefined
+  ) {
+    return assessment
+  }
+  return {
+    ...assessment,
+    qualifyInput: {
+      ...q,
+      cartHoursPerTeeRound: q.cartHoursPerTeeRound ?? CART_HOURS_PER_TEE_ROUND_DEFAULT,
+      playersPerCart: q.playersPerCart ?? PLAYERS_PER_CART_DEFAULT,
+      cartRevenuePerRound: q.cartRevenuePerRound ?? CART_REVENUE_PER_ROUND_DEFAULT,
+      cartCost: q.cartCost ?? CART_COST_DEFAULT,
+    },
+  }
+}
+
 function readAll(): Assessment[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as Assessment[]) : []
+    return raw ? (JSON.parse(raw) as Assessment[]).map(withCartDefaults) : []
   } catch {
     return []
   }

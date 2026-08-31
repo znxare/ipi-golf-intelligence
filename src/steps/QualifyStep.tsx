@@ -42,6 +42,7 @@ const CUSTOMER_TYPES: {
 ]
 
 const HOURS_OPTIONS = Array.from({ length: 24 }, (_, i) => i + 1)
+const PLAYERS_PER_CART_OPTIONS = [1, 2]
 
 const ICON_PATHS = {
   players: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M11 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M17.5 3.13a4 4 0 0 1 0 7.75',
@@ -201,6 +202,34 @@ export function QualifyStep({
               placeholder="__________"
             />
           </div>
+
+          <SectionLabel>Cart assumptions</SectionLabel>
+          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Field
+              label="Golf cart hrs / tee round"
+              value={input.cartHoursPerTeeRound}
+              onChange={(v) => onChange({ ...input, cartHoursPerTeeRound: v })}
+              suffix="hrs"
+            />
+            <SelectField
+              label="Players per cart"
+              value={input.playersPerCart}
+              onChange={(v) => onChange({ ...input, playersPerCart: v })}
+              options={PLAYERS_PER_CART_OPTIONS}
+            />
+            <Field
+              label="Revenue per cart round"
+              value={input.cartRevenuePerRound}
+              onChange={(v) => onChange({ ...input, cartRevenuePerRound: v })}
+              suffix="₹"
+            />
+            <Field
+              label="Cart cost"
+              value={input.cartCost}
+              onChange={(v) => onChange({ ...input, cartCost: v })}
+              suffix="₹"
+            />
+          </div>
         </div>
       </div>
 
@@ -245,7 +274,13 @@ export function QualifyStep({
         />
       </StatBar>
 
-      <RevenueScenarioMatrix avgGreenFee={input.pricePerRound} expensesPerDay={input.expensesPerDay} />
+      <RevenueScenarioMatrix
+        playableHoursPerDay={input.playableHoursPerDay}
+        cartHoursPerTeeRound={input.cartHoursPerTeeRound}
+        playersPerCart={input.playersPerCart}
+        cartRevenuePerRound={input.cartRevenuePerRound}
+        cartCost={input.cartCost}
+      />
 
       <div className="flex justify-end">
         <PrimaryButton onClick={onNext}>

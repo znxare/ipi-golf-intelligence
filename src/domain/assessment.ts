@@ -1,4 +1,10 @@
-import { TANKER_CAPACITY_LITERS } from '../calc/constants'
+import {
+  CART_COST_DEFAULT,
+  CART_HOURS_PER_TEE_ROUND_DEFAULT,
+  CART_REVENUE_PER_ROUND_DEFAULT,
+  PLAYERS_PER_CART_DEFAULT,
+  TANKER_CAPACITY_LITERS,
+} from '../calc/constants'
 import type {
   CertifyResult,
   QualifyInput,
@@ -41,6 +47,10 @@ export function createDefaultQualifyInput(): QualifyInput {
     waterRequiredPerDay: 200_000,
     tankerCost: 1_000,
     tankerCapacity: TANKER_CAPACITY_LITERS,
+    cartHoursPerTeeRound: CART_HOURS_PER_TEE_ROUND_DEFAULT,
+    playersPerCart: PLAYERS_PER_CART_DEFAULT,
+    cartRevenuePerRound: CART_REVENUE_PER_ROUND_DEFAULT,
+    cartCost: CART_COST_DEFAULT,
     superintendent: '',
     directorOfOperations: '',
     procurementHead: '',

@@ -25,6 +25,12 @@ export interface QualifyInput {
   waterRequiredPerDay: number
   tankerCost: number
   tankerCapacity: number
+  /** Round time — hours a cart is out per tee round; drives cart rounds/day = playableHoursPerDay ÷ this. */
+  cartHoursPerTeeRound: number
+  /** 1 or 2. */
+  playersPerCart: number
+  cartRevenuePerRound: number
+  cartCost: number
   superintendent: string
   directorOfOperations: string
   procurementHead: string
