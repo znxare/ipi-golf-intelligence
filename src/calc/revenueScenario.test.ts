@@ -21,22 +21,37 @@ describe('deriveRoundsPerCartPerDay', () => {
 describe('buildCartCapacityMatrix', () => {
   const rows = buildCartCapacityMatrix(REFERENCE_INPUT)
 
-  it('matches the reference chart\'s Players/Cart Rounds/Carts at every capacity band', () => {
+  it('derives Players/Cart Rounds/Carts — cart rounds/day = tee rounds/day × players per cart', () => {
     expect(rows.map((r) => [r.capacityPct, r.playersPerDay, r.cartRoundsPerDay, r.cartsRequired])).toEqual([
       [10, 20, 10, 5],
       [20, 39, 20, 10],
-      [30, 58, 29, 15],
-      [40, 77, 39, 20],
+      [30, 58, 30, 15],
+      [40, 77, 40, 20],
       [50, 96, 48, 24],
       [60, 116, 58, 29],
       [70, 135, 68, 34],
-      [80, 154, 77, 39],
-      [90, 173, 87, 44],
+      [80, 154, 78, 39],
+      [90, 173, 88, 44],
       [100, 192, 96, 48],
     ])
   })
 
-  it('matches the reference chart\'s Cart Revenue', () => {
+  it('derives Tee Rounds/Day as Players/Day ÷ 4 players per tee time', () => {
+    expect(rows.map((r) => [r.capacityPct, r.teeRoundsPerDay])).toEqual([
+      [10, 5],
+      [20, 10],
+      [30, 15],
+      [40, 20],
+      [50, 24],
+      [60, 29],
+      [70, 34],
+      [80, 39],
+      [90, 44],
+      [100, 48],
+    ])
+  })
+
+  it('derives Cart Revenue as tee rounds/day × players per cart × revenue per cart round', () => {
     const at = (pct: number) => rows.find((r) => r.capacityPct === pct)!
     expect(at(10).cartRevenuePerDay).toBe(10_000)
     expect(at(60).cartRevenuePerDay).toBe(58_000)
@@ -53,9 +68,10 @@ describe('buildCartCapacityMatrix', () => {
     })
     const at100 = custom.find((r) => r.capacityPct === 100)!
     expect(at100.playersPerDay).toBe(192)
-    expect(at100.cartRoundsPerDay).toBe(192)
-    expect(at100.cartsRequired).toBe(96)
-    expect(at100.cartRevenuePerDay).toBe(288_000)
+    expect(at100.teeRoundsPerDay).toBe(48)
+    expect(at100.cartRoundsPerDay).toBe(48)
+    expect(at100.cartsRequired).toBe(24)
+    expect(at100.cartRevenuePerDay).toBe(72_000)
   })
 })
 

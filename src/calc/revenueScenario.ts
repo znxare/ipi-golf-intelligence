@@ -6,6 +6,7 @@
  * players/cart, revenue/cart round, cart cost).
  */
 
+import { PLAYERS_PER_TEE_TIME } from './constants'
 import { derivePotentialPlayersPerDay } from './qualify'
 
 export const CAPACITY_BANDS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as const
@@ -27,25 +28,29 @@ export function deriveRoundsPerCartPerDay(playableHoursPerDay: number, cartHours
 export interface CartCapacityRow {
   capacityPct: number
   playersPerDay: number
+  teeRoundsPerDay: number
   cartRoundsPerDay: number
   cartsRequired: number
   cartRevenuePerDay: number
 }
 
+/** Cart rounds/revenue are driven off tee rounds/day (not players/day): cartRoundsPerDay = teeRoundsPerDay × playersPerCart. */
 export function buildCartCapacityMatrix(input: CartScenarioInput): CartCapacityRow[] {
   const basePlayersPerDay = derivePotentialPlayersPerDay(input.playableHoursPerDay)
   const roundsPerCartPerDay = deriveRoundsPerCartPerDay(input.playableHoursPerDay, input.cartHoursPerTeeRound)
 
   return CAPACITY_BANDS.map((capacityPct) => {
     const playersPerDay = Math.ceil((basePlayersPerDay * capacityPct) / 100)
-    const cartRoundsPerDay = input.playersPerCart > 0 ? Math.ceil(playersPerDay / input.playersPerCart) : 0
+    const teeRoundsPerDay = Math.ceil(playersPerDay / PLAYERS_PER_TEE_TIME)
+    const cartRoundsPerDay = teeRoundsPerDay * input.playersPerCart
     const cartsRequired = roundsPerCartPerDay > 0 ? Math.ceil(cartRoundsPerDay / roundsPerCartPerDay) : 0
     return {
       capacityPct,
       playersPerDay,
+      teeRoundsPerDay,
       cartRoundsPerDay,
       cartsRequired,
-      cartRevenuePerDay: cartRoundsPerDay * input.cartRevenuePerRound,
+      cartRevenuePerDay: teeRoundsPerDay * input.playersPerCart * input.cartRevenuePerRound,
     }
   })
 }
