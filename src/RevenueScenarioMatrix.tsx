@@ -300,12 +300,14 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
                       { label: 'Cart Revenue / Day', value: formatRupeesCompact(at100Golf.cartRevenue) },
                     ].map((row, i) => (
                       <tr key={row.label} className={i > 0 ? 'border-t border-hairline' : ''}>
-                        <td className="px-3 py-2 text-ipi-700/70">{row.label}</td>
-                        <td className="border-l border-hairline px-3 py-2" />
-                        <td className="font-data border-l border-hairline px-3 py-2 text-center font-semibold tabular-nums text-ink">
-                          {row.value}
+                        <td className="px-3 py-1.5 text-[11px] text-ipi-700/70">{row.label}</td>
+                        <td className="border-l border-hairline px-3 py-1.5" />
+                        <td className="border-l border-hairline px-3 py-1.5 text-center">
+                          <span className="font-data inline-block rounded-md bg-white px-2 py-1 text-[11px] font-semibold tabular-nums text-ipi-700/70">
+                            {row.value}
+                          </span>
                         </td>
-                        <td className="border-l border-hairline px-3 py-2" />
+                        <td className="border-l border-hairline px-3 py-1.5" />
                       </tr>
                     ))}
                   </tbody>
