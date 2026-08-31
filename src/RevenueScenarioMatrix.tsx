@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { PLAYABLE_DAYS_PER_YEAR } from './calc/constants'
-import { Icon } from './components/ui'
+import { Icon, IntelRow } from './components/ui'
 import {
   buildGolfCapacityMatrix,
   deriveFrozenCartBreakEven,
@@ -75,6 +75,7 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
   const [golfBeBandExpanded, setGolfBeBandExpanded] = useState(true)
 
   const golfRows = buildGolfCapacityMatrix()
+  const at100Golf = golfRows[golfRows.length - 1]
   const frozenCartBE = deriveFrozenCartBreakEven()
   const { avgGreenFee, expensesPerDay } = props
   const courseBreakEven =
@@ -219,9 +220,6 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
                         )}
                       </th>
                     ))}
-                    <th className="border-l border-hairline px-3 py-1.5 text-center font-medium">
-                      Cart BE ({formatRupeesCompact(FROZEN_CART_CAPEX)}/cart)
-                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,11 +257,6 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
                             </td>
                           )
                         })}
-                        <td className="border-l border-hairline px-3 py-1.5 text-center text-[11px] text-ipi-700/70">
-                          {formatNumber(frozenCartBE.roundsToRecoverCapital)} Rds /{' '}
-                          {formatNumber(frozenCartBE.playerRoundsToRecoverCapital)} Plyr /{' '}
-                          {formatNumber(frozenCartBE.daysToRecoverCapital)} Days
-                        </td>
                       </tr>
                     )
                   })}
@@ -272,6 +265,26 @@ export function RevenueScenarioMatrix(props: CartScenarioInput & { avgGreenFee?:
             </div>
           </>
         )}
+      </div>
+
+      <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
+        <div className="bg-ipi-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-white">
+          At 100% Capacity (Reference)
+        </div>
+        <div className="bg-white px-4">
+          <IntelRow label="Players / Day" value={formatNumber(at100Golf.playersPerDay)} mono />
+          <IntelRow
+            label={`Cart Rounds / Day (Players ÷ ${FROZEN_PLAYERS_PER_CART})`}
+            value={formatNumber(at100Golf.roundsPerDay)}
+            mono
+          />
+          <IntelRow
+            label={`Physical Carts Required (Rounds ÷ ${FROZEN_ROUNDS_PER_CART_PER_DAY})`}
+            value={formatNumber(at100Golf.carts)}
+            mono
+          />
+          <IntelRow label="Cart Revenue / Day" value={formatRupeesCompact(at100Golf.cartRevenue)} mono />
+        </div>
       </div>
 
       <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
