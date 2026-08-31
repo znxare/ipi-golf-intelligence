@@ -52,16 +52,12 @@ export function RevenueScenarioMatrix(props: CartScenarioInput) {
   const [breakEvenExpanded, setBreakEvenExpanded] = useState(true)
   const rows = buildCartCapacityMatrix(props)
   const cartBE = deriveCartBreakEven(props)
+  const withinPlayableYear = cartBE.daysToRecoverCapital > 0 && cartBE.daysToRecoverCapital <= PLAYABLE_DAYS_PER_YEAR
   const roundsPerCartPerDay = deriveRoundsPerCartPerDay(props.playableHoursPerDay, props.cartHoursPerTeeRound)
   const at100 = rows[rows.length - 1]
 
   return (
     <div className="mb-5">
-      <div className="mb-3 rounded-xl bg-ipi-900 px-4 py-3 text-white">
-        <div className="text-xs font-semibold uppercase tracking-wide">Cart Revenue Scenario</div>
-        <div className="mt-0.5 text-[11px] text-white/60">Driven by this course's own cart assumptions</div>
-      </div>
-
       <div className="mb-5 overflow-hidden rounded-xl border border-hairline">
         <ToggleHeader
           title="Capacity Ramp"
@@ -71,7 +67,7 @@ export function RevenueScenarioMatrix(props: CartScenarioInput) {
         />
         {matrixExpanded && (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] border-collapse text-xs">
+            <table className="w-full min-w-[760px] border-collapse text-xs">
               <thead>
                 <tr className="bg-ipi-50/60 text-left text-[11px] text-ipi-700/60">
                   <th className="px-3 py-1.5 font-medium">Cap.</th>
@@ -79,15 +75,19 @@ export function RevenueScenarioMatrix(props: CartScenarioInput) {
                   <th className="px-3 py-1.5 text-right font-medium">Cart Rds/Day</th>
                   <th className="px-3 py-1.5 text-right font-medium">Tee Rounds/Day</th>
                   <th className="border-l border-hairline px-3 py-1.5 text-right font-medium">Cart Rev./Day (₹)</th>
+                  <th className="border-l border-hairline px-3 py-1.5 font-medium">Notes</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row) => {
                   const isFull = row.capacityPct === 100
+                  const isCrossing = row.status === 'crossing'
                   return (
                     <tr
                       key={row.capacityPct}
-                      className={`border-t border-hairline ${isFull ? 'bg-ipi-100/50' : ''}`}
+                      className={`border-t border-hairline ${
+                        isCrossing ? 'bg-mint-100/50' : isFull ? 'bg-ipi-100/50' : ''
+                      }`}
                     >
                       <td className="px-3 py-1.5">
                         <span className={isFull ? 'font-semibold text-ipi-900' : ''}>{row.capacityPct}%</span>
@@ -97,6 +97,22 @@ export function RevenueScenarioMatrix(props: CartScenarioInput) {
                       <td className="font-data px-3 py-1.5 text-right tabular-nums text-ink">{row.teeRoundsPerDay}</td>
                       <td className="font-data border-l border-hairline px-3 py-1.5 text-right tabular-nums text-ink">
                         {formatRupeesCompact(row.cartRevenuePerDay)}
+                      </td>
+                      <td className="border-l border-hairline px-3 py-1.5">
+                        {isCrossing ? (
+                          <span className="inline-flex items-center gap-1.5 font-semibold text-mint-600">
+                            <span className="flex h-4 w-4 flex-none items-center justify-center rounded-full bg-mint-600 text-white">
+                              <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 6 9 17l-5-5" />
+                              </svg>
+                            </span>
+                            Breakeven crossed — {formatNumber(roundsPerCartPerDay)} rounds/cart/day
+                          </span>
+                        ) : (
+                          <span className="text-ipi-700/60">
+                            {row.status === 'below' ? 'Below Breakeven' : 'Above Breakeven'}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   )
@@ -124,7 +140,7 @@ export function RevenueScenarioMatrix(props: CartScenarioInput) {
             </div>
             <div className="bg-white p-3">
               <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
-                Revenue / Cart Round
+                Revenue / Player / Cart Round
               </div>
               <div className="font-data mt-1 text-xs font-semibold tabular-nums text-ink">
                 {formatRupees(props.cartRevenuePerRound)}
@@ -150,8 +166,17 @@ export function RevenueScenarioMatrix(props: CartScenarioInput) {
               <div className="text-[10px] font-semibold uppercase tracking-wide text-ipi-700/60">
                 Days to Break-even
               </div>
-              <div className="font-data mt-1 text-xs font-semibold tabular-nums text-ink">
-                {formatNumber(cartBE.daysToRecoverCapital)}
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="font-data text-xs font-semibold tabular-nums text-ink">
+                  {formatNumber(cartBE.daysToRecoverCapital)}
+                </span>
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
+                    withinPlayableYear ? 'bg-mint-100 text-mint-600' : 'bg-amber-100 text-amber-600'
+                  }`}
+                >
+                  {withinPlayableYear ? '✓ Within year' : '⚠ Exceeds year'}
+                </span>
               </div>
             </div>
           </div>

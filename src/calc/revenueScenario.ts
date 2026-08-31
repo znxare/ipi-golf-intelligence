@@ -25,6 +25,8 @@ export function deriveRoundsPerCartPerDay(playableHoursPerDay: number, cartHours
   return playableHoursPerDay / cartHoursPerTeeRound
 }
 
+export type BreakEvenStatus = 'below' | 'crossing' | 'above'
+
 export interface CartCapacityRow {
   capacityPct: number
   playersPerDay: number
@@ -32,18 +34,32 @@ export interface CartCapacityRow {
   cartRoundsPerDay: number
   cartsRequired: number
   cartRevenuePerDay: number
+  /** Relative to Breakeven = playable hrs/day ÷ cart hrs/tee round (one cart's own daily round capacity). */
+  status: BreakEvenStatus
 }
 
 /** Cart rounds/revenue are driven off tee rounds/day (not players/day): cartRoundsPerDay = teeRoundsPerDay × playersPerCart. */
 export function buildCartCapacityMatrix(input: CartScenarioInput): CartCapacityRow[] {
   const basePlayersPerDay = derivePotentialPlayersPerDay(input.playableHoursPerDay)
   const roundsPerCartPerDay = deriveRoundsPerCartPerDay(input.playableHoursPerDay, input.cartHoursPerTeeRound)
+  let crossed = false
 
   return CAPACITY_BANDS.map((capacityPct) => {
     const playersPerDay = Math.ceil((basePlayersPerDay * capacityPct) / 100)
     const teeRoundsPerDay = Math.ceil(playersPerDay / PLAYERS_PER_TEE_TIME)
     const cartRoundsPerDay = teeRoundsPerDay * input.playersPerCart
     const cartsRequired = roundsPerCartPerDay > 0 ? Math.ceil(cartRoundsPerDay / roundsPerCartPerDay) : 0
+
+    let status: BreakEvenStatus
+    if (cartRoundsPerDay < roundsPerCartPerDay) {
+      status = 'below'
+    } else if (!crossed) {
+      status = 'crossing'
+      crossed = true
+    } else {
+      status = 'above'
+    }
+
     return {
       capacityPct,
       playersPerDay,
@@ -51,6 +67,7 @@ export function buildCartCapacityMatrix(input: CartScenarioInput): CartCapacityR
       cartRoundsPerDay,
       cartsRequired,
       cartRevenuePerDay: teeRoundsPerDay * input.playersPerCart * input.cartRevenuePerRound,
+      status,
     }
   })
 }

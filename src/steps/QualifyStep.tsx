@@ -218,7 +218,7 @@ export function QualifyStep({
               options={PLAYERS_PER_CART_OPTIONS}
             />
             <Field
-              label="Revenue per cart round"
+              label="Revenue per player / cart round"
               value={input.cartRevenuePerRound}
               onChange={(v) => onChange({ ...input, cartRevenuePerRound: v })}
               suffix="₹"

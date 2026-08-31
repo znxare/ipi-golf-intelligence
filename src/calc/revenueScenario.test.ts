@@ -58,6 +58,36 @@ describe('buildCartCapacityMatrix', () => {
     expect(at(100).cartRevenuePerDay).toBe(96_000)
   })
 
+  it('marks the row where cart rounds/day first crosses Breakeven (playable hrs ÷ cart hrs/tee round)', () => {
+    // Threshold = 8 ÷ 4 = 2 rounds/cart/day — already cleared at the smallest (10%) band.
+    expect(rows.map((r) => r.status)).toEqual([
+      'crossing', 'above', 'above', 'above', 'above', 'above', 'above', 'above', 'above', 'above',
+    ])
+  })
+
+  it('shows a below band when the round-time threshold is high enough to not be cleared immediately', () => {
+    // Threshold = 8 ÷ 0.5 = 16 rounds/cart/day.
+    const custom = buildCartCapacityMatrix({
+      playableHoursPerDay: 8,
+      cartHoursPerTeeRound: 0.5,
+      playersPerCart: 2,
+      cartRevenuePerRound: 1_000,
+      cartCost: 800_000,
+    })
+    expect(custom.map((r) => [r.capacityPct, r.cartRoundsPerDay, r.status])).toEqual([
+      [10, 10, 'below'],
+      [20, 20, 'crossing'],
+      [30, 30, 'above'],
+      [40, 40, 'above'],
+      [50, 48, 'above'],
+      [60, 58, 'above'],
+      [70, 68, 'above'],
+      [80, 78, 'above'],
+      [90, 88, 'above'],
+      [100, 96, 'above'],
+    ])
+  })
+
   it('reflects a different course\'s inputs — 1 player/cart, ₹1,500/round', () => {
     const custom = buildCartCapacityMatrix({
       playableHoursPerDay: 8,
