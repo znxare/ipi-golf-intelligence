@@ -1,4 +1,5 @@
 import type { EquipmentCatalogItem } from '../data/equipmentCatalog'
+import type { GolfCartCatalogItem } from '../data/golfCartCatalog'
 import { PLAYABLE_DAYS_PER_YEAR } from './constants'
 import { deriveAnnualSalaryCost, deriveAnnualWaterCost } from './costs'
 import { deriveEquipmentPriceINR } from './pricing'
@@ -6,7 +7,10 @@ import { derivePotentialPlayersPerDay } from './qualify'
 import type { CommercialViewData, EquipmentVerificationLine, QualifyInput } from './types'
 
 /** Qty the rep has actually put on the SOW for this line: template qty if confirmed, else their typed override. */
-export function deriveVerifiedQty(item: EquipmentCatalogItem, line: EquipmentVerificationLine | undefined): number {
+export function deriveVerifiedQty(
+  item: { templateQtyNumeric: number },
+  line: EquipmentVerificationLine | undefined,
+): number {
   if (!line) return 0
   if (line.confirmed) return item.templateQtyNumeric
   const override = Number(line.sowQty)
@@ -37,6 +41,25 @@ export function calculateSelectedEquipmentTotal(
     }
   }
   return { pricedTotal, hasUnpriced }
+}
+
+/**
+ * Live golf-cart price total from what's checked off in the Golf Cart
+ * Template. Prices are already in INR (Ex-Bangalore pricing) — no USD
+ * conversion step, unlike the Toro equipment catalog. Feeds the Golf Cart
+ * figure in the IPI Opportunity Breakdown.
+ */
+export function calculateSelectedGolfCartTotal(
+  catalog: GolfCartCatalogItem[],
+  lines: Record<string, EquipmentVerificationLine>,
+): { pricedTotal: number } {
+  let pricedTotal = 0
+  for (const item of catalog) {
+    const qty = deriveVerifiedQty(item, lines[item.id])
+    if (qty <= 0) continue
+    pricedTotal += item.priceINR * qty
+  }
+  return { pricedTotal }
 }
 
 /**

@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
-import { calculateSelectedEquipmentTotal } from '../calc/commercial'
+import { calculateSelectedEquipmentTotal, calculateSelectedGolfCartTotal } from '../calc/commercial'
 import { calculateQuantify } from '../calc/quantify'
 import type { QualifyInput, QuantifyInput } from '../calc/types'
 import { Field, PrimaryButton, SecondaryButton, SectionLabel } from '../components/ui'
 import { EQUIPMENT_CATALOG } from '../data/equipmentCatalog'
+import { GOLF_CART_CATALOG } from '../data/golfCartCatalog'
 import { useUsdInrRate } from '../hooks/useUsdInrRate'
 import { EquipmentVerification } from './EquipmentVerification'
+import { GolfCartVerification } from './GolfCartVerification'
 import { IpiOpportunityBreakdown } from '../IpiOpportunityBreakdown'
 import { SelectedEquipmentDetail } from './SelectedEquipmentDetail'
+import { SelectedGolfCartDetail } from './SelectedGolfCartDetail'
 
 export function QuantifyStep({
   qualifyInput,
@@ -24,6 +27,7 @@ export function QuantifyStep({
 }) {
   const result = calculateQuantify(qualifyInput, input)
   const [showEquipmentDetail, setShowEquipmentDetail] = useState(false)
+  const [showGolfCartDetail, setShowGolfCartDetail] = useState(false)
   const { rate: usdInrRate } = useUsdInrRate()
 
   const { pricedTotal: equipmentTotal } = calculateSelectedEquipmentTotal(
@@ -31,6 +35,7 @@ export function QuantifyStep({
     input.equipmentVerification,
     usdInrRate,
   )
+  const { pricedTotal: golfCartTotal } = calculateSelectedGolfCartTotal(GOLF_CART_CATALOG, input.golfCartVerification)
 
   // Keep breakdown.equipment synced to the Equipment Template selection (and
   // the live rate) at all times — including on first load, before the rep
@@ -41,6 +46,13 @@ export function QuantifyStep({
       onChange({ ...input, breakdown: { ...input.breakdown, equipment: equipmentTotal } })
     }
   }, [equipmentTotal])
+
+  // Same live sync as Equipment, but for the Golf Cart Template.
+  useEffect(() => {
+    if (input.breakdown.golfCart !== golfCartTotal) {
+      onChange({ ...input, breakdown: { ...input.breakdown, golfCart: golfCartTotal } })
+    }
+  }, [golfCartTotal])
 
   return (
     <div>
@@ -82,15 +94,23 @@ export function QuantifyStep({
         onChange={(equipmentVerification) => onChange({ ...input, equipmentVerification })}
       />
 
+      <GolfCartVerification
+        lines={input.golfCartVerification}
+        onChange={(golfCartVerification) => onChange({ ...input, golfCartVerification })}
+      />
+
       <IpiOpportunityBreakdown
         breakdown={input.breakdown}
         total={result.actualIpiOpportunity}
         onChange={(breakdown) => onChange({ ...input, breakdown })}
         equipmentAuto
         onEquipmentClick={() => setShowEquipmentDetail((v) => !v)}
+        golfCartAuto
+        onGolfCartClick={() => setShowGolfCartDetail((v) => !v)}
       />
 
       {showEquipmentDetail && <SelectedEquipmentDetail lines={input.equipmentVerification} />}
+      {showGolfCartDetail && <SelectedGolfCartDetail lines={input.golfCartVerification} />}
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>

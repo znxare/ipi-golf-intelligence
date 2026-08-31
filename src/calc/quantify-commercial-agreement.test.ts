@@ -34,6 +34,7 @@ const QUANTIFY_INPUT: QuantifyInput = {
   waterPerMonth: 1_120_000,
   breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000, golfCart: 0 },
   equipmentVerification: {},
+  golfCartVerification: {},
 }
 
 describe('calculateQuantify vs calculateCommercialView agreement', () => {

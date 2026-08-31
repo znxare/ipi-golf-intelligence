@@ -35,6 +35,7 @@ describe('calculateQuantify', () => {
       waterPerMonth: 1_120_000,
       breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000, golfCart: 0 },
       equipmentVerification: {},
+      golfCartVerification: {},
     })
 
     expect(result.breakEvenPlayersPerDay).toBe(55)
@@ -49,6 +50,7 @@ describe('calculateQuantify', () => {
       waterPerMonth: 1_120_000,
       breakdown: { equipment: 4_000_000, irrigation: 2_000_000, maintenance: 3_000_000, golfCart: 0 },
       equipmentVerification: {},
+      golfCartVerification: {},
     })
 
     // Revenue: 17 players/day × ₹5,500 × 336 days = ₹3.14 Cr

@@ -24,7 +24,9 @@ function withCartDefaults(assessment: Assessment): Assessment {
     q.cartRevenuePerRound === undefined ||
     q.cartCost === undefined
   const needsQuantifyBackfill =
-    assessment.quantifyInput !== undefined && assessment.quantifyInput.breakdown.golfCart === undefined
+    assessment.quantifyInput !== undefined &&
+    (assessment.quantifyInput.breakdown.golfCart === undefined ||
+      assessment.quantifyInput.golfCartVerification === undefined)
 
   if (!needsQualifyBackfill && !needsQuantifyBackfill) {
     return assessment
@@ -45,7 +47,8 @@ function withCartDefaults(assessment: Assessment): Assessment {
       needsQuantifyBackfill && assessment.quantifyInput
         ? {
             ...assessment.quantifyInput,
-            breakdown: { ...assessment.quantifyInput.breakdown, golfCart: 0 },
+            breakdown: { ...assessment.quantifyInput.breakdown, golfCart: assessment.quantifyInput.breakdown.golfCart ?? 0 },
+            golfCartVerification: assessment.quantifyInput.golfCartVerification ?? {},
           }
         : assessment.quantifyInput,
   }

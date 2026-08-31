@@ -31,6 +31,8 @@ export function IpiOpportunityBreakdown({
   onChange,
   equipmentAuto = false,
   onEquipmentClick,
+  golfCartAuto = false,
+  onGolfCartClick,
 }: {
   breakdown: EquipmentBreakdown
   total: number
@@ -39,6 +41,10 @@ export function IpiOpportunityBreakdown({
   equipmentAuto?: boolean
   /** Click the Equipment stat to reveal which items make up that total. */
   onEquipmentClick?: () => void
+  /** When true, Golf Cart is synced live from the Golf Cart Template above and shown read-only. */
+  golfCartAuto?: boolean
+  /** Click the Golf Cart stat to reveal which items make up that total. */
+  onGolfCartClick?: () => void
 }) {
   return (
     <div>
@@ -72,7 +78,13 @@ export function IpiOpportunityBreakdown({
           icon={ICON_PATHS.golfCart}
           label="Golf Cart"
           value={formatRupeesCompact(breakdown.golfCart)}
-          editable={onChange ? { value: breakdown.golfCart, onChange: (v) => onChange({ ...breakdown, golfCart: v }) } : undefined}
+          sublabel={golfCartAuto ? 'Click to view selected golf carts' : undefined}
+          onClick={onGolfCartClick}
+          editable={
+            onChange && !golfCartAuto
+              ? { value: breakdown.golfCart, onChange: (v) => onChange({ ...breakdown, golfCart: v }) }
+              : undefined
+          }
         />
         <BarDivider />
         <BarStat icon={ICON_PATHS.total} label="Actual IPI Opportunity" value={formatRupeesCompact(total)} emphasis />

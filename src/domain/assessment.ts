@@ -74,6 +74,7 @@ export function createDefaultQuantifyInput(actualPlayersPerDay = 17): QuantifyIn
       golfCart: 0,
     },
     equipmentVerification: {},
+    golfCartVerification: {},
   }
 }
 

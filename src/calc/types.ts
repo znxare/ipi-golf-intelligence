@@ -72,6 +72,8 @@ export interface QuantifyInput {
   }
   /** Keyed by equipment catalog id. */
   equipmentVerification: Record<string, EquipmentVerificationLine>
+  /** Keyed by golf cart catalog id. */
+  golfCartVerification: Record<string, EquipmentVerificationLine>
 }
 
 export interface QuantifyResult {
