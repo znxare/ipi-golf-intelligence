@@ -28,7 +28,7 @@ export function isGolfCartCar(item: GolfCartCatalogItem): boolean {
  * Quantify, mirroring how EQUIPMENT_CATALOG feeds the Equipment Template.
  */
 export const GOLF_CART_CATALOG: GolfCartCatalogItem[] = [
-  { id: 'elite-golf-2-seater', category: 'Golf Cars', equipment: 'Elite Golf 2 Seater', model: 'Elite-2S-Li', description: 'Lithium 105AH, AC 48V 4KW motor, LED lights', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 600_000, brand: 'elite' },
+  { id: 'elite-golf-2-seater', category: 'Golf Cars', equipment: 'Elite Golf 2 Seater', model: 'Elite-2S-Li', description: 'Lithium 105AH, AC 48V 4KW motor, LED lights', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 600_000, brand: 'elite', imageFile: 'elite-2s.png' },
   { id: 'yamaha-dr2e-cruise-trojan', category: 'Golf Cars', equipment: 'Yamaha DR2E Cruise — Trojan', model: 'J1K700010A', description: 'AC motor 4.4HP, Trojan battery 8V ×6 (170AH)', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 795_000, brand: 'yamaha', imageFile: 'yamaha-dr2e.png' },
   { id: 'yamaha-dr2e-cruise-lithium', category: 'Golf Cars', equipment: 'Yamaha DR2E Cruise — Lithium', model: 'J1K700010A', description: 'AC motor 4.4HP, Lithium 105AH, on-board charger', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 858_000, brand: 'yamaha', imageFile: 'yamaha-dr2e.png' },
 
