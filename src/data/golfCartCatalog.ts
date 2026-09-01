@@ -11,8 +11,10 @@ export interface GolfCartCatalogItem {
   templateQtyNumeric: number
   /** Ex-Bangalore price in INR — already converted, no USD/rate step needed (unlike the Toro equipment catalog). */
   priceINR: number
-  /** Elite and Yamaha car/accessory ranges don't mix — see deriveSelectedGolfCartBrand in calc/commercial.ts. */
+  /** An accessory needs a car of this same brand on the order — see deriveActiveGolfCartBrands in calc/commercial.ts. */
   brand: GolfCartBrand
+  /** Filename under public/golf-carts/ — car line items only; accessories have no product shot. */
+  imageFile?: string
 }
 
 /** True for the golf car line items themselves (as opposed to accessories). */
@@ -27,8 +29,8 @@ export function isGolfCartCar(item: GolfCartCatalogItem): boolean {
  */
 export const GOLF_CART_CATALOG: GolfCartCatalogItem[] = [
   { id: 'elite-golf-2-seater', category: 'Golf Cars', equipment: 'Elite Golf 2 Seater', model: 'Elite-2S-Li', description: 'Lithium 105AH, AC 48V 4KW motor, LED lights', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 600_000, brand: 'elite' },
-  { id: 'yamaha-dr2e-cruise-trojan', category: 'Golf Cars', equipment: 'Yamaha DR2E Cruise — Trojan', model: 'J1K700010A', description: 'AC motor 4.4HP, Trojan battery 8V ×6 (170AH)', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 795_000, brand: 'yamaha' },
-  { id: 'yamaha-dr2e-cruise-lithium', category: 'Golf Cars', equipment: 'Yamaha DR2E Cruise — Lithium', model: 'J1K700010A', description: 'AC motor 4.4HP, Lithium 105AH, on-board charger', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 858_000, brand: 'yamaha' },
+  { id: 'yamaha-dr2e-cruise-trojan', category: 'Golf Cars', equipment: 'Yamaha DR2E Cruise — Trojan', model: 'J1K700010A', description: 'AC motor 4.4HP, Trojan battery 8V ×6 (170AH)', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 795_000, brand: 'yamaha', imageFile: 'yamaha-dr2e.png' },
+  { id: 'yamaha-dr2e-cruise-lithium', category: 'Golf Cars', equipment: 'Yamaha DR2E Cruise — Lithium', model: 'J1K700010A', description: 'AC motor 4.4HP, Lithium 105AH, on-board charger', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 858_000, brand: 'yamaha', imageFile: 'yamaha-dr2e.png' },
 
   { id: 'elite-caddy-stand', category: 'Elite Accessories', equipment: 'Caddy Stand', model: 'Elite-CDS', description: '', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 10_950, brand: 'elite' },
   { id: 'elite-sand-bottle', category: 'Elite Accessories', equipment: 'Sand Bottle', model: '3406000592', description: '', templateQtyLabel: '1', templateQtyNumeric: 1, priceINR: 1_650, brand: 'elite' },

@@ -44,50 +44,50 @@ export function calculateSelectedEquipmentTotal(
 }
 
 /**
- * Elite and Yamaha car/accessory ranges don't mix on one SOW — the active
- * brand is whichever Golf Cars line has a car actually selected. Returns
- * null when no car is selected yet (accessories can't stand alone either).
+ * Cars of both brands can coexist on one SOW (buying an Elite car and a
+ * Yamaha car together is fine) — what doesn't make sense is an accessory
+ * with no matching-brand car on the order. Returns every brand that
+ * currently has a car selected.
  */
-export function deriveSelectedGolfCartBrand(
+export function deriveActiveGolfCartBrands(
   catalog: GolfCartCatalogItem[],
   lines: Record<string, EquipmentVerificationLine>,
-): GolfCartBrand | null {
+): Set<GolfCartBrand> {
+  const active = new Set<GolfCartBrand>()
   for (const item of catalog) {
     if (isGolfCartCar(item) && deriveVerifiedQty(item, lines[item.id]) > 0) {
-      return item.brand
+      active.add(item.brand)
     }
   }
-  return null
+  return active
 }
 
 /**
- * Whether this Golf Cart Template row can be checked/edited right now: a
- * car of a different brand already selected locks out the other brand's
- * cars, and accessories are locked out entirely until a car of their own
- * brand is selected — no mixing brands, and no accessories-only SOW.
+ * Whether this Golf Cart Template row can be checked/edited right now:
+ * cars are always selectable, accessories only once their own brand's car
+ * is on the order — no accessories-only SOW, but no cross-brand car lock.
  */
-export function isGolfCartItemEnabled(item: GolfCartCatalogItem, selectedBrand: GolfCartBrand | null): boolean {
-  if (isGolfCartCar(item)) return selectedBrand === null || selectedBrand === item.brand
-  return selectedBrand === item.brand
+export function isGolfCartItemEnabled(item: GolfCartCatalogItem, activeBrands: Set<GolfCartBrand>): boolean {
+  if (isGolfCartCar(item)) return true
+  return activeBrands.has(item.brand)
 }
 
 /**
  * Live golf-cart price total from what's checked off in the Golf Cart
  * Template. Prices are already in INR (Ex-Bangalore pricing) — no USD
  * conversion step, unlike the Toro equipment catalog. Feeds the Golf Cart
- * figure in the IPI Opportunity Breakdown. Only counts lines matching the
- * active brand, so a stray selection left over from switching brands can't
- * silently inflate the total.
+ * figure in the IPI Opportunity Breakdown. Cars always count; accessories
+ * only count when their brand's car is active, so a stray accessory left
+ * over from before its car was unchecked can't silently inflate the total.
  */
 export function calculateSelectedGolfCartTotal(
   catalog: GolfCartCatalogItem[],
   lines: Record<string, EquipmentVerificationLine>,
 ): { pricedTotal: number } {
-  const selectedBrand = deriveSelectedGolfCartBrand(catalog, lines)
+  const activeBrands = deriveActiveGolfCartBrands(catalog, lines)
   let pricedTotal = 0
-  if (selectedBrand === null) return { pricedTotal }
   for (const item of catalog) {
-    if (item.brand !== selectedBrand) continue
+    if (!isGolfCartCar(item) && !activeBrands.has(item.brand)) continue
     const qty = deriveVerifiedQty(item, lines[item.id])
     if (qty <= 0) continue
     pricedTotal += item.priceINR * qty

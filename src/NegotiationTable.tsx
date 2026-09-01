@@ -1,7 +1,8 @@
-import { calculateCommercialView, deriveVerifiedQty } from './calc/commercial'
+import { calculateCommercialView, deriveActiveGolfCartBrands, deriveVerifiedQty, isGolfCartItemEnabled } from './calc/commercial'
 import { deriveEquipmentPriceINR } from './calc/pricing'
 import { BarStat, StatBar } from './components/ui'
 import { EQUIPMENT_CATALOG } from './data/equipmentCatalog'
+import { GOLF_CART_CATALOG } from './data/golfCartCatalog'
 import type { Assessment, NegotiationLine } from './domain/assessment'
 import { formatRupeesCompact } from './format'
 import { useUsdInrRate } from './hooks/useUsdInrRate'
@@ -27,6 +28,7 @@ export function NegotiationTable({
   const negotiation = assessment.negotiation ?? {}
   const quantifyInput = assessment.quantifyInput
   const equipmentVerification = quantifyInput?.equipmentVerification ?? {}
+  const golfCartVerification = quantifyInput?.golfCartVerification ?? {}
   const { rate: usdInrRate } = useUsdInrRate()
 
   function lineFor(id: string): NegotiationLine {
@@ -37,15 +39,34 @@ export function NegotiationTable({
     onChange({ ...negotiation, [id]: { ...lineFor(id), ...patch } })
   }
 
-  const negotiationLines = EQUIPMENT_CATALOG.map((item) => {
-    const verifiedQty = deriveVerifiedQty(item, equipmentVerification[item.id])
-    const line = lineFor(item.id)
-    const unitPrice = item.usdMsrp === null ? null : deriveEquipmentPriceINR(item.usdMsrp, usdInrRate)
-    const draftValue = unitPrice === null ? null : unitPrice * verifiedQty
-    const negotiatedValue = unitPrice === null ? null : unitPrice * line.negotiatedQty
-    const gapValue = unitPrice === null ? null : unitPrice * Math.max(verifiedQty - line.negotiatedQty, 0)
-    return { item, verifiedQty, line, unitPrice, draftValue, negotiatedValue, gapValue }
-  }).filter(({ verifiedQty }) => verifiedQty > 0)
+  const activeGolfCartBrands = deriveActiveGolfCartBrands(GOLF_CART_CATALOG, golfCartVerification)
+
+  // Equipment and Golf Cart Template selections, normalized to one shape so they negotiate
+  // side by side — same as Quantify shows both templates one after another.
+  const candidates = [
+    ...EQUIPMENT_CATALOG.map((item) => ({
+      id: item.id,
+      name: item.equipment,
+      unitPrice: item.usdMsrp === null ? null : deriveEquipmentPriceINR(item.usdMsrp, usdInrRate),
+      verifiedQty: deriveVerifiedQty(item, equipmentVerification[item.id]),
+    })),
+    ...GOLF_CART_CATALOG.filter((item) => isGolfCartItemEnabled(item, activeGolfCartBrands)).map((item) => ({
+      id: item.id,
+      name: item.equipment,
+      unitPrice: item.priceINR,
+      verifiedQty: deriveVerifiedQty(item, golfCartVerification[item.id]),
+    })),
+  ]
+
+  const negotiationLines = candidates
+    .map(({ id, name, unitPrice, verifiedQty }) => {
+      const line = lineFor(id)
+      const draftValue = unitPrice === null ? null : unitPrice * verifiedQty
+      const negotiatedValue = unitPrice === null ? null : unitPrice * line.negotiatedQty
+      const gapValue = unitPrice === null ? null : unitPrice * Math.max(verifiedQty - line.negotiatedQty, 0)
+      return { id, name, verifiedQty, line, unitPrice, draftValue, negotiatedValue, gapValue }
+    })
+    .filter(({ verifiedQty }) => verifiedQty > 0)
 
   const draftTotal = negotiationLines.reduce((sum, l) => sum + (l.draftValue ?? 0), 0)
   const negotiatedTotal = negotiationLines.reduce((sum, l) => sum + (l.negotiatedValue ?? 0), 0)
@@ -97,9 +118,9 @@ export function NegotiationTable({
 
       {negotiationLines.length === 0 ? (
         <div className="rounded-xl border border-dashed border-hairline p-10 text-center">
-          <div className="text-sm font-medium text-ink">No verified equipment yet</div>
+          <div className="text-sm font-medium text-ink">No verified equipment or golf carts yet</div>
           <div className="mt-1 text-sm text-ipi-700/60">
-            Go back to Quantify and enter a qty on the Equipment Template to negotiate against.
+            Go back to Quantify and enter a qty on the Equipment Template or Golf Cart Template to negotiate against.
           </div>
         </div>
       ) : (
@@ -108,7 +129,7 @@ export function NegotiationTable({
             <table className="w-full min-w-[880px] border-collapse text-sm">
               <thead className="sticky top-0 z-10 bg-white shadow-[0_1px_0_var(--color-hairline)]">
                 <tr className="text-left text-xs text-ipi-700/60">
-                  <th className="px-3 py-2 font-medium">SOW Equipment</th>
+                  <th className="px-3 py-2 font-medium">SOW Line Item</th>
                   <th className="px-3 py-2 text-right font-medium">SOW Qty</th>
                   <th className="px-3 py-2 text-right font-medium">Unit Price</th>
                   <th className="px-3 py-2 text-right font-medium">Draft SOW Value</th>
@@ -118,15 +139,15 @@ export function NegotiationTable({
                 </tr>
               </thead>
               <tbody>
-                {negotiationLines.map(({ item, verifiedQty, line, unitPrice, draftValue, negotiatedValue }) => {
+                {negotiationLines.map(({ id, name, verifiedQty, line, unitPrice, draftValue, negotiatedValue }) => {
                   const isNegotiated = line.negotiatedQty > 0
 
                   return (
                     <tr
-                      key={item.id}
+                      key={id}
                       className={`border-b border-hairline last:border-b-0 ${isNegotiated ? 'bg-ipi-50/60' : ''}`}
                     >
-                      <td className="px-3 py-2 text-ink">{item.equipment}</td>
+                      <td className="px-3 py-2 text-ink">{name}</td>
                       <td className="font-data px-3 py-2 text-right tabular-nums text-ipi-700/80">{verifiedQty}</td>
                       <td className="font-data px-3 py-2 text-right tabular-nums text-ipi-700/80">
                         {unitPrice === null ? <span className="text-amber-600">TBD</span> : money(unitPrice)}
@@ -141,7 +162,7 @@ export function NegotiationTable({
                           max={verifiedQty}
                           value={line.negotiatedQty}
                           onChange={(e) =>
-                            updateLine(item.id, {
+                            updateLine(id, {
                               negotiatedQty: Math.max(0, Math.min(verifiedQty, e.target.valueAsNumber || 0)),
                             })
                           }
@@ -155,7 +176,7 @@ export function NegotiationTable({
                         <input
                           type="text"
                           value={line.notes}
-                          onChange={(e) => updateLine(item.id, { notes: e.target.value })}
+                          onChange={(e) => updateLine(id, { notes: e.target.value })}
                           placeholder="—"
                           className="w-full rounded-md border border-hairline px-1.5 py-1 text-xs outline-none placeholder:text-ipi-700/30 transition-colors focus:border-ipi-600"
                         />

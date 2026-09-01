@@ -1,4 +1,4 @@
-import { calculateSelectedGolfCartTotal, deriveSelectedGolfCartBrand, deriveVerifiedQty } from '../calc/commercial'
+import { calculateSelectedGolfCartTotal, deriveActiveGolfCartBrands, deriveVerifiedQty, isGolfCartItemEnabled } from '../calc/commercial'
 import type { EquipmentVerificationLine } from '../calc/types'
 import { GOLF_CART_CATALOG } from '../data/golfCartCatalog'
 import { formatRupees, formatRupeesCompact } from '../format'
@@ -6,11 +6,11 @@ import { formatRupees, formatRupeesCompact } from '../format'
 /**
  * Pricing detail for what's checked off in the Golf Cart Template, revealed
  * by clicking the Golf Cart stat in the IPI Opportunity Breakdown. Only
- * shows lines matching the active brand — same scope as the priced total.
+ * shows lines matching an active brand — same scope as the priced total.
  */
 export function SelectedGolfCartDetail({ lines }: { lines: Record<string, EquipmentVerificationLine> }) {
-  const selectedBrand = deriveSelectedGolfCartBrand(GOLF_CART_CATALOG, lines)
-  const selected = GOLF_CART_CATALOG.filter((item) => item.brand === selectedBrand)
+  const activeBrands = deriveActiveGolfCartBrands(GOLF_CART_CATALOG, lines)
+  const selected = GOLF_CART_CATALOG.filter((item) => isGolfCartItemEnabled(item, activeBrands))
     .map((item) => ({ item, qty: deriveVerifiedQty(item, lines[item.id]) }))
     .filter(({ qty }) => qty > 0)
   const { pricedTotal } = calculateSelectedGolfCartTotal(GOLF_CART_CATALOG, lines)
