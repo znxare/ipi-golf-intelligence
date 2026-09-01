@@ -1,5 +1,5 @@
 import type { EquipmentCatalogItem } from '../data/equipmentCatalog'
-import type { GolfCartCatalogItem } from '../data/golfCartCatalog'
+import { isGolfCartCar, type GolfCartBrand, type GolfCartCatalogItem } from '../data/golfCartCatalog'
 import { PLAYABLE_DAYS_PER_YEAR } from './constants'
 import { deriveAnnualSalaryCost, deriveAnnualWaterCost } from './costs'
 import { deriveEquipmentPriceINR } from './pricing'
@@ -44,17 +44,50 @@ export function calculateSelectedEquipmentTotal(
 }
 
 /**
+ * Elite and Yamaha car/accessory ranges don't mix on one SOW — the active
+ * brand is whichever Golf Cars line has a car actually selected. Returns
+ * null when no car is selected yet (accessories can't stand alone either).
+ */
+export function deriveSelectedGolfCartBrand(
+  catalog: GolfCartCatalogItem[],
+  lines: Record<string, EquipmentVerificationLine>,
+): GolfCartBrand | null {
+  for (const item of catalog) {
+    if (isGolfCartCar(item) && deriveVerifiedQty(item, lines[item.id]) > 0) {
+      return item.brand
+    }
+  }
+  return null
+}
+
+/**
+ * Whether this Golf Cart Template row can be checked/edited right now: a
+ * car of a different brand already selected locks out the other brand's
+ * cars, and accessories are locked out entirely until a car of their own
+ * brand is selected — no mixing brands, and no accessories-only SOW.
+ */
+export function isGolfCartItemEnabled(item: GolfCartCatalogItem, selectedBrand: GolfCartBrand | null): boolean {
+  if (isGolfCartCar(item)) return selectedBrand === null || selectedBrand === item.brand
+  return selectedBrand === item.brand
+}
+
+/**
  * Live golf-cart price total from what's checked off in the Golf Cart
  * Template. Prices are already in INR (Ex-Bangalore pricing) — no USD
  * conversion step, unlike the Toro equipment catalog. Feeds the Golf Cart
- * figure in the IPI Opportunity Breakdown.
+ * figure in the IPI Opportunity Breakdown. Only counts lines matching the
+ * active brand, so a stray selection left over from switching brands can't
+ * silently inflate the total.
  */
 export function calculateSelectedGolfCartTotal(
   catalog: GolfCartCatalogItem[],
   lines: Record<string, EquipmentVerificationLine>,
 ): { pricedTotal: number } {
+  const selectedBrand = deriveSelectedGolfCartBrand(catalog, lines)
   let pricedTotal = 0
+  if (selectedBrand === null) return { pricedTotal }
   for (const item of catalog) {
+    if (item.brand !== selectedBrand) continue
     const qty = deriveVerifiedQty(item, lines[item.id])
     if (qty <= 0) continue
     pricedTotal += item.priceINR * qty

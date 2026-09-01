@@ -1,5 +1,6 @@
+import { deriveSelectedGolfCartBrand, isGolfCartItemEnabled } from '../calc/commercial'
 import type { EquipmentVerificationLine } from '../calc/types'
-import { GOLF_CART_CATALOG } from '../data/golfCartCatalog'
+import { GOLF_CART_CATALOG, isGolfCartCar } from '../data/golfCartCatalog'
 import { formatRupees } from '../format'
 
 export function GolfCartVerification({
@@ -9,6 +10,8 @@ export function GolfCartVerification({
   lines: Record<string, EquipmentVerificationLine>
   onChange: (lines: Record<string, EquipmentVerificationLine>) => void
 }) {
+  const selectedBrand = deriveSelectedGolfCartBrand(GOLF_CART_CATALOG, lines)
+
   function lineFor(id: string): EquipmentVerificationLine {
     return lines[id] ?? { confirmed: false, sowQty: '' }
   }
@@ -44,8 +47,23 @@ export function GolfCartVerification({
           <tbody>
             {GOLF_CART_CATALOG.map((item) => {
               const line = lineFor(item.id)
+              const enabled = isGolfCartItemEnabled(item, selectedBrand)
+              const otherBrandLabel = item.brand === 'elite' ? 'a Yamaha' : 'an Elite'
+              const selectedBrandLabel = selectedBrand === 'elite' ? 'an Elite' : 'a Yamaha'
+              const selectedBrandName = selectedBrand === 'elite' ? 'Elite' : 'Yamaha'
+              const disabledReason = enabled
+                ? undefined
+                : isGolfCartCar(item)
+                  ? `${otherBrandLabel[0].toUpperCase()}${otherBrandLabel.slice(1)} car is already selected — clear it first to switch brands`
+                  : selectedBrand === null
+                    ? 'Select a golf car first'
+                    : `Only ${selectedBrandName} accessories can be added alongside ${selectedBrandLabel} car`
               return (
-                <tr key={item.id} className="border-b border-hairline last:border-b-0">
+                <tr
+                  key={item.id}
+                  className={`border-b border-hairline last:border-b-0 ${enabled ? '' : 'opacity-40'}`}
+                  title={disabledReason}
+                >
                   <td className="px-4 py-2 text-xs text-ipi-700/60">{item.category}</td>
                   <td className="px-4 py-2 text-ink">{item.equipment}</td>
                   <td className="font-data px-4 py-2 text-xs tabular-nums text-ipi-700/70">{item.model}</td>
@@ -62,8 +80,9 @@ export function GolfCartVerification({
                     <input
                       type="checkbox"
                       checked={line.confirmed}
+                      disabled={!enabled}
                       onChange={(e) => updateLine(item.id, { confirmed: e.target.checked })}
-                      className="h-4 w-4 accent-[var(--color-ipi-600)]"
+                      className="h-4 w-4 accent-[var(--color-ipi-600)] disabled:cursor-not-allowed"
                     />
                   </td>
                   <td className="px-4 py-2 text-right">
@@ -73,9 +92,10 @@ export function GolfCartVerification({
                       <input
                         type="text"
                         value={line.sowQty}
+                        disabled={!enabled}
                         onChange={(e) => updateLine(item.id, { sowQty: e.target.value })}
                         placeholder="___"
-                        className="font-data w-20 rounded-md border border-hairline px-2 py-1 text-right tabular-nums outline-none transition-colors placeholder:text-ipi-700/30 focus:border-ipi-600"
+                        className="font-data w-20 rounded-md border border-hairline px-2 py-1 text-right tabular-nums outline-none transition-colors placeholder:text-ipi-700/30 focus:border-ipi-600 disabled:cursor-not-allowed disabled:bg-ipi-50/60"
                       />
                     )}
                   </td>
@@ -88,6 +108,11 @@ export function GolfCartVerification({
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline bg-ipi-50/60 px-4 py-2 text-xs text-ipi-700/60">
         <span>Ex-Bangalore pricing, converted from IPI's Elite and Yamaha DR2E price lists</span>
+        <span>
+          {selectedBrand === null
+            ? 'Select a golf car to unlock its accessories'
+            : `${selectedBrand === 'elite' ? 'Elite' : 'Yamaha'} selected — only ${selectedBrand === 'elite' ? 'Elite' : 'Yamaha'} cars/accessories can be added`}
+        </span>
       </div>
     </div>
   )
