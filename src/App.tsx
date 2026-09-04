@@ -4,8 +4,11 @@ import { AssessmentWizard } from './AssessmentWizard'
 import { CommercialLayer } from './CommercialLayer'
 import { Dashboard } from './Dashboard'
 import type { Assessment } from './domain/assessment'
+import type { Lead } from './domain/lead'
+import { LeadDetail } from './LeadDetail'
+import { LeadsList } from './LeadsList'
 
-type Tab = 'dashboard' | 'transaction'
+type Tab = 'dashboard' | 'transaction' | 'leads'
 
 function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => void }) {
   function navItemClass(active: boolean) {
@@ -33,6 +36,9 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
         <button type="button" onClick={() => onTabChange('transaction')} className={navItemClass(tab === 'transaction')}>
           Transaction
         </button>
+        <button type="button" onClick={() => onTabChange('leads')} className={navItemClass(tab === 'leads')}>
+          Leads
+        </button>
       </div>
     </div>
   )
@@ -41,6 +47,7 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
 function App() {
   const [tab, setTab] = useState<Tab>('dashboard')
   const [openAssessment, setOpenAssessment] = useState<Assessment | null>(null)
+  const [openLead, setOpenLead] = useState<Lead | null>(null)
 
   return (
     <div className="flex min-h-screen">
@@ -49,6 +56,7 @@ function App() {
         onTabChange={(next) => {
           setTab(next)
           setOpenAssessment(null)
+          setOpenLead(null)
         }}
       />
       <div className="flex-1 bg-ipi-50 p-6">
@@ -59,8 +67,10 @@ function App() {
           {openAssessment && openAssessment.status !== 'in_progress' && (
             <CommercialLayer assessment={openAssessment} onBack={() => setOpenAssessment(null)} />
           )}
-          {!openAssessment && tab === 'dashboard' && <Dashboard />}
-          {!openAssessment && tab === 'transaction' && <AssessmentsList onOpen={setOpenAssessment} />}
+          {!openAssessment && !openLead && tab === 'dashboard' && <Dashboard />}
+          {!openAssessment && !openLead && tab === 'transaction' && <AssessmentsList onOpen={setOpenAssessment} />}
+          {!openAssessment && !openLead && tab === 'leads' && <LeadsList onOpen={setOpenLead} />}
+          {openLead && <LeadDetail lead={openLead} onBack={() => setOpenLead(null)} />}
         </div>
       </div>
     </div>
