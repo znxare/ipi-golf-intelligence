@@ -487,23 +487,23 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
         <div className="flex flex-col gap-4">
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.category}>Customer Category — All Opportunities</CardHeader>
-            <div className="flex justify-center py-1">
+            <div className="flex items-center gap-3">
               <Donut
                 segments={categoryBreakdown(leads)}
-                size={188}
-                thickness={30}
+                size={112}
+                thickness={16}
                 selected={categoryFilter}
                 onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
                 centerLabel={String(leads.length)}
                 centerSublabel="Total"
               />
+              <DonutLegend
+                segments={categoryBreakdown(leads)}
+                total={leads.length}
+                selected={categoryFilter}
+                onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
+              />
             </div>
-            <DonutLegend
-              segments={categoryBreakdown(leads)}
-              total={leads.length}
-              selected={categoryFilter}
-              onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
-            />
           </div>
 
           <div className={CARD_CLASS}>
