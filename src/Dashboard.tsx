@@ -338,19 +338,13 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
     <div>
       <DashboardHero />
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
-        <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
-        <StatTile
-          icon={ICON_TARGET}
-          label="Total Actual Opportunity"
-          value={formatRupeesCompact(actualTotal)}
-          sublabel={`${actualPct}% of potential`}
-        />
-      </div>
-
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
+            <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
+          </div>
+
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.process}>Transaction Process (LOA) — click a stage</CardHeader>
             <div className="overflow-x-auto pb-1">
@@ -485,6 +479,13 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
         </div>
 
         <div className="flex flex-col gap-4">
+          <StatTile
+            icon={ICON_TARGET}
+            label="Total Actual Opportunity"
+            value={formatRupeesCompact(actualTotal)}
+            sublabel={`${actualPct}% of potential`}
+          />
+
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.category}>Customer Category — All Opportunities</CardHeader>
             <div className="flex items-center gap-3">
