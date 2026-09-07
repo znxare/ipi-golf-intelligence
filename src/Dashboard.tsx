@@ -35,17 +35,17 @@ const CARD_ACCENT = {
 
 const STAGE_TAB_CLASS: Record<'lead' | LeadAction, string> = {
   lead: 'bg-white border border-hairline text-ipi-800',
-  qualify: 'bg-ipi-100 text-ipi-800',
+  qualify: 'bg-sky-100 text-sky-700',
   quantify: 'bg-mint-100 text-mint-600',
   verify: 'bg-amber-100 text-amber-600',
-  certify: 'bg-ipi-900 text-white',
+  certify: 'bg-rose-500 text-white',
 }
 
 const STAGE_BADGE_CLASS: Record<LeadAction, string> = {
-  qualify: 'bg-ipi-100 text-ipi-800',
+  qualify: 'bg-sky-100 text-sky-700',
   quantify: 'bg-mint-100 text-mint-600',
   verify: 'bg-amber-100 text-amber-600',
-  certify: 'bg-ipi-900 text-white',
+  certify: 'bg-rose-100 text-rose-600',
 }
 
 const STAGE_DEFS: { key: LeadAction; label: string }[] = [
