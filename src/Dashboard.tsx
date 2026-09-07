@@ -1,100 +1,524 @@
 import { useEffect, useState } from 'react'
-import { calculateCommercialView } from './calc/commercial'
-import { PageHeader } from './components/ui'
-import type { Assessment } from './domain/assessment'
-import { OpportunityWaterfallBox } from './IpiOpportunityWaterfall'
-import { assessmentStore } from './store/assessmentStore'
+import { Icon, SectionLabel } from './components/ui'
+import type { Lead, LeadAction, LeadCategory } from './domain/lead'
+import { formatRupeesCompact } from './format'
+import {
+  CATEGORY_DOT,
+  CATEGORY_LABEL,
+  HEALTH_DOT,
+  HEALTH_LABEL,
+  RATING_DOT,
+} from './LeadDetail'
+import { LEAD_ACTION_LABEL } from './LeadsList'
+import { leadStore } from './store/leadStore'
 
-interface OpportunityTotals {
-  revenue: number
-  operatingCost: number
-  salaryCost: number
-  waterCost: number
-  total: number
+const ICON_USERS =
+  'M8 11a3 3 0 100-6 3 3 0 000 6zM3 20a5 5 0 0110 0M17 11a3 3 0 100-6 3 3 0 000 6zM13.2 14.2a5 5 0 016.8 5.8'
+const ICON_BAR = 'M4 20V11M10 20V4M16 20v-8M3 20h18'
+const ICON_TARGET =
+  'M3 12a9 9 0 1018 0 9 9 0 10-18 0M7 12a5 5 0 1010 0 5 5 0 10-10 0M11 12a1 1 0 102 0 1 1 0 10-2 0'
+const ICON_CHECK = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
+
+const CATEGORY_COLOR: Record<LeadCategory, string> = {
+  growth: 'var(--color-ipi-700)',
+  operational: 'var(--color-mint-600)',
+  developing: '#aebdb4',
 }
 
-function zeroTotals(): OpportunityTotals {
-  return { revenue: 0, operatingCost: 0, salaryCost: 0, waterCost: 0, total: 0 }
+const STAGE_TAB_CLASS: Record<'lead' | LeadAction, string> = {
+  lead: 'bg-white border border-hairline text-ipi-800',
+  qualify: 'bg-ipi-100 text-ipi-800',
+  quantify: 'bg-mint-100 text-mint-600',
+  verify: 'bg-amber-100 text-amber-600',
+  certify: 'bg-ipi-900 text-white',
+}
+
+const STAGE_BADGE_CLASS: Record<LeadAction, string> = {
+  qualify: 'bg-ipi-100 text-ipi-800',
+  quantify: 'bg-mint-100 text-mint-600',
+  verify: 'bg-amber-100 text-amber-600',
+  certify: 'bg-ipi-900 text-white',
+}
+
+const STAGE_DEFS: { key: LeadAction; label: string }[] = [
+  { key: 'qualify', label: 'Qualify' },
+  { key: 'quantify', label: 'Quantify' },
+  { key: 'verify', label: 'Verify' },
+  { key: 'certify', label: 'Certify' },
+]
+
+interface DonutSegment {
+  key: string
+  label: string
+  value: number
+  color: string
+}
+
+/** Lightweight SVG donut — no chart library — segments are clickable and dim when a sibling is selected. */
+function Donut({
+  segments,
+  size = 176,
+  thickness = 26,
+  selected,
+  onSelect,
+  centerLabel,
+  centerSublabel,
+}: {
+  segments: DonutSegment[]
+  size?: number
+  thickness?: number
+  selected: string | null
+  onSelect: (key: string) => void
+  centerLabel: string
+  centerSublabel?: string
+}) {
+  const total = segments.reduce((s, x) => s + x.value, 0)
+  const radius = (size - thickness) / 2
+  const circumference = 2 * Math.PI * radius
+  let cursor = 0
+
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} className="flex-none">
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--color-hairline)" strokeWidth={thickness} />
+      {total > 0 && (
+        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+          {segments.map((seg) => {
+            if (seg.value <= 0) return null
+            const frac = seg.value / total
+            const dash = Math.max(frac * circumference - 2, 0)
+            const gapStart = cursor
+            cursor += frac * circumference
+            const isDim = selected !== null && selected !== seg.key
+            return (
+              <circle
+                key={seg.key}
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                fill="none"
+                stroke={seg.color}
+                strokeWidth={selected === seg.key ? thickness + 6 : thickness}
+                strokeDasharray={`${dash} ${circumference - dash}`}
+                strokeDashoffset={-gapStart}
+                className="cursor-pointer transition-all duration-150"
+                style={{ opacity: isDim ? 0.32 : 1 }}
+                onClick={() => onSelect(seg.key)}
+              />
+            )
+          })}
+        </g>
+      )}
+      <text x="50%" y="46%" textAnchor="middle" dominantBaseline="middle" className="fill-ink font-data text-[22px] font-semibold">
+        {centerLabel}
+      </text>
+      {centerSublabel && (
+        <text
+          x="50%"
+          y="62%"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          className="fill-ipi-700/60 text-[9px] font-semibold uppercase tracking-wide"
+        >
+          {centerSublabel}
+        </text>
+      )}
+    </svg>
+  )
+}
+
+function DonutLegend({
+  segments,
+  total,
+  selected,
+  onSelect,
+}: {
+  segments: DonutSegment[]
+  total: number
+  selected: string | null
+  onSelect: (key: string) => void
+}) {
+  return (
+    <div className="flex flex-1 flex-col gap-1">
+      {segments.map((seg) => (
+        <button
+          key={seg.key}
+          type="button"
+          onClick={() => onSelect(seg.key)}
+          className={`flex items-center justify-between gap-3 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
+            selected === seg.key ? 'bg-ipi-50' : 'hover:bg-ipi-50/60'
+          }`}
+        >
+          <span className="flex items-center gap-2 text-ipi-700/80">
+            <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: seg.color }} />
+            {seg.label}
+          </span>
+          <span className="font-data tabular-nums text-ink">
+            {seg.value} <span className="text-ipi-700/40">({total > 0 ? Math.round((seg.value / total) * 100) : 0}%)</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function StatTile({
+  icon,
+  label,
+  value,
+  sublabel,
+  emphasis = false,
+}: {
+  icon: string
+  label: string
+  value: string
+  sublabel?: string
+  emphasis?: boolean
+}) {
+  return (
+    <div
+      className={`rounded-xl border p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)] ${
+        emphasis ? 'border-ipi-800 bg-ipi-900' : 'border-hairline bg-white'
+      }`}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <span
+          className={`flex h-8 w-8 flex-none items-center justify-center rounded-full ${
+            emphasis ? 'bg-white/15 text-white' : 'bg-mint-100 text-mint-600'
+          }`}
+        >
+          <Icon path={icon} />
+        </span>
+        <span className={`text-[11px] font-semibold uppercase tracking-wide ${emphasis ? 'text-white/60' : 'text-ipi-700/60'}`}>
+          {label}
+        </span>
+      </div>
+      <div className={`font-data text-2xl font-semibold tabular-nums ${emphasis ? 'text-white' : 'text-ink'}`}>{value}</div>
+      {sublabel && <div className={`mt-0.5 text-xs ${emphasis ? 'text-white/60' : 'text-ipi-700/60'}`}>{sublabel}</div>}
+    </div>
+  )
 }
 
 /**
- * Portfolio rollup, above the Transaction list — the same Qualify Potential /
- * Quantify Actual IPI Opportunity waterfall from the Commercial Layer, but
- * summed across every saved assessment instead of one deal at a time.
+ * Portfolio dashboard — LOA pipeline rolled up from every saved Lead. The
+ * Transaction Process tabs and both category donuts write into the same
+ * filter state, so any combination of stage + category + client-scope drives
+ * the table beneath them.
  */
-export function Dashboard() {
-  const [assessments, setAssessments] = useState<Assessment[]>([])
+export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) {
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [stageFilter, setStageFilter] = useState<'all' | 'lead' | LeadAction>('all')
+  const [categoryFilter, setCategoryFilter] = useState<LeadCategory | null>(null)
+  const [clientScope, setClientScope] = useState<'all' | 'prospects'>('all')
 
   useEffect(() => {
-    assessmentStore.list().then(setAssessments)
+    leadStore.list().then(setLeads)
   }, [])
 
-  const potential = zeroTotals()
-  const actual = zeroTotals()
-  let quantifiedCount = 0
+  if (leads.length === 0) {
+    return (
+      <div>
+        <DashboardHero />
+        <div className="rounded-xl border border-dashed border-hairline p-10 text-center">
+          <div className="text-sm font-medium text-ink">No leads yet</div>
+          <div className="mt-1 text-sm text-ipi-700/60">Add a golf course under Leads to start seeing pipeline numbers here.</div>
+        </div>
+      </div>
+    )
+  }
 
-  for (const a of assessments) {
-    const commercial = calculateCommercialView(a.qualifyInput, {
-      actualPlayersPerDay: a.quantifyInput?.actualPlayersPerDay ?? 0,
-      actualGolfSpendPerMonth: a.quantifyInput?.golfSpendPerMonth ?? 0,
-      actualSalariesPerMonth: a.quantifyInput?.salariesPerMonth ?? 0,
-      actualWaterPerMonth: a.quantifyInput?.waterPerMonth ?? 0,
-    })
+  const existingCount = leads.filter((l) => l.customerType === 'existing').length
+  const leadCount = leads.length - existingCount
+  const prospects = leads.filter((l) => l.customerType !== 'existing')
 
-    potential.revenue += commercial.revenueSpendPotentialAnnual
-    potential.operatingCost += commercial.estimatedOperatingCostAnnual
-    potential.salaryCost += commercial.annualSalaryCost
-    potential.waterCost += commercial.annualWaterCost
-    potential.total += commercial.ipiOpportunityPotentialAnnual
+  const potentialTotal = leads.reduce((s, l) => s + l.potentialValue, 0)
+  const actualTotal = leads.reduce((s, l) => s + l.actualValue, 0)
+  const actualPct = potentialTotal > 0 ? Math.round((actualTotal / potentialTotal) * 100) : 0
 
-    if (a.quantifyInput) {
-      quantifiedCount += 1
-      actual.revenue += commercial.revenueSpendActualAnnual
-      actual.operatingCost += commercial.actualOperatingCostAnnual
-      actual.salaryCost += commercial.actualSalaryCostAnnual
-      actual.waterCost += commercial.actualWaterCostAnnual
-      actual.total += commercial.ipiOpportunityActualAnnual
+  const certifyLeads = leads.filter((l) => l.action === 'certify')
+  const certifyValue = certifyLeads.reduce((s, l) => s + l.potentialValue, 0)
+
+  const stageStats = STAGE_DEFS.map((s) => {
+    const rows = leads.filter((l) => l.action === s.key)
+    return { ...s, count: rows.length, value: rows.reduce((sum, l) => sum + l.potentialValue, 0) }
+  })
+
+  function categoryBreakdown(rows: Lead[]): DonutSegment[] {
+    const totals: Record<LeadCategory, number> = { growth: 0, operational: 0, developing: 0 }
+    for (const l of rows) totals[l.category] += 1
+    return (['growth', 'operational', 'developing'] as LeadCategory[]).map((c) => ({
+      key: c,
+      label: CATEGORY_LABEL[c],
+      value: totals[c],
+      color: CATEGORY_COLOR[c],
+    }))
+  }
+
+  const healthCounts = { on_track: 0, needs_attention: 0, stuck: 0 }
+  for (const l of leads) healthCounts[l.health] += 1
+
+  function toggleStage(key: 'lead' | LeadAction) {
+    setStageFilter((cur) => (cur === key ? 'all' : key))
+  }
+
+  function toggleCategory(key: LeadCategory, scope: 'all' | 'prospects') {
+    if (categoryFilter === key && clientScope === scope) {
+      setCategoryFilter(null)
+      setClientScope('all')
+    } else {
+      setCategoryFilter(key)
+      setClientScope(scope)
     }
   }
 
+  function clearFilters() {
+    setStageFilter('all')
+    setCategoryFilter(null)
+    setClientScope('all')
+  }
+
+  let filtered = leads
+  if (stageFilter !== 'all' && stageFilter !== 'lead') filtered = filtered.filter((l) => l.action === stageFilter)
+  if (categoryFilter) filtered = filtered.filter((l) => l.category === categoryFilter)
+  if (clientScope === 'prospects') filtered = filtered.filter((l) => l.customerType !== 'existing')
+
+  const filtersActive = stageFilter !== 'all' || categoryFilter !== null || clientScope !== 'all'
+  const sorted = [...filtered].sort((a, b) => b.potentialValue - a.potentialValue)
+  const visibleRows = filtersActive ? sorted : sorted.slice(0, 4)
+
   return (
     <div>
-      <PageHeader eyebrow="Portfolio Summary" title="Dashboard" />
+      <DashboardHero />
 
-      {assessments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-hairline p-10 text-center">
-          <div className="text-sm font-medium text-ink">No transactions yet</div>
-          <div className="mt-1 text-sm text-ipi-700/60">
-            Add a golf course under Transaction to start seeing portfolio numbers here.
+      <div className="mb-4 grid grid-cols-4 gap-3">
+        <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
+        <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
+        <StatTile
+          icon={ICON_TARGET}
+          label="Total Actual Opportunity"
+          value={formatRupeesCompact(actualTotal)}
+          sublabel={`${actualPct}% of potential`}
+        />
+        <StatTile
+          icon={ICON_CHECK}
+          label="At Certify"
+          value={String(certifyLeads.length)}
+          sublabel={formatRupeesCompact(certifyValue)}
+          emphasis
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
+            <SectionLabel>Transaction Process (LOA) — click a stage</SectionLabel>
+            <div className="flex items-stretch gap-1.5">
+              {(
+                [
+                  { key: 'lead' as const, label: 'Lead', hint: 'Identify & capture' },
+                  ...stageStats,
+                ] as { key: 'lead' | LeadAction; label: string; hint?: string; count?: number; value?: number }[]
+              ).map((s, i, all) => (
+                <div key={s.key} className="flex flex-1 items-stretch gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleStage(s.key)}
+                    className={`flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
+                      stageFilter === s.key ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
+                    }`}
+                  >
+                    <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</div>
+                    {s.key === 'lead' ? (
+                      <div className="mt-2.5 text-[11px] leading-tight opacity-70">{s.hint}</div>
+                    ) : (
+                      <>
+                        <div className="mt-1 font-data text-xl font-semibold tabular-nums">{s.count}</div>
+                        <div className="text-[11px] opacity-70">{formatRupeesCompact(s.value ?? 0)}</div>
+                      </>
+                    )}
+                  </button>
+                  {i < all.length - 1 && <div className="flex flex-none items-center text-ipi-700/25">›</div>}
+                </div>
+              ))}
+            </div>
+            <div className="mt-2.5 text-[11px] text-ipi-700/45">
+              → SAP (Accounts) owns final invoicing &amp; collections from Certify onward.
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-hairline bg-white shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
+            <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-2.5">
+              <div className="text-xs text-ipi-700/60">
+                Showing <span className="font-medium text-ink">{visibleRows.length}</span>
+                {filtersActive ? ' matching opportunities' : ` of ${leads.length} — top by potential opportunity`}
+              </div>
+              {filtersActive && (
+                <button type="button" onClick={clearFilters} className="text-xs font-medium text-ipi-600 hover:text-ipi-800">
+                  Clear filters ×
+                </button>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[680px] border-collapse text-xs">
+                <thead>
+                  <tr className="bg-ipi-50/60 text-left text-[10px] uppercase tracking-wide text-ipi-700/50">
+                    <th className="px-3 py-2 font-medium">#</th>
+                    <th className="px-3 py-2 font-medium">Customer / Project</th>
+                    <th className="px-3 py-2 font-medium">Category</th>
+                    <th className="px-3 py-2 text-right font-medium">Potential</th>
+                    <th className="px-3 py-2 text-right font-medium">Actual</th>
+                    <th className="px-3 py-2 text-center font-medium">Ability</th>
+                    <th className="px-3 py-2 text-center font-medium">Maint.</th>
+                    <th className="px-3 py-2 font-medium">Stage</th>
+                    <th className="px-3 py-2 text-center font-medium">Health</th>
+                    <th className="px-3 py-2 font-medium">Target</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleRows.map((lead, i) => (
+                    <tr
+                      key={lead.id}
+                      onClick={() => onOpenLead(lead)}
+                      className="cursor-pointer border-t border-hairline transition-colors hover:bg-ipi-50/60"
+                    >
+                      <td className="px-3 py-2 text-ipi-700/50">{i + 1}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-1.5 font-medium text-ink">
+                          <span
+                            className={`h-2 w-2 flex-none rounded-full ${lead.customerType === 'existing' ? 'bg-mint-600' : 'bg-ipi-600'}`}
+                          />
+                          {lead.courseName || 'Untitled'}
+                        </div>
+                        {lead.nextAction && <div className="mt-0.5 text-[11px] text-ipi-700/50">{lead.nextAction}</div>}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className="inline-flex items-center gap-1.5 text-ipi-700/70">
+                          <span className={`h-2 w-2 flex-none rounded-full ${CATEGORY_DOT[lead.category]}`} />
+                          {CATEGORY_LABEL[lead.category]}
+                        </span>
+                      </td>
+                      <td className="font-data px-3 py-2 text-right tabular-nums text-ink">{formatRupeesCompact(lead.potentialValue)}</td>
+                      <td className="font-data px-3 py-2 text-right tabular-nums text-ipi-700/70">
+                        {lead.actualValue > 0 ? formatRupeesCompact(lead.actualValue) : '—'}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <span
+                          title={lead.abilityToPay}
+                          className={`inline-block h-2.5 w-2.5 rounded-full ${RATING_DOT[lead.abilityToPay]}`}
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <span
+                          title={lead.maintenanceCommitment}
+                          className={`inline-block h-2.5 w-2.5 rounded-full ${RATING_DOT[lead.maintenanceCommitment]}`}
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${STAGE_BADGE_CLASS[lead.action]}`}
+                        >
+                          {LEAD_ACTION_LABEL[lead.action]}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <span title={HEALTH_LABEL[lead.health]} className={`inline-block h-2.5 w-2.5 rounded-full ${HEALTH_DOT[lead.health]}`} />
+                      </td>
+                      <td className="px-3 py-2 text-ipi-700/60">
+                        {lead.targetDate ? new Date(lead.targetDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      ) : (
-        <>
-          <div className="mb-3 text-xs text-ipi-700/50">
-            Combined across {assessments.length} transaction{assessments.length === 1 ? '' : 's'}
-            {quantifiedCount > 0 && ` (${quantifiedCount} with Quantify data)`}.
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <OpportunityWaterfallBox
-              title="Qualify — Potential IPI Opportunity"
-              revenue={potential.revenue}
-              operatingCost={potential.operatingCost}
-              salaryCost={potential.salaryCost}
-              waterCost={potential.waterCost}
-              total={potential.total}
-            />
-            <OpportunityWaterfallBox
-              title="Quantify — Actual IPI Opportunity"
-              revenue={actual.revenue}
-              operatingCost={actual.operatingCost}
-              salaryCost={actual.salaryCost}
-              waterCost={actual.waterCost}
-              total={actual.total}
-              empty={quantifiedCount === 0 ? 'No Quantify data yet across any transaction.' : undefined}
+
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
+            <SectionLabel>Customer Category — All Opportunities</SectionLabel>
+            <div className="flex justify-center py-1">
+              <Donut
+                segments={categoryBreakdown(leads)}
+                size={188}
+                thickness={30}
+                selected={clientScope === 'all' ? categoryFilter : null}
+                onSelect={(k) => toggleCategory(k as LeadCategory, 'all')}
+                centerLabel={String(leads.length)}
+                centerSublabel="Total"
+              />
+            </div>
+            <DonutLegend
+              segments={categoryBreakdown(leads)}
+              total={leads.length}
+              selected={clientScope === 'all' ? categoryFilter : null}
+              onSelect={(k) => toggleCategory(k as LeadCategory, 'all')}
             />
           </div>
-        </>
-      )}
+
+          <div className="rounded-xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
+            <SectionLabel>Prospects — Not Yet a Client</SectionLabel>
+            <div className="flex items-center gap-3">
+              <Donut
+                segments={categoryBreakdown(prospects)}
+                size={112}
+                thickness={16}
+                selected={clientScope === 'prospects' ? categoryFilter : null}
+                onSelect={(k) => toggleCategory(k as LeadCategory, 'prospects')}
+                centerLabel={String(prospects.length)}
+                centerSublabel="Leads"
+              />
+              <DonutLegend
+                segments={categoryBreakdown(prospects)}
+                total={prospects.length}
+                selected={clientScope === 'prospects' ? categoryFilter : null}
+                onSelect={(k) => toggleCategory(k as LeadCategory, 'prospects')}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)]">
+            <SectionLabel>Opportunity Health (All)</SectionLabel>
+            <div className="mb-3 font-data text-3xl font-semibold tabular-nums text-ink">{leads.length}</div>
+            <div className="flex flex-col gap-2">
+              {(
+                [
+                  { key: 'on_track', dot: HEALTH_DOT.on_track, count: healthCounts.on_track },
+                  { key: 'needs_attention', dot: HEALTH_DOT.needs_attention, count: healthCounts.needs_attention },
+                  { key: 'stuck', dot: HEALTH_DOT.stuck, count: healthCounts.stuck },
+                ] as const
+              ).map((h) => (
+                <div key={h.key} className="flex items-center gap-2">
+                  <span className={`h-2.5 w-2.5 flex-none rounded-full ${h.dot}`} />
+                  <span className="flex-1 text-xs text-ipi-700/70">{HEALTH_LABEL[h.key]}</span>
+                  <span className="font-data text-sm font-semibold tabular-nums text-ink">{h.count}</span>
+                  <span className="w-9 text-right text-[11px] text-ipi-700/40">
+                    {leads.length > 0 ? Math.round((h.count / leads.length) * 100) : 0}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DashboardHero() {
+  const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+  return (
+    <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-ipi-950 via-ipi-900 to-ipi-800 px-6 py-5 text-white shadow-[0_8px_24px_rgba(10,42,30,0.28)]">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50">Lead Opportunity Action</div>
+          <div className="mt-0.5 text-xl font-semibold">Dashboard</div>
+          <div className="mt-1 text-sm text-white/60">From Lead to Certify. Focused opportunities. Stronger relationships.</div>
+        </div>
+        <div className="text-right">
+          <div className="text-[11px] uppercase tracking-wide text-white/40">Today</div>
+          <div className="text-sm font-medium text-white/85">{today}</div>
+        </div>
+      </div>
     </div>
   )
 }

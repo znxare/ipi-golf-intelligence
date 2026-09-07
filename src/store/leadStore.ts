@@ -9,14 +9,23 @@ export interface LeadStore {
 
 const STORAGE_KEY = 'ipi.leads.v1'
 
-/** Backfills fields onto leads saved before they existed (customerType/requirement/competition/opportunity/action). */
+/** Backfills fields onto leads saved before they existed (customerType/requirement/competition/opportunity/action/scoring). */
 function withLeadDefaults(lead: Lead): Lead {
   const needsBackfill =
     lead.customerType === undefined ||
     lead.requirement === undefined ||
     lead.competition === undefined ||
     lead.opportunity === undefined ||
-    lead.action === undefined
+    lead.action === undefined ||
+    lead.category === undefined ||
+    lead.abilityToPay === undefined ||
+    lead.maintenanceCommitment === undefined ||
+    lead.health === undefined ||
+    lead.owner === undefined ||
+    lead.targetDate === undefined ||
+    lead.nextAction === undefined ||
+    lead.potentialValue === undefined ||
+    lead.actualValue === undefined
 
   if (!needsBackfill) return lead
 
@@ -27,6 +36,15 @@ function withLeadDefaults(lead: Lead): Lead {
     competition: lead.competition ?? '',
     opportunity: lead.opportunity ?? { equipment: false, training: false, amc: false },
     action: lead.action ?? 'qualify',
+    category: lead.category ?? 'developing',
+    abilityToPay: lead.abilityToPay ?? 'yellow',
+    maintenanceCommitment: lead.maintenanceCommitment ?? 'yellow',
+    health: lead.health ?? 'on_track',
+    owner: lead.owner ?? '',
+    targetDate: lead.targetDate ?? '',
+    nextAction: lead.nextAction ?? '',
+    potentialValue: lead.potentialValue ?? 0,
+    actualValue: lead.actualValue ?? 0,
   }
 }
 

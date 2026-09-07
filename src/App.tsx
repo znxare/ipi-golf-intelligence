@@ -60,14 +60,14 @@ function App() {
         }}
       />
       <div className="flex-1 bg-ipi-50 p-6">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-6xl">
           {openAssessment && openAssessment.status === 'in_progress' && (
             <AssessmentWizard assessment={openAssessment} onDone={setOpenAssessment} />
           )}
           {openAssessment && openAssessment.status !== 'in_progress' && (
             <CommercialLayer assessment={openAssessment} onBack={() => setOpenAssessment(null)} />
           )}
-          {!openAssessment && !openLead && tab === 'dashboard' && <Dashboard />}
+          {!openAssessment && !openLead && tab === 'dashboard' && <Dashboard onOpenLead={setOpenLead} />}
           {!openAssessment && !openLead && tab === 'transaction' && <AssessmentsList onOpen={setOpenAssessment} />}
           {!openAssessment && !openLead && tab === 'leads' && <LeadsList onOpen={setOpenLead} />}
           {openLead && <LeadDetail lead={openLead} onBack={() => setOpenLead(null)} />}
