@@ -17,7 +17,7 @@ const ICON_USERS =
 const ICON_BAR = 'M4 20V11M10 20V4M16 20v-8M3 20h18'
 const ICON_TARGET =
   'M3 12a9 9 0 1018 0 9 9 0 10-18 0M7 12a5 5 0 1010 0 5 5 0 10-10 0M11 12a1 1 0 102 0 1 1 0 10-2 0'
-const ICON_CHECK = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
+const NEUTRAL_COLOR = '#c7d2cb'
 
 const CATEGORY_COLOR: Record<LeadCategory, string> = {
   growth: 'var(--color-ipi-700)',
@@ -28,6 +28,7 @@ const CATEGORY_COLOR: Record<LeadCategory, string> = {
 const CARD_ACCENT = {
   category: 'var(--color-ipi-700)',
   unqualified: 'var(--color-amber-600)',
+  certify: 'var(--color-ipi-900)',
   health: 'var(--color-mint-600)',
   process: 'var(--color-ipi-800)',
 } as const
@@ -280,11 +281,24 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
     }))
   }
 
+  const certifySegments: DonutSegment[] = [
+    { key: 'certify', label: 'At Certify', value: certifyLeads.length, color: CARD_ACCENT.certify },
+    { key: 'rest', label: 'Earlier Stages', value: leads.length - certifyLeads.length, color: NEUTRAL_COLOR },
+  ]
+
   const healthCounts = { on_track: 0, needs_attention: 0, stuck: 0 }
   for (const l of leads) healthCounts[l.health] += 1
 
   function toggleStage(key: 'lead' | LeadAction) {
     setStageFilter((cur) => (cur === key ? 'all' : key))
+  }
+
+  function handleCertifySelect(key: string) {
+    if (key !== 'certify') {
+      if (stageFilter === 'certify') setStageFilter('all')
+      return
+    }
+    toggleStage('certify')
   }
 
   /** Customer Category donut — combines with whatever stage is already selected, if any. */
@@ -318,12 +332,13 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
   const visibleRows = filtersActive ? sorted : sorted.slice(0, 4)
 
   const unqualifiedSelected = stageFilter === 'lead' ? categoryFilter : null
+  const certifySelected = stageFilter === 'certify' ? 'certify' : null
 
   return (
     <div>
       <DashboardHero />
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
         <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
         <StatTile
@@ -331,13 +346,6 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
           label="Total Actual Opportunity"
           value={formatRupeesCompact(actualTotal)}
           sublabel={`${actualPct}% of potential`}
-        />
-        <StatTile
-          icon={ICON_CHECK}
-          label="At Certify"
-          value={String(certifyLeads.length)}
-          sublabel={formatRupeesCompact(certifyValue)}
-          emphasis
         />
       </div>
 
@@ -517,6 +525,23 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
                 onSelect={(k) => toggleUnqualified(k as LeadCategory)}
               />
             </div>
+          </div>
+
+          <div className={CARD_CLASS}>
+            <CardHeader accent={CARD_ACCENT.certify}>At Certify</CardHeader>
+            <div className="flex items-center gap-3">
+              <Donut
+                segments={certifySegments}
+                size={112}
+                thickness={16}
+                selected={certifySelected}
+                onSelect={handleCertifySelect}
+                centerLabel={String(certifyLeads.length)}
+                centerSublabel="Certify"
+              />
+              <DonutLegend segments={certifySegments} total={leads.length} selected={certifySelected} onSelect={handleCertifySelect} />
+            </div>
+            <div className="mt-1 text-center text-[11px] text-ipi-700/50">{formatRupeesCompact(certifyValue)} verified value</div>
           </div>
 
           <div className={CARD_CLASS}>
