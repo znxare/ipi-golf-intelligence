@@ -338,19 +338,112 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
     <div>
       <DashboardHero />
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
-        <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
-        <StatTile
-          icon={ICON_TARGET}
-          label="Total Actual Opportunity"
-          value={formatRupeesCompact(actualTotal)}
-          sublabel={`${actualPct}% of potential`}
-        />
+      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
+        <div className="flex flex-col gap-3">
+          <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
+          <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
+          <StatTile
+            icon={ICON_TARGET}
+            label="Total Actual Opportunity"
+            value={formatRupeesCompact(actualTotal)}
+            sublabel={`${actualPct}% of potential`}
+          />
+        </div>
+
+        <div className={CARD_CLASS}>
+          <CardHeader accent={CARD_ACCENT.category}>Customer Category — All Opportunities</CardHeader>
+          <div className="flex h-full flex-col items-center justify-center gap-4 sm:flex-row sm:justify-around">
+            <Donut
+              segments={categoryBreakdown(leads)}
+              size={200}
+              thickness={32}
+              selected={categoryFilter}
+              onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
+              centerLabel={String(leads.length)}
+              centerSublabel="Total"
+            />
+            <div className="w-full max-w-[240px]">
+              <DonutLegend
+                segments={categoryBreakdown(leads)}
+                total={leads.length}
+                selected={categoryFilter}
+                onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
-        <div className="flex flex-col gap-4">
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className={CARD_CLASS}>
+          <CardHeader accent={CARD_ACCENT.unqualified}>Leads — Not Yet Qualified</CardHeader>
+          <div className="flex justify-center py-1">
+            <Donut
+              segments={categoryBreakdown(notYetQualified)}
+              size={128}
+              thickness={18}
+              selected={unqualifiedSelected}
+              onSelect={(k) => toggleUnqualified(k as LeadCategory)}
+              centerLabel={String(notYetQualified.length)}
+              centerSublabel="Unqualified"
+            />
+          </div>
+          <DonutLegend
+            segments={categoryBreakdown(notYetQualified)}
+            total={notYetQualified.length}
+            selected={unqualifiedSelected}
+            onSelect={(k) => toggleUnqualified(k as LeadCategory)}
+          />
+        </div>
+
+        <div className={CARD_CLASS}>
+          <CardHeader accent={CARD_ACCENT.certify}>At Certify</CardHeader>
+          <div className="flex justify-center py-1">
+            <Donut
+              segments={certifySegments}
+              size={128}
+              thickness={18}
+              selected={certifySelected}
+              onSelect={handleCertifySelect}
+              centerLabel={String(certifyLeads.length)}
+              centerSublabel="Certify"
+            />
+          </div>
+          <DonutLegend segments={certifySegments} total={leads.length} selected={certifySelected} onSelect={handleCertifySelect} />
+          <div className="mt-1 text-center text-[11px] text-ipi-700/50">{formatRupeesCompact(certifyValue)} verified value</div>
+        </div>
+
+        <div className={CARD_CLASS}>
+          <CardHeader accent={CARD_ACCENT.health}>Opportunity Health (All)</CardHeader>
+          <div className="mb-2 font-data text-3xl font-semibold tabular-nums text-ink">{leads.length}</div>
+          <div className="flex flex-col gap-2">
+            {(
+              [
+                { key: 'on_track', dot: HEALTH_DOT.on_track, count: healthCounts.on_track },
+                { key: 'needs_attention', dot: HEALTH_DOT.needs_attention, count: healthCounts.needs_attention },
+                { key: 'stuck', dot: HEALTH_DOT.stuck, count: healthCounts.stuck },
+              ] as const
+            ).map((h) => {
+              const pct = leads.length > 0 ? Math.round((h.count / leads.length) * 100) : 0
+              return (
+                <div key={h.key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 flex-none rounded-full ${h.dot}`} />
+                    <span className="flex-1 text-xs text-ipi-700/70">{HEALTH_LABEL[h.key]}</span>
+                    <span className="font-data text-sm font-semibold tabular-nums text-ink">{h.count}</span>
+                    <span className="w-9 text-right text-[11px] text-ipi-700/40">{pct}%</span>
+                  </div>
+                  <span className="h-1 overflow-hidden rounded-full bg-ipi-50">
+                    <span className={`block h-full rounded-full transition-all duration-300 ${h.dot}`} style={{ width: `${pct}%` }} />
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.process}>Transaction Process (LOA) — click a stage</CardHeader>
             <div className="overflow-x-auto pb-1">
@@ -482,97 +575,6 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
               </table>
             </div>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.category}>Customer Category — All Opportunities</CardHeader>
-            <div className="flex justify-center py-1">
-              <Donut
-                segments={categoryBreakdown(leads)}
-                size={188}
-                thickness={30}
-                selected={categoryFilter}
-                onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
-                centerLabel={String(leads.length)}
-                centerSublabel="Total"
-              />
-            </div>
-            <DonutLegend
-              segments={categoryBreakdown(leads)}
-              total={leads.length}
-              selected={categoryFilter}
-              onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
-            />
-          </div>
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.unqualified}>Leads — Not Yet Qualified</CardHeader>
-            <div className="flex items-center gap-3">
-              <Donut
-                segments={categoryBreakdown(notYetQualified)}
-                size={112}
-                thickness={16}
-                selected={unqualifiedSelected}
-                onSelect={(k) => toggleUnqualified(k as LeadCategory)}
-                centerLabel={String(notYetQualified.length)}
-                centerSublabel="Unqualified"
-              />
-              <DonutLegend
-                segments={categoryBreakdown(notYetQualified)}
-                total={notYetQualified.length}
-                selected={unqualifiedSelected}
-                onSelect={(k) => toggleUnqualified(k as LeadCategory)}
-              />
-            </div>
-          </div>
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.certify}>At Certify</CardHeader>
-            <div className="flex items-center gap-3">
-              <Donut
-                segments={certifySegments}
-                size={112}
-                thickness={16}
-                selected={certifySelected}
-                onSelect={handleCertifySelect}
-                centerLabel={String(certifyLeads.length)}
-                centerSublabel="Certify"
-              />
-              <DonutLegend segments={certifySegments} total={leads.length} selected={certifySelected} onSelect={handleCertifySelect} />
-            </div>
-            <div className="mt-1 text-center text-[11px] text-ipi-700/50">{formatRupeesCompact(certifyValue)} verified value</div>
-          </div>
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.health}>Opportunity Health (All)</CardHeader>
-            <div className="mb-2 font-data text-3xl font-semibold tabular-nums text-ink">{leads.length}</div>
-            <div className="flex flex-col gap-2">
-              {(
-                [
-                  { key: 'on_track', dot: HEALTH_DOT.on_track, count: healthCounts.on_track },
-                  { key: 'needs_attention', dot: HEALTH_DOT.needs_attention, count: healthCounts.needs_attention },
-                  { key: 'stuck', dot: HEALTH_DOT.stuck, count: healthCounts.stuck },
-                ] as const
-              ).map((h) => {
-                const pct = leads.length > 0 ? Math.round((h.count / leads.length) * 100) : 0
-                return (
-                  <div key={h.key} className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 flex-none rounded-full ${h.dot}`} />
-                      <span className="flex-1 text-xs text-ipi-700/70">{HEALTH_LABEL[h.key]}</span>
-                      <span className="font-data text-sm font-semibold tabular-nums text-ink">{h.count}</span>
-                      <span className="w-9 text-right text-[11px] text-ipi-700/40">{pct}%</span>
-                    </div>
-                    <span className="h-1 overflow-hidden rounded-full bg-ipi-50">
-                      <span className={`block h-full rounded-full transition-all duration-300 ${h.dot}`} style={{ width: `${pct}%` }} />
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
