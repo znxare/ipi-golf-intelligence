@@ -37,13 +37,11 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
       <div className="absolute inset-0 bg-gradient-to-b from-ipi-950/92 via-ipi-950/70 to-ipi-950/95" />
 
       <div className="relative px-1">
-        <div className="overflow-hidden rounded-xl bg-white/95 p-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
-          <img
-            src={`${import.meta.env.BASE_URL}ipi-logo.png`}
-            alt="IPI"
-            className="block h-auto w-full rounded object-contain"
-          />
-        </div>
+        <img
+          src={`${import.meta.env.BASE_URL}ipi-logo.png`}
+          alt="IPI"
+          className="block h-auto w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]"
+        />
         <div className="mt-2 text-center text-[10px] uppercase tracking-[0.15em] text-white/40">Transaction Platform</div>
       </div>
       <div className="relative flex flex-col gap-1">
