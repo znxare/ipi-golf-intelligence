@@ -39,7 +39,7 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
       <div className="relative px-1">
         <div className="overflow-hidden rounded-xl bg-white/95 p-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
           <img
-            src={`${import.meta.env.BASE_URL}ipi-logo.jpg`}
+            src={`${import.meta.env.BASE_URL}ipi-logo.png`}
             alt="IPI"
             className="block h-auto w-full rounded object-contain"
           />
