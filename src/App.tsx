@@ -29,8 +29,14 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
   ]
 
   return (
-    <div className="flex w-52 flex-none flex-col gap-5 bg-gradient-to-b from-ipi-950 via-ipi-900 to-ipi-950 px-3 py-4">
-      <div className="px-1">
+    <div className="relative flex w-52 flex-none flex-col gap-5 overflow-hidden bg-ipi-950 px-3 py-4">
+      <div
+        className="absolute inset-0 bg-cover bg-bottom"
+        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}sidebar-bg.jpg)` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-ipi-950/92 via-ipi-950/70 to-ipi-950/95" />
+
+      <div className="relative px-1">
         <div className="overflow-hidden rounded-xl bg-white/95 p-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
           <img
             src={`${import.meta.env.BASE_URL}ipi-logo.jpg`}
@@ -40,7 +46,7 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
         </div>
         <div className="mt-2 text-center text-[10px] uppercase tracking-[0.15em] text-white/40">Transaction Platform</div>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="relative flex flex-col gap-1">
         {items.map((item) => {
           const active = tab === item.key
           return (
@@ -62,7 +68,7 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
           )
         })}
       </div>
-      <div className="mt-auto px-1 text-[11px] leading-snug text-white/30">Smarter Solutions.
+      <div className="relative mt-auto px-1 text-[11px] leading-snug text-white/30">Smarter Solutions.
         <br />Healthier Landscapes.</div>
     </div>
   )
