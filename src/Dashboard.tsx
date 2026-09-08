@@ -625,15 +625,14 @@ function timeOfDayGreeting(): string {
 function DashboardHero({ pipeline, activeLeads, certifyRate }: { pipeline: number; activeLeads: number; certifyRate: number }) {
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
   return (
-    <div className="relative mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-ipi-950 via-ipi-900 to-ipi-700 px-6 py-5 text-white shadow-[0_8px_24px_rgba(10,42,30,0.28)]">
+    <div className="relative mb-4 overflow-hidden rounded-2xl bg-ipi-950 text-white shadow-[0_8px_24px_rgba(10,42,30,0.28)]">
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.15]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 15% 20%, white 0, transparent 35%), radial-gradient(circle at 85% 0%, white 0, transparent 45%)',
-        }}
+        className="absolute inset-0 bg-cover bg-right"
+        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}dashboard-hero.jpg)` }}
       />
-      <div className="relative flex flex-wrap items-start justify-between gap-4">
+      <div className="absolute inset-0 bg-gradient-to-r from-ipi-950 via-ipi-950/85 to-ipi-950/10" />
+      <div className="relative px-6 py-5">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50">{timeOfDayGreeting()}, Team</div>
           <div className="mt-0.5 text-xl font-semibold">Lead Opportunity Dashboard</div>
@@ -672,6 +671,7 @@ function DashboardHero({ pipeline, activeLeads, certifyRate }: { pipeline: numbe
             <div className="font-data text-sm font-semibold tabular-nums">{certifyRate}%</div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
