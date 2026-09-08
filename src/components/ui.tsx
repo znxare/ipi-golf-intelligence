@@ -3,7 +3,7 @@ import { formatEditableNumber, parseEditableNumber } from '../format'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)] ${className}`}>
+    <div className={`rounded-2xl border border-hairline bg-white p-4 shadow-[0_1px_2px_rgba(14,31,23,0.04)] ${className}`}>
       {children}
     </div>
   )

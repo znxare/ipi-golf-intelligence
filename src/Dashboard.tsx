@@ -17,7 +17,21 @@ const ICON_USERS =
 const ICON_BAR = 'M4 20V11M10 20V4M16 20v-8M3 20h18'
 const ICON_TARGET =
   'M3 12a9 9 0 1018 0 9 9 0 10-18 0M7 12a5 5 0 1010 0 5 5 0 10-10 0M11 12a1 1 0 102 0 1 1 0 10-2 0'
+const ICON_PERSON = 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0'
+const ICON_CHECK_CIRCLE = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
+const ICON_SHIELD = 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z'
+const ICON_MEDAL = 'M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 14L6 21l6-3 6 3-2.5-7'
+const ICON_CHEVRON = 'M9 5l7 7-7 7'
+const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
 const NEUTRAL_COLOR = '#c7d2cb'
+
+const STAGE_ICON: Record<'lead' | LeadAction, string> = {
+  lead: ICON_PERSON,
+  qualify: ICON_CHECK_CIRCLE,
+  quantify: ICON_BAR,
+  verify: ICON_SHIELD,
+  certify: ICON_MEDAL,
+}
 
 const CATEGORY_COLOR: Record<LeadCategory, string> = {
   growth: 'var(--color-ipi-700)',
@@ -233,7 +247,7 @@ function StatTile({
  * Transaction Process tabs and both donuts write into the same filter state
  * (stage + category), so any combination drives the table beneath them.
  */
-export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) {
+export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead) => void; search?: string }) {
   const [leads, setLeads] = useState<Lead[]>([])
   const [stageFilter, setStageFilter] = useState<'all' | 'lead' | LeadAction>('all')
   const [categoryFilter, setCategoryFilter] = useState<LeadCategory | null>(null)
@@ -242,10 +256,14 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
     leadStore.list().then(setLeads)
   }, [])
 
+  const certifyLeadsAll = leads.filter((l) => l.action === 'certify')
+  const potentialTotalAll = leads.reduce((s, l) => s + l.potentialValue, 0)
+  const certifyRate = leads.length > 0 ? Math.round((certifyLeadsAll.length / leads.length) * 100) : 0
+
   if (leads.length === 0) {
     return (
       <div>
-        <DashboardHero />
+        <DashboardHero pipeline={0} activeLeads={0} certifyRate={0} />
         <div className="rounded-2xl border border-dashed border-hairline p-10 text-center">
           <div className="text-sm font-medium text-ink">No leads yet</div>
           <div className="mt-1 text-sm text-ipi-700/60">Add a golf course under Leads to start seeing pipeline numbers here.</div>
@@ -322,12 +340,14 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
     setCategoryFilter(null)
   }
 
+  const searchTerm = search.trim().toLowerCase()
   let filtered = leads
   if (stageFilter === 'lead') filtered = filtered.filter((l) => l.action === 'qualify')
   else if (stageFilter !== 'all') filtered = filtered.filter((l) => l.action === stageFilter)
   if (categoryFilter) filtered = filtered.filter((l) => l.category === categoryFilter)
+  if (searchTerm) filtered = filtered.filter((l) => l.courseName.toLowerCase().includes(searchTerm))
 
-  const filtersActive = stageFilter !== 'all' || categoryFilter !== null
+  const filtersActive = stageFilter !== 'all' || categoryFilter !== null || searchTerm !== ''
   const sorted = [...filtered].sort((a, b) => b.potentialValue - a.potentialValue)
   const visibleRows = filtersActive ? sorted : sorted.slice(0, 4)
 
@@ -336,7 +356,7 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
 
   return (
     <div>
-      <DashboardHero />
+      <DashboardHero pipeline={potentialTotalAll} activeLeads={leads.length} certifyRate={certifyRate} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         <div className="flex flex-col gap-4">
@@ -363,16 +383,21 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
                       key={s.key}
                       type="button"
                       onClick={() => toggleStage(s.key)}
-                      className={`min-w-[108px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
+                      className={`min-w-[116px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
                         stageFilter === s.key ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
                       }`}
                     >
-                      <div className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</div>
+                      <div className="mb-1.5 flex items-center gap-1.5">
+                        <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-white/60">
+                          <Icon path={STAGE_ICON[s.key]} />
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</span>
+                      </div>
                       {s.key === 'lead' ? (
-                        <div className="mt-2.5 text-[11px] leading-tight opacity-70">{s.hint}</div>
+                        <div className="text-[11px] leading-tight opacity-70">{s.hint}</div>
                       ) : (
                         <>
-                          <div className="mt-1 font-data text-xl font-semibold tabular-nums">{s.count}</div>
+                          <div className="font-data text-xl font-semibold tabular-nums">{s.count}</div>
                           <div className="text-[11px] opacity-70">{formatRupeesCompact(s.value ?? 0)}</div>
                         </>
                       )}
@@ -382,7 +407,7 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
                   return [
                     button,
                     <div key={`${s.key}-sep`} className="flex flex-none items-center text-ipi-700/25">
-                      ›
+                      <Icon path={ICON_CHEVRON} />
                     </div>,
                   ]
                 })}
@@ -405,10 +430,10 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
                 </button>
               )}
             </div>
-            <div className="overflow-x-auto">
+            <div className="max-h-[460px] overflow-auto">
               <table className="w-full min-w-[680px] border-collapse text-xs">
                 <thead>
-                  <tr className="bg-ipi-50/60 text-left text-[10px] uppercase tracking-wide text-ipi-700/50">
+                  <tr className="sticky top-0 z-10 bg-ipi-50 text-left text-[10px] uppercase tracking-wide text-ipi-700/50">
                     <th className="px-3 py-2 font-medium">#</th>
                     <th className="px-3 py-2 font-medium">Customer / Project</th>
                     <th className="px-3 py-2 font-medium">Category</th>
@@ -422,6 +447,17 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
                   </tr>
                 </thead>
                 <tbody>
+                  {visibleRows.length === 0 && (
+                    <tr>
+                      <td colSpan={10} className="px-3 py-14 text-center">
+                        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ipi-50 text-ipi-700/30">
+                          <Icon path={ICON_SEARCH_OFF} />
+                        </span>
+                        <div className="mt-3 text-sm font-medium text-ink">No matching opportunities found</div>
+                        <div className="mt-0.5 text-xs text-ipi-700/50">Try adjusting your filters or search.</div>
+                      </td>
+                    </tr>
+                  )}
                   {visibleRows.map((lead, i) => (
                     <tr
                       key={lead.id}
@@ -579,19 +615,62 @@ export function Dashboard({ onOpenLead }: { onOpenLead: (lead: Lead) => void }) 
   )
 }
 
-function DashboardHero() {
+function timeOfDayGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good Morning'
+  if (hour < 17) return 'Good Afternoon'
+  return 'Good Evening'
+}
+
+function DashboardHero({ pipeline, activeLeads, certifyRate }: { pipeline: number; activeLeads: number; certifyRate: number }) {
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
   return (
-    <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-ipi-950 via-ipi-900 to-ipi-800 px-6 py-5 text-white shadow-[0_8px_24px_rgba(10,42,30,0.28)]">
-      <div className="flex items-center justify-between gap-4">
+    <div className="relative mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-ipi-950 via-ipi-900 to-ipi-700 px-6 py-5 text-white shadow-[0_8px_24px_rgba(10,42,30,0.28)]">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.15]"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 15% 20%, white 0, transparent 35%), radial-gradient(circle at 85% 0%, white 0, transparent 45%)',
+        }}
+      />
+      <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50">Lead Opportunity Action</div>
-          <div className="mt-0.5 text-xl font-semibold">Dashboard</div>
-          <div className="mt-1 text-sm text-white/60">From Lead to Certify. Focused opportunities. Stronger relationships.</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50">{timeOfDayGreeting()}, Team</div>
+          <div className="mt-0.5 text-xl font-semibold">Lead Opportunity Dashboard</div>
+          <div className="mt-1 text-sm text-white/60">Stronger relationships. More opportunities. Sustainable growth.</div>
         </div>
-        <div className="text-right">
-          <div className="text-[11px] uppercase tracking-wide text-white/40">Today</div>
+        <div className="rounded-xl bg-white/10 px-3 py-2 text-right backdrop-blur-sm">
+          <div className="text-[10px] uppercase tracking-wide text-white/40">Today</div>
           <div className="text-sm font-medium text-white/85">{today}</div>
+        </div>
+      </div>
+      <div className="relative mt-4 flex flex-wrap gap-6 border-t border-white/10 pt-4">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/10">
+            <Icon path={ICON_BAR} />
+          </span>
+          <div>
+            <div className="text-[11px] text-white/50">Total Pipeline</div>
+            <div className="font-data text-sm font-semibold tabular-nums">{formatRupeesCompact(pipeline)}</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/10">
+            <Icon path={ICON_USERS} />
+          </span>
+          <div>
+            <div className="text-[11px] text-white/50">Active Leads</div>
+            <div className="font-data text-sm font-semibold tabular-nums">{activeLeads}</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/10">
+            <Icon path={ICON_TARGET} />
+          </span>
+          <div>
+            <div className="text-[11px] text-white/50">Certify Rate</div>
+            <div className="font-data text-sm font-semibold tabular-nums">{certifyRate}%</div>
+          </div>
         </div>
       </div>
     </div>
