@@ -179,7 +179,7 @@ function DonutLegend({
   onSelect: (key: string) => void
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-1">
+    <div className="flex flex-1 flex-col gap-0.5">
       {segments.map((seg) => {
         const pct = total > 0 ? Math.round((seg.value / total) * 100) : 0
         return (
@@ -187,7 +187,7 @@ function DonutLegend({
             key={seg.key}
             type="button"
             onClick={() => onSelect(seg.key)}
-            className={`flex flex-col gap-1 rounded-lg px-2 py-1.5 text-left text-sm transition-colors ${
+            className={`flex flex-col gap-0.5 rounded-lg px-2 py-0.5 text-left text-xs transition-colors ${
               selected === seg.key ? 'bg-ipi-50' : 'hover:bg-ipi-50/60'
             }`}
           >
@@ -502,8 +502,8 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
             <div className="flex items-center gap-3">
               <Donut
                 segments={customerTypeBreakdown(leads)}
-                size={112}
-                thickness={16}
+                size={134}
+                thickness={18}
                 selected={typeFilter}
                 onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
                 centerLabel={String(leads.length)}
