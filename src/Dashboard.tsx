@@ -21,8 +21,6 @@ const ICON_PERSON = 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0'
 const ICON_CHECK_CIRCLE = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
 const ICON_SHIELD = 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z'
 const ICON_MEDAL = 'M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 14L6 21l6-3 6 3-2.5-7'
-const ARROW_CLIP_FIRST = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%)'
-const ARROW_CLIP_MID = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%)'
 const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
 const ICON_SUN =
   'M12 17a5 5 0 100-10 5 5 0 000 10zM12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4'
@@ -387,14 +385,13 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                   <div className="text-[10px] leading-tight opacity-70">Identify &amp; capture</div>
                 </button>
 
-                {stageStats.map((s, i) => (
+                {stageStats.map((s) => (
                   <button
                     key={s.key}
                     type="button"
                     onClick={() => toggleStage(s.key)}
-                    style={{ clipPath: i === 0 ? ARROW_CLIP_FIRST : ARROW_CLIP_MID }}
-                    className={`relative py-2.5 pl-4 pr-5 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
-                      stageFilter === s.key ? 'z-10 brightness-105 drop-shadow-md' : 'hover:brightness-95'
+                    className={`rounded-xl px-2.5 py-2.5 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
+                      stageFilter === s.key ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
                     }`}
                   >
                     <div className="mb-1 flex items-center gap-1.5">
@@ -520,7 +517,7 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
           />
 
           <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.category}>Customer Category — All Opportunities</CardHeader>
+            <CardHeader accent={CARD_ACCENT.category}>Customer Category Performance</CardHeader>
             <div className="flex items-center gap-3">
               <Donut
                 segments={categoryBreakdown(leads)}
