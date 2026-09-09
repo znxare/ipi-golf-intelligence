@@ -25,6 +25,11 @@ const ICON_CHEVRON = 'M9 5l7 7-7 7'
 const ARROW_CLIP_FIRST = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%)'
 const ARROW_CLIP_MID = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%)'
 const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
+const ICON_SUN =
+  'M12 17a5 5 0 100-10 5 5 0 000 10zM12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4'
+const ICON_MOON = 'M21 12.8A9 9 0 1111.2 3 7.2 7.2 0 0021 12.8z'
+const ICON_CLOUD = 'M7 18a4 4 0 01-1-7.87 6 6 0 0111.44-1.98A4 4 0 0117 18H7z'
+const ICON_RAIN = 'M7 15a4 4 0 01-1-7.87 6 6 0 0111.44-1.98A4 4 0 0117 15h-1M8 18l-1 3M13 18l-1 3M18 18l-1 3'
 const NEUTRAL_COLOR = '#c7d2cb'
 
 const STAGE_ICON: Record<'lead' | LeadAction, string> = {
@@ -51,24 +56,24 @@ const CARD_ACCENT = {
 
 const STAGE_TAB_CLASS: Record<'lead' | LeadAction, string> = {
   lead: 'bg-white border border-hairline text-ipi-800',
-  qualify: 'bg-ipi-100 text-ipi-800',
-  quantify: 'bg-mint-100 text-mint-600',
-  verify: 'bg-amber-100 text-amber-600',
+  qualify: 'bg-ipi-600/10 text-ipi-800',
+  quantify: 'bg-ipi-600/20 text-ipi-800',
+  verify: 'bg-ipi-600/35 text-ipi-900',
   certify: 'bg-ipi-900 text-white',
 }
 
 const STAGE_BADGE_CLASS: Record<LeadAction, string> = {
-  qualify: 'bg-ipi-100 text-ipi-800',
-  quantify: 'bg-mint-100 text-mint-600',
-  verify: 'bg-amber-100 text-amber-600',
+  qualify: 'bg-ipi-600/10 text-ipi-800',
+  quantify: 'bg-ipi-600/20 text-ipi-800',
+  verify: 'bg-ipi-600/35 text-ipi-900',
   certify: 'bg-ipi-900 text-white',
 }
 
 const STAGE_DEFS: { key: LeadAction; label: string; hint: string }[] = [
-  { key: 'qualify', label: 'Qualify', hint: 'Is this worth pursuing?' },
-  { key: 'quantify', label: 'Quantify', hint: 'How much is on the table?' },
-  { key: 'verify', label: 'Verify', hint: 'Is it real, and can they pay?' },
-  { key: 'certify', label: 'Certify', hint: 'Customer negotiation, before final invoice' },
+  { key: 'qualify', label: 'Qualify', hint: 'New customer' },
+  { key: 'quantify', label: 'Quantify', hint: 'Budget' },
+  { key: 'verify', label: 'Verify', hint: 'Able to pay?' },
+  { key: 'certify', label: 'Certify', hint: 'Invoice generated' },
 ]
 
 const CARD_CLASS =
@@ -258,14 +263,10 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
     leadStore.list().then(setLeads)
   }, [])
 
-  const certifyLeadsAll = leads.filter((l) => l.action === 'certify')
-  const potentialTotalAll = leads.reduce((s, l) => s + l.potentialValue, 0)
-  const certifyRate = leads.length > 0 ? Math.round((certifyLeadsAll.length / leads.length) * 100) : 0
-
   if (leads.length === 0) {
     return (
       <div>
-        <DashboardHero pipeline={0} activeLeads={0} certifyRate={0} />
+        <DashboardHero />
         <div className="rounded-2xl border border-dashed border-hairline p-10 text-center">
           <div className="text-sm font-medium text-ink">No leads yet</div>
           <div className="mt-1 text-sm text-ipi-700/60">Add a golf course under Leads to start seeing pipeline numbers here.</div>
@@ -358,7 +359,7 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
 
   return (
     <div>
-      <DashboardHero pipeline={potentialTotalAll} activeLeads={leads.length} certifyRate={certifyRate} />
+      <DashboardHero />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         <div className="flex flex-col gap-4">
@@ -374,20 +375,20 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                 <button
                   type="button"
                   onClick={() => toggleStage('lead')}
-                  className={`min-w-[112px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS.lead} ${
+                  className={`min-w-[92px] flex-1 rounded-xl px-2.5 py-2.5 text-left transition-all ${STAGE_TAB_CLASS.lead} ${
                     stageFilter === 'lead' ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
                   }`}
                 >
-                  <div className="mb-1.5 flex items-center gap-1.5">
-                    <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-white/60">
+                  <div className="mb-1 flex items-center gap-1.5">
+                    <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white/60">
                       <Icon path={STAGE_ICON.lead} />
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">Lead</span>
                   </div>
-                  <div className="text-[11px] leading-tight opacity-70">Identify &amp; capture</div>
+                  <div className="text-[10px] leading-tight opacity-70">Identify &amp; capture</div>
                 </button>
 
-                <div className="flex flex-none items-center px-1.5 text-ipi-700/25">
+                <div className="flex flex-none items-center px-1 text-ipi-700/25">
                   <Icon path={ICON_CHEVRON} />
                 </div>
 
@@ -398,21 +399,21 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                       type="button"
                       onClick={() => toggleStage(s.key)}
                       style={{ clipPath: i === 0 ? ARROW_CLIP_FIRST : ARROW_CLIP_MID }}
-                      className={`relative min-w-[132px] flex-1 py-3 text-left transition-all ${i === 0 ? 'pl-4' : 'pl-6'} pr-6 ${
-                        i > 0 ? '-ml-3' : ''
+                      className={`relative min-w-[104px] flex-1 py-2.5 text-left transition-all ${i === 0 ? 'pl-3' : 'pl-5'} pr-5 ${
+                        i > 0 ? '-ml-2.5' : ''
                       } ${STAGE_TAB_CLASS[s.key]} ${
                         stageFilter === s.key ? 'z-10 brightness-105 drop-shadow-md' : 'hover:brightness-95'
                       }`}
                     >
-                      <div className="mb-1.5 flex items-center gap-1.5">
-                        <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-white/60">
+                      <div className="mb-1 flex items-center gap-1.5">
+                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white/60">
                           <Icon path={STAGE_ICON[s.key]} />
                         </span>
                         <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</span>
                       </div>
-                      <div className="mb-1.5 text-[11px] leading-snug opacity-70">{s.hint}</div>
-                      <div className="font-data text-xl font-semibold tabular-nums">{s.count}</div>
-                      <div className="text-[11px] opacity-70">{formatRupeesCompact(s.value)}</div>
+                      <div className="mb-1 text-[10px] leading-snug opacity-70">{s.hint}</div>
+                      <div className="font-data text-lg font-semibold tabular-nums">{s.count}</div>
+                      <div className="text-[10px] opacity-70">{formatRupeesCompact(s.value)}</div>
                     </button>
                   ))}
                 </div>
@@ -627,8 +628,90 @@ function timeOfDayGreeting(): string {
   return 'Good Evening'
 }
 
-function DashboardHero({ pipeline, activeLeads, certifyRate }: { pipeline: number; activeLeads: number; certifyRate: number }) {
-  const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+interface WeatherData {
+  tempC: number
+  isDay: boolean
+  code: number
+}
+
+/** Live weather for the viewer's device location, via Open-Meteo (no API key needed). Falls back to just the date if geolocation is denied/unavailable — never shows a made-up condition. */
+function useWeather() {
+  const [weather, setWeather] = useState<WeatherData | null>(null)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading')
+
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      setStatus('unavailable')
+      return
+    }
+    let cancelled = false
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,is_day&timezone=auto`,
+        )
+          .then((r) => r.json())
+          .then((json) => {
+            if (cancelled) return
+            setWeather({ tempC: json.current.temperature_2m, isDay: json.current.is_day === 1, code: json.current.weather_code })
+            setStatus('ready')
+          })
+          .catch(() => {
+            if (!cancelled) setStatus('unavailable')
+          })
+      },
+      () => setStatus('unavailable'),
+      { timeout: 8000, maximumAge: 600_000 },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  return { weather, status }
+}
+
+function weatherIconAndLabel(code: number, isDay: boolean): { icon: string; label: string } {
+  if (code === 0) return { icon: isDay ? ICON_SUN : ICON_MOON, label: isDay ? 'Clear' : 'Clear night' }
+  if (code === 1 || code === 2 || code === 3) return { icon: ICON_CLOUD, label: 'Cloudy' }
+  if (code === 45 || code === 48) return { icon: ICON_CLOUD, label: 'Fog' }
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return { icon: ICON_RAIN, label: 'Rain' }
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return { icon: ICON_RAIN, label: 'Snow' }
+  if (code === 95 || code === 96 || code === 99) return { icon: ICON_RAIN, label: 'Storm' }
+  return { icon: isDay ? ICON_SUN : ICON_MOON, label: '—' }
+}
+
+function HeroDateOrWeather() {
+  const { weather, status } = useWeather()
+  const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })
+
+  if (status !== 'ready' || !weather) {
+    return (
+      <div className="rounded-xl bg-white/10 px-3 py-2 text-right backdrop-blur-sm">
+        <div className="text-[10px] uppercase tracking-wide text-white/40">Today</div>
+        <div className="text-sm font-medium text-white/85">{today}</div>
+      </div>
+    )
+  }
+
+  const { icon, label } = weatherIconAndLabel(weather.code, weather.isDay)
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl bg-white/10 px-3 py-2 backdrop-blur-sm">
+      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white/10">
+        <Icon path={icon} />
+      </span>
+      <div className="text-right">
+        <div className="font-data text-sm font-semibold tabular-nums">{Math.round(weather.tempC)}°C</div>
+        <div className="text-[10px] text-white/50">
+          {label} · {today}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DashboardHero() {
   return (
     <div className="relative mb-4 overflow-hidden rounded-2xl bg-ipi-950 text-white shadow-[0_8px_24px_rgba(10,42,30,0.28)]">
       <div
@@ -636,47 +719,13 @@ function DashboardHero({ pipeline, activeLeads, certifyRate }: { pipeline: numbe
         style={{ backgroundImage: `url(${import.meta.env.BASE_URL}dashboard-hero.jpg)` }}
       />
       <div className="absolute inset-0 bg-gradient-to-r from-ipi-950 via-ipi-950/85 to-ipi-950/10" />
-      <div className="relative px-6 py-5">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="relative flex flex-wrap items-start justify-between gap-4 px-6 py-5">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50">{timeOfDayGreeting()}, Team</div>
           <div className="mt-0.5 text-xl font-semibold">Lead Opportunity Dashboard</div>
           <div className="mt-1 text-sm text-white/60">Stronger relationships. More opportunities. Sustainable growth.</div>
         </div>
-        <div className="rounded-xl bg-white/10 px-3 py-2 text-right backdrop-blur-sm">
-          <div className="text-[10px] uppercase tracking-wide text-white/40">Today</div>
-          <div className="text-sm font-medium text-white/85">{today}</div>
-        </div>
-      </div>
-      <div className="relative mt-4 flex flex-wrap gap-6 border-t border-white/10 pt-4">
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/10">
-            <Icon path={ICON_BAR} />
-          </span>
-          <div>
-            <div className="text-[11px] text-white/50">Total Pipeline</div>
-            <div className="font-data text-sm font-semibold tabular-nums">{formatRupeesCompact(pipeline)}</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/10">
-            <Icon path={ICON_USERS} />
-          </span>
-          <div>
-            <div className="text-[11px] text-white/50">Active Leads</div>
-            <div className="font-data text-sm font-semibold tabular-nums">{activeLeads}</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/10">
-            <Icon path={ICON_TARGET} />
-          </span>
-          <div>
-            <div className="text-[11px] text-white/50">Certify Rate</div>
-            <div className="font-data text-sm font-semibold tabular-nums">{certifyRate}%</div>
-          </div>
-        </div>
-      </div>
+        <HeroDateOrWeather />
       </div>
     </div>
   )

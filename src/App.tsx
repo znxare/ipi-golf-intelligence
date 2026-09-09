@@ -123,9 +123,9 @@ function App() {
           setOpenLead(null)
         }}
       />
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <TopHeader search={search} onSearchChange={setSearch} />
-        <div className="flex-1 overflow-y-auto bg-ipi-50 p-6">
+        <div className="min-w-0 flex-1 overflow-y-auto bg-ipi-50 p-6">
           <div className="mx-auto max-w-6xl">
             {openAssessment && openAssessment.status === 'in_progress' && (
               <AssessmentWizard assessment={openAssessment} onDone={setOpenAssessment} />
