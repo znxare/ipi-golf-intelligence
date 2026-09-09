@@ -21,7 +21,6 @@ const ICON_PERSON = 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0'
 const ICON_CHECK_CIRCLE = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
 const ICON_SHIELD = 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z'
 const ICON_MEDAL = 'M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 14L6 21l6-3 6 3-2.5-7'
-const ICON_CHEVRON = 'M9 5l7 7-7 7'
 const ARROW_CLIP_FIRST = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%)'
 const ARROW_CLIP_MID = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%)'
 const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
@@ -371,11 +370,11 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.process}>Transaction Process (LOA) — click a stage</CardHeader>
             <div className="overflow-x-auto pb-1">
-              <div className="flex items-stretch">
+              <div className="grid grid-cols-5 gap-1.5" style={{ minWidth: 560 }}>
                 <button
                   type="button"
                   onClick={() => toggleStage('lead')}
-                  className={`min-w-[92px] flex-1 rounded-xl px-2.5 py-2.5 text-left transition-all ${STAGE_TAB_CLASS.lead} ${
+                  className={`rounded-xl px-2.5 py-2.5 text-left transition-all ${STAGE_TAB_CLASS.lead} ${
                     stageFilter === 'lead' ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
                   }`}
                 >
@@ -388,35 +387,27 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                   <div className="text-[10px] leading-tight opacity-70">Identify &amp; capture</div>
                 </button>
 
-                <div className="flex flex-none items-center px-1 text-ipi-700/25">
-                  <Icon path={ICON_CHEVRON} />
-                </div>
-
-                <div className="flex flex-1 items-stretch">
-                  {stageStats.map((s, i) => (
-                    <button
-                      key={s.key}
-                      type="button"
-                      onClick={() => toggleStage(s.key)}
-                      style={{ clipPath: i === 0 ? ARROW_CLIP_FIRST : ARROW_CLIP_MID }}
-                      className={`relative min-w-[104px] flex-1 py-2.5 text-left transition-all ${i === 0 ? 'pl-3' : 'pl-5'} pr-5 ${
-                        i > 0 ? '-ml-2.5' : ''
-                      } ${STAGE_TAB_CLASS[s.key]} ${
-                        stageFilter === s.key ? 'z-10 brightness-105 drop-shadow-md' : 'hover:brightness-95'
-                      }`}
-                    >
-                      <div className="mb-1 flex items-center gap-1.5">
-                        <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white/60">
-                          <Icon path={STAGE_ICON[s.key]} />
-                        </span>
-                        <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</span>
-                      </div>
-                      <div className="mb-1 text-[10px] leading-snug opacity-70">{s.hint}</div>
-                      <div className="font-data text-lg font-semibold tabular-nums">{s.count}</div>
-                      <div className="text-[10px] opacity-70">{formatRupeesCompact(s.value)}</div>
-                    </button>
-                  ))}
-                </div>
+                {stageStats.map((s, i) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => toggleStage(s.key)}
+                    style={{ clipPath: i === 0 ? ARROW_CLIP_FIRST : ARROW_CLIP_MID }}
+                    className={`relative py-2.5 pl-4 pr-5 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
+                      stageFilter === s.key ? 'z-10 brightness-105 drop-shadow-md' : 'hover:brightness-95'
+                    }`}
+                  >
+                    <div className="mb-1 flex items-center gap-1.5">
+                      <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white/60">
+                        <Icon path={STAGE_ICON[s.key]} />
+                      </span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</span>
+                    </div>
+                    <div className="mb-1 text-[10px] leading-snug opacity-70">{s.hint}</div>
+                    <div className="font-data text-lg font-semibold tabular-nums">{s.count}</div>
+                    <div className="text-[10px] opacity-70">{formatRupeesCompact(s.value)}</div>
+                  </button>
+                ))}
               </div>
             </div>
             <div className="mt-2.5 text-[11px] text-ipi-700/45">
@@ -722,7 +713,7 @@ function DashboardHero() {
       <div className="relative flex flex-wrap items-start justify-between gap-4 px-6 py-5">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/50">{timeOfDayGreeting()}, Team</div>
-          <div className="mt-0.5 text-xl font-semibold">Lead Opportunity Dashboard</div>
+          <div className="mt-0.5 text-xl font-semibold">Lead Opportunity Action</div>
           <div className="mt-1 text-sm text-white/60">Stronger relationships. More opportunities. Sustainable growth.</div>
         </div>
         <HeroDateOrWeather />
