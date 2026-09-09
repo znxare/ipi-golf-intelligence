@@ -1,14 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Icon } from './components/ui'
-import type { Lead, LeadAction, LeadCategory } from './domain/lead'
+import type { Lead, LeadAction, LeadCustomerType } from './domain/lead'
 import { formatRupeesCompact } from './format'
-import {
-  CATEGORY_DOT,
-  CATEGORY_LABEL,
-  HEALTH_DOT,
-  HEALTH_LABEL,
-  RATING_DOT,
-} from './LeadDetail'
+import { HEALTH_DOT, HEALTH_LABEL, RATING_DOT } from './LeadDetail'
 import { LEAD_ACTION_LABEL } from './LeadsList'
 import { leadStore } from './store/leadStore'
 
@@ -22,12 +16,27 @@ const ICON_CHECK_CIRCLE = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
 const ICON_SHIELD = 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z'
 const ICON_MEDAL = 'M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 14L6 21l6-3 6 3-2.5-7'
 const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
+
+const CUSTOMER_TYPE_LABEL: Record<LeadCustomerType, string> = {
+  existing: 'Existing Customer',
+  non_existing: 'New Customer',
+  new_build: 'New Build',
+}
+const CUSTOMER_TYPE_DOT: Record<LeadCustomerType, string> = {
+  existing: 'bg-mint-600',
+  non_existing: 'bg-ipi-600',
+  new_build: 'bg-amber-600',
+}
+const CUSTOMER_TYPE_COLOR: Record<LeadCustomerType, string> = {
+  existing: 'var(--color-mint-600)',
+  non_existing: 'var(--color-ipi-600)',
+  new_build: 'var(--color-amber-600)',
+}
 const ICON_SUN =
   'M12 17a5 5 0 100-10 5 5 0 000 10zM12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4'
 const ICON_MOON = 'M21 12.8A9 9 0 1111.2 3 7.2 7.2 0 0021 12.8z'
 const ICON_CLOUD = 'M7 18a4 4 0 01-1-7.87 6 6 0 0111.44-1.98A4 4 0 0117 18H7z'
 const ICON_RAIN = 'M7 15a4 4 0 01-1-7.87 6 6 0 0111.44-1.98A4 4 0 0117 15h-1M8 18l-1 3M13 18l-1 3M18 18l-1 3'
-const NEUTRAL_COLOR = '#c7d2cb'
 
 const STAGE_ICON: Record<'lead' | LeadAction, string> = {
   lead: ICON_PERSON,
@@ -37,17 +46,9 @@ const STAGE_ICON: Record<'lead' | LeadAction, string> = {
   certify: ICON_MEDAL,
 }
 
-const CATEGORY_COLOR: Record<LeadCategory, string> = {
-  growth: 'var(--color-ipi-700)',
-  operational: 'var(--color-mint-600)',
-  developing: '#aebdb4',
-}
-
 const CARD_ACCENT = {
   category: 'var(--color-ipi-700)',
   unqualified: 'var(--color-amber-600)',
-  certify: 'var(--color-ipi-900)',
-  health: 'var(--color-mint-600)',
   process: 'var(--color-ipi-800)',
 } as const
 
@@ -254,7 +255,7 @@ function StatTile({
 export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead) => void; search?: string }) {
   const [leads, setLeads] = useState<Lead[]>([])
   const [stageFilter, setStageFilter] = useState<'all' | 'lead' | LeadAction>('all')
-  const [categoryFilter, setCategoryFilter] = useState<LeadCategory | null>(null)
+  const [typeFilter, setTypeFilter] = useState<LeadCustomerType | null>(null)
 
   useEffect(() => {
     leadStore.list().then(setLeads)
@@ -280,79 +281,59 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
   const actualTotal = leads.reduce((s, l) => s + l.actualValue, 0)
   const actualPct = potentialTotal > 0 ? Math.round((actualTotal / potentialTotal) * 100) : 0
 
-  const certifyLeads = leads.filter((l) => l.action === 'certify')
-  const certifyValue = certifyLeads.reduce((s, l) => s + l.potentialValue, 0)
-
   const stageStats = STAGE_DEFS.map((s) => {
     const rows = leads.filter((l) => l.action === s.key)
     return { ...s, count: rows.length, value: rows.reduce((sum, l) => sum + l.potentialValue, 0) }
   })
 
-  function categoryBreakdown(rows: Lead[]): DonutSegment[] {
-    const totals: Record<LeadCategory, number> = { growth: 0, operational: 0, developing: 0 }
-    for (const l of rows) totals[l.category] += 1
-    return (['growth', 'operational', 'developing'] as LeadCategory[]).map((c) => ({
-      key: c,
-      label: CATEGORY_LABEL[c],
-      value: totals[c],
-      color: CATEGORY_COLOR[c],
+  function customerTypeBreakdown(rows: Lead[]): DonutSegment[] {
+    const totals: Record<LeadCustomerType, number> = { existing: 0, non_existing: 0, new_build: 0 }
+    for (const l of rows) totals[l.customerType] += 1
+    return (['existing', 'non_existing', 'new_build'] as LeadCustomerType[]).map((t) => ({
+      key: t,
+      label: CUSTOMER_TYPE_LABEL[t],
+      value: totals[t],
+      color: CUSTOMER_TYPE_COLOR[t],
     }))
   }
-
-  const certifySegments: DonutSegment[] = [
-    { key: 'certify', label: 'At Certify', value: certifyLeads.length, color: CARD_ACCENT.certify },
-    { key: 'rest', label: 'Earlier Stages', value: leads.length - certifyLeads.length, color: NEUTRAL_COLOR },
-  ]
-
-  const healthCounts = { on_track: 0, needs_attention: 0, stuck: 0 }
-  for (const l of leads) healthCounts[l.health] += 1
 
   function toggleStage(key: 'lead' | LeadAction) {
     setStageFilter((cur) => (cur === key ? 'all' : key))
   }
 
-  function handleCertifySelect(key: string) {
-    if (key !== 'certify') {
-      if (stageFilter === 'certify') setStageFilter('all')
-      return
-    }
-    toggleStage('certify')
-  }
-
   /** Customer Category donut — combines with whatever stage is already selected, if any. */
-  function toggleCategoryOnly(key: LeadCategory) {
-    setCategoryFilter((cur) => (cur === key ? null : key))
+  function toggleTypeOnly(key: LeadCustomerType) {
+    setTypeFilter((cur) => (cur === key ? null : key))
   }
 
   /** "Not yet qualified" donut owns the stage filter too, so a slice scopes the table to the Lead stage. */
-  function toggleUnqualified(key: LeadCategory) {
-    if (categoryFilter === key && stageFilter === 'lead') {
-      setCategoryFilter(null)
+  function toggleUnqualified(key: LeadCustomerType) {
+    if (typeFilter === key && stageFilter === 'lead') {
+      setTypeFilter(null)
       setStageFilter('all')
     } else {
-      setCategoryFilter(key)
+      setTypeFilter(key)
       setStageFilter('lead')
     }
   }
 
   function clearFilters() {
     setStageFilter('all')
-    setCategoryFilter(null)
+    setTypeFilter(null)
   }
 
   const searchTerm = search.trim().toLowerCase()
   let filtered = leads
   if (stageFilter === 'lead') filtered = filtered.filter((l) => l.action === 'qualify')
   else if (stageFilter !== 'all') filtered = filtered.filter((l) => l.action === stageFilter)
-  if (categoryFilter) filtered = filtered.filter((l) => l.category === categoryFilter)
+  if (typeFilter) filtered = filtered.filter((l) => l.customerType === typeFilter)
   if (searchTerm) filtered = filtered.filter((l) => l.courseName.toLowerCase().includes(searchTerm))
 
-  const filtersActive = stageFilter !== 'all' || categoryFilter !== null || searchTerm !== ''
+  const filtersActive = stageFilter !== 'all' || typeFilter !== null || searchTerm !== ''
   const sorted = [...filtered].sort((a, b) => b.potentialValue - a.potentialValue)
   const visibleRows = filtersActive ? sorted : sorted.slice(0, 4)
 
-  const unqualifiedSelected = stageFilter === 'lead' ? categoryFilter : null
-  const certifySelected = stageFilter === 'certify' ? 'certify' : null
+  const unqualifiedSelected = stageFilter === 'lead' ? typeFilter : null
 
   return (
     <div>
@@ -430,7 +411,7 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                   <tr className="sticky top-0 z-10 bg-ipi-50 text-left text-[10px] uppercase tracking-wide text-ipi-700/50">
                     <th className="px-3 py-2 font-medium">#</th>
                     <th className="px-3 py-2 font-medium">Customer / Project</th>
-                    <th className="px-3 py-2 font-medium">Category</th>
+                    <th className="px-3 py-2 font-medium">Type</th>
                     <th className="px-3 py-2 text-right font-medium">Potential</th>
                     <th className="px-3 py-2 text-right font-medium">Actual</th>
                     <th className="px-3 py-2 text-center font-medium">Ability</th>
@@ -470,8 +451,8 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                       </td>
                       <td className="px-3 py-2">
                         <span className="inline-flex items-center gap-1.5 text-ipi-700/70">
-                          <span className={`h-2 w-2 flex-none rounded-full ${CATEGORY_DOT[lead.category]}`} />
-                          {CATEGORY_LABEL[lead.category]}
+                          <span className={`h-2 w-2 flex-none rounded-full ${CUSTOMER_TYPE_DOT[lead.customerType]}`} />
+                          {CUSTOMER_TYPE_LABEL[lead.customerType]}
                         </span>
                       </td>
                       <td className="font-data px-3 py-2 text-right tabular-nums text-ink">{formatRupeesCompact(lead.potentialValue)}</td>
@@ -520,19 +501,19 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
             <CardHeader accent={CARD_ACCENT.category}>Customer Category Performance</CardHeader>
             <div className="flex items-center gap-3">
               <Donut
-                segments={categoryBreakdown(leads)}
+                segments={customerTypeBreakdown(leads)}
                 size={112}
                 thickness={16}
-                selected={categoryFilter}
-                onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
+                selected={typeFilter}
+                onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
                 centerLabel={String(leads.length)}
                 centerSublabel="Total"
               />
               <DonutLegend
-                segments={categoryBreakdown(leads)}
+                segments={customerTypeBreakdown(leads)}
                 total={leads.length}
-                selected={categoryFilter}
-                onSelect={(k) => toggleCategoryOnly(k as LeadCategory)}
+                selected={typeFilter}
+                onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
               />
             </div>
           </div>
@@ -541,66 +522,20 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
             <CardHeader accent={CARD_ACCENT.unqualified}>Leads — Not Yet Qualified</CardHeader>
             <div className="flex items-center gap-3">
               <Donut
-                segments={categoryBreakdown(notYetQualified)}
+                segments={customerTypeBreakdown(notYetQualified)}
                 size={112}
                 thickness={16}
                 selected={unqualifiedSelected}
-                onSelect={(k) => toggleUnqualified(k as LeadCategory)}
+                onSelect={(k) => toggleUnqualified(k as LeadCustomerType)}
                 centerLabel={String(notYetQualified.length)}
                 centerSublabel="Unqualified"
               />
               <DonutLegend
-                segments={categoryBreakdown(notYetQualified)}
+                segments={customerTypeBreakdown(notYetQualified)}
                 total={notYetQualified.length}
                 selected={unqualifiedSelected}
-                onSelect={(k) => toggleUnqualified(k as LeadCategory)}
+                onSelect={(k) => toggleUnqualified(k as LeadCustomerType)}
               />
-            </div>
-          </div>
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.certify}>At Certify</CardHeader>
-            <div className="flex items-center gap-3">
-              <Donut
-                segments={certifySegments}
-                size={112}
-                thickness={16}
-                selected={certifySelected}
-                onSelect={handleCertifySelect}
-                centerLabel={String(certifyLeads.length)}
-                centerSublabel="Certify"
-              />
-              <DonutLegend segments={certifySegments} total={leads.length} selected={certifySelected} onSelect={handleCertifySelect} />
-            </div>
-            <div className="mt-1 text-center text-[11px] text-ipi-700/50">{formatRupeesCompact(certifyValue)} verified value</div>
-          </div>
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.health}>Opportunity Health (All)</CardHeader>
-            <div className="mb-2 font-data text-3xl font-semibold tabular-nums text-ink">{leads.length}</div>
-            <div className="flex flex-col gap-2">
-              {(
-                [
-                  { key: 'on_track', dot: HEALTH_DOT.on_track, count: healthCounts.on_track },
-                  { key: 'needs_attention', dot: HEALTH_DOT.needs_attention, count: healthCounts.needs_attention },
-                  { key: 'stuck', dot: HEALTH_DOT.stuck, count: healthCounts.stuck },
-                ] as const
-              ).map((h) => {
-                const pct = leads.length > 0 ? Math.round((h.count / leads.length) * 100) : 0
-                return (
-                  <div key={h.key} className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 flex-none rounded-full ${h.dot}`} />
-                      <span className="flex-1 text-xs text-ipi-700/70">{HEALTH_LABEL[h.key]}</span>
-                      <span className="font-data text-sm font-semibold tabular-nums text-ink">{h.count}</span>
-                      <span className="w-9 text-right text-[11px] text-ipi-700/40">{pct}%</span>
-                    </div>
-                    <span className="h-1 overflow-hidden rounded-full bg-ipi-50">
-                      <span className={`block h-full rounded-full transition-all duration-300 ${h.dot}`} style={{ width: `${pct}%` }} />
-                    </span>
-                  </div>
-                )
-              })}
             </div>
           </div>
         </div>
