@@ -22,6 +22,8 @@ const ICON_CHECK_CIRCLE = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
 const ICON_SHIELD = 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z'
 const ICON_MEDAL = 'M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 14L6 21l6-3 6 3-2.5-7'
 const ICON_CHEVRON = 'M9 5l7 7-7 7'
+const ARROW_CLIP_FIRST = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%)'
+const ARROW_CLIP_MID = 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%)'
 const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
 const NEUTRAL_COLOR = '#c7d2cb'
 
@@ -361,30 +363,45 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <StatTile icon={ICON_USERS} label="Total Customers" value={String(leads.length)} sublabel={`${leadCount} Leads · ${existingCount} Existing`} />
+            <StatTile icon={ICON_USERS} label="Total Leads" value={String(leadCount)} sublabel={`${existingCount} Existing customers · ${leads.length} Total`} />
             <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
           </div>
 
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.process}>Transaction Process (LOA) — click a stage</CardHeader>
             <div className="overflow-x-auto pb-1">
-              <div className="flex items-stretch gap-1.5">
-                {(
-                  [{ key: 'lead' as const, label: 'Lead', hint: 'Identify & capture' }, ...stageStats] as {
-                    key: 'lead' | LeadAction
-                    label: string
-                    hint?: string
-                    count?: number
-                    value?: number
-                  }[]
-                ).flatMap((s, i, all) => {
-                  const button = (
+              <div className="flex items-stretch">
+                <button
+                  type="button"
+                  onClick={() => toggleStage('lead')}
+                  className={`min-w-[112px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS.lead} ${
+                    stageFilter === 'lead' ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
+                  }`}
+                >
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-white/60">
+                      <Icon path={STAGE_ICON.lead} />
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">Lead</span>
+                  </div>
+                  <div className="text-[11px] leading-tight opacity-70">Identify &amp; capture</div>
+                </button>
+
+                <div className="flex flex-none items-center px-1.5 text-ipi-700/25">
+                  <Icon path={ICON_CHEVRON} />
+                </div>
+
+                <div className="flex flex-1 items-stretch">
+                  {stageStats.map((s, i) => (
                     <button
                       key={s.key}
                       type="button"
                       onClick={() => toggleStage(s.key)}
-                      className={`min-w-[138px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
-                        stageFilter === s.key ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
+                      style={{ clipPath: i === 0 ? ARROW_CLIP_FIRST : ARROW_CLIP_MID }}
+                      className={`relative min-w-[132px] flex-1 py-3 text-left transition-all ${i === 0 ? 'pl-4' : 'pl-6'} pr-6 ${
+                        i > 0 ? '-ml-3' : ''
+                      } ${STAGE_TAB_CLASS[s.key]} ${
+                        stageFilter === s.key ? 'z-10 brightness-105 drop-shadow-md' : 'hover:brightness-95'
                       }`}
                     >
                       <div className="mb-1.5 flex items-center gap-1.5">
@@ -393,25 +410,12 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                         </span>
                         <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{s.label}</span>
                       </div>
-                      {s.key === 'lead' ? (
-                        <div className="text-[11px] leading-tight opacity-70">{s.hint}</div>
-                      ) : (
-                        <>
-                          <div className="mb-1.5 text-[11px] leading-snug opacity-70">{s.hint}</div>
-                          <div className="font-data text-xl font-semibold tabular-nums">{s.count}</div>
-                          <div className="text-[11px] opacity-70">{formatRupeesCompact(s.value ?? 0)}</div>
-                        </>
-                      )}
+                      <div className="mb-1.5 text-[11px] leading-snug opacity-70">{s.hint}</div>
+                      <div className="font-data text-xl font-semibold tabular-nums">{s.count}</div>
+                      <div className="text-[11px] opacity-70">{formatRupeesCompact(s.value)}</div>
                     </button>
-                  )
-                  if (i === all.length - 1) return [button]
-                  return [
-                    button,
-                    <div key={`${s.key}-sep`} className="flex flex-none items-center text-ipi-700/25">
-                      <Icon path={ICON_CHEVRON} />
-                    </div>,
-                  ]
-                })}
+                  ))}
+                </div>
               </div>
             </div>
             <div className="mt-2.5 text-[11px] text-ipi-700/45">
