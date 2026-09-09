@@ -339,13 +339,62 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
     <div>
       <DashboardHero />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
-        <div className="flex flex-col gap-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <StatTile icon={ICON_USERS} label="Total Leads" value={String(leadCount)} sublabel={`${existingCount} Existing customers · ${leads.length} Total`} />
-            <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
-          </div>
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatTile icon={ICON_USERS} label="Total Leads" value={String(leadCount)} sublabel={`${existingCount} Existing customers · ${leads.length} Total`} />
+        <StatTile icon={ICON_BAR} label="Total Potential Opportunity" value={formatRupeesCompact(potentialTotal)} />
+        <StatTile
+          icon={ICON_TARGET}
+          label="Total Actual Opportunity"
+          value={formatRupeesCompact(actualTotal)}
+          sublabel={`${actualPct}% of potential`}
+        />
+      </div>
 
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className={CARD_CLASS}>
+          <CardHeader accent={CARD_ACCENT.category}>Customer Category Performance</CardHeader>
+          <div className="flex items-center gap-3">
+            <Donut
+              segments={customerTypeBreakdown(leads)}
+              size={128}
+              thickness={18}
+              selected={typeFilter}
+              onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
+              centerLabel={String(leads.length)}
+              centerSublabel="Total"
+            />
+            <DonutLegend
+              segments={customerTypeBreakdown(leads)}
+              total={leads.length}
+              selected={typeFilter}
+              onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
+            />
+          </div>
+        </div>
+
+        <div className={CARD_CLASS}>
+          <CardHeader accent={CARD_ACCENT.unqualified}>Leads — Not Yet Qualified</CardHeader>
+          <div className="flex items-center gap-3">
+            <Donut
+              segments={customerTypeBreakdown(notYetQualified)}
+              size={128}
+              thickness={18}
+              selected={unqualifiedSelected}
+              onSelect={(k) => toggleUnqualified(k as LeadCustomerType)}
+              centerLabel={String(notYetQualified.length)}
+              centerSublabel="Unqualified"
+            />
+            <DonutLegend
+              segments={customerTypeBreakdown(notYetQualified)}
+              total={notYetQualified.length}
+              selected={unqualifiedSelected}
+              onSelect={(k) => toggleUnqualified(k as LeadCustomerType)}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4">
           <div className={CARD_CLASS}>
             <CardHeader accent={CARD_ACCENT.process}>Transaction Process (LOA) — click a stage</CardHeader>
             <div className="overflow-x-auto pb-1">
@@ -487,58 +536,6 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
               </table>
             </div>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <StatTile
-            icon={ICON_TARGET}
-            label="Total Actual Opportunity"
-            value={formatRupeesCompact(actualTotal)}
-            sublabel={`${actualPct}% of potential`}
-          />
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.category}>Customer Category Performance</CardHeader>
-            <div className="flex items-center gap-3">
-              <Donut
-                segments={customerTypeBreakdown(leads)}
-                size={112}
-                thickness={16}
-                selected={typeFilter}
-                onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
-                centerLabel={String(leads.length)}
-                centerSublabel="Total"
-              />
-              <DonutLegend
-                segments={customerTypeBreakdown(leads)}
-                total={leads.length}
-                selected={typeFilter}
-                onSelect={(k) => toggleTypeOnly(k as LeadCustomerType)}
-              />
-            </div>
-          </div>
-
-          <div className={CARD_CLASS}>
-            <CardHeader accent={CARD_ACCENT.unqualified}>Leads — Not Yet Qualified</CardHeader>
-            <div className="flex items-center gap-3">
-              <Donut
-                segments={customerTypeBreakdown(notYetQualified)}
-                size={112}
-                thickness={16}
-                selected={unqualifiedSelected}
-                onSelect={(k) => toggleUnqualified(k as LeadCustomerType)}
-                centerLabel={String(notYetQualified.length)}
-                centerSublabel="Unqualified"
-              />
-              <DonutLegend
-                segments={customerTypeBreakdown(notYetQualified)}
-                total={notYetQualified.length}
-                selected={unqualifiedSelected}
-                onSelect={(k) => toggleUnqualified(k as LeadCustomerType)}
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
