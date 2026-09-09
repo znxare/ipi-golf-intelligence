@@ -62,11 +62,11 @@ const STAGE_BADGE_CLASS: Record<LeadAction, string> = {
   certify: 'bg-ipi-900 text-white',
 }
 
-const STAGE_DEFS: { key: LeadAction; label: string }[] = [
-  { key: 'qualify', label: 'Qualify' },
-  { key: 'quantify', label: 'Quantify' },
-  { key: 'verify', label: 'Verify' },
-  { key: 'certify', label: 'Certify' },
+const STAGE_DEFS: { key: LeadAction; label: string; hint: string }[] = [
+  { key: 'qualify', label: 'Qualify', hint: 'Is this worth pursuing?' },
+  { key: 'quantify', label: 'Quantify', hint: 'How much is on the table?' },
+  { key: 'verify', label: 'Verify', hint: 'Is it real, and can they pay?' },
+  { key: 'certify', label: 'Certify', hint: 'Customer negotiation, before final invoice' },
 ]
 
 const CARD_CLASS =
@@ -383,7 +383,7 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                       key={s.key}
                       type="button"
                       onClick={() => toggleStage(s.key)}
-                      className={`min-w-[116px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
+                      className={`min-w-[138px] flex-1 rounded-xl px-3 py-3 text-left transition-all ${STAGE_TAB_CLASS[s.key]} ${
                         stageFilter === s.key ? 'shadow-md ring-2 ring-ipi-600 ring-offset-1 ring-offset-ipi-50' : 'hover:brightness-95'
                       }`}
                     >
@@ -397,6 +397,7 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                         <div className="text-[11px] leading-tight opacity-70">{s.hint}</div>
                       ) : (
                         <>
+                          <div className="mb-1.5 text-[11px] leading-snug opacity-70">{s.hint}</div>
                           <div className="font-data text-xl font-semibold tabular-nums">{s.count}</div>
                           <div className="text-[11px] opacity-70">{formatRupeesCompact(s.value ?? 0)}</div>
                         </>
