@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Badge, Card, PageHeader, PrimaryButton } from './components/ui'
 import { createAssessment, type Assessment } from './domain/assessment'
 import { formatRupeesCompact } from './format'
-import { assessmentStore } from './store/assessmentStore'
+import { assessmentStore } from './store'
 
 const STATUS_LABEL: Record<Assessment['status'], string> = {
   in_progress: 'In progress',
