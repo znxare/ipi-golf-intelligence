@@ -1,14 +1,11 @@
 import { useState } from 'react'
 import { AssessmentsList } from './AssessmentsList'
 import { AssessmentWizard } from './AssessmentWizard'
-import { LoginScreen } from './Auth/LoginScreen'
-import { useSession } from './Auth/useSession'
 import { Icon } from './components/ui'
 import { CommercialLayer } from './CommercialLayer'
 import { Dashboard } from './Dashboard'
 import type { Assessment } from './domain/assessment'
 import type { Lead } from './domain/lead'
-import { isSupabaseConfigured, supabase } from './lib/supabaseClient'
 import { LeadDetail } from './LeadDetail'
 import { LeadsList } from './LeadsList'
 
@@ -75,15 +72,7 @@ function Sidebar({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => vo
   )
 }
 
-function TopHeader({
-  search,
-  onSearchChange,
-  userEmail,
-}: {
-  search: string
-  onSearchChange: (v: string) => void
-  userEmail?: string
-}) {
+function TopHeader({ search, onSearchChange }: { search: string; onSearchChange: (v: string) => void }) {
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })
   return (
     <div className="flex items-center gap-4 border-b border-hairline bg-white/80 px-6 py-3 backdrop-blur-sm">
@@ -109,9 +98,7 @@ function TopHeader({
       </button>
       <button
         type="button"
-        aria-label={userEmail ? `Signed in as ${userEmail} — sign out` : 'Account'}
-        title={userEmail ? `Signed in as ${userEmail} — click to sign out` : undefined}
-        onClick={userEmail ? () => supabase?.auth.signOut() : undefined}
+        aria-label="Account"
         className="flex h-9 w-9 items-center justify-center rounded-full bg-ipi-100 text-ipi-800 transition-colors hover:bg-ipi-100/70"
       >
         <Icon path={ICON_ACCOUNT} />
@@ -125,15 +112,6 @@ function App() {
   const [openAssessment, setOpenAssessment] = useState<Assessment | null>(null)
   const [openLead, setOpenLead] = useState<Lead | null>(null)
   const [search, setSearch] = useState('')
-  const { session, loading } = useSession()
-
-  if (isSupabaseConfigured && loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-ipi-50 text-sm text-ipi-700/60">Loading…</div>
-  }
-
-  if (isSupabaseConfigured && !session) {
-    return <LoginScreen />
-  }
 
   return (
     <div className="flex min-h-screen">
@@ -146,7 +124,7 @@ function App() {
         }}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopHeader search={search} onSearchChange={setSearch} userEmail={session?.user.email} />
+        <TopHeader search={search} onSearchChange={setSearch} />
         <div className="min-w-0 flex-1 overflow-y-auto bg-ipi-50 p-6">
           <div className="mx-auto max-w-6xl">
             {openAssessment && openAssessment.status === 'in_progress' && (

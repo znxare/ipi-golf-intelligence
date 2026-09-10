@@ -3,7 +3,7 @@ import { CommercialView } from './CommercialView'
 import { PageHeader, SecondaryButton, TabButton } from './components/ui'
 import type { Assessment, NegotiationLine } from './domain/assessment'
 import { NegotiationTable } from './NegotiationTable'
-import { assessmentStore } from './store'
+import { assessmentStore } from './store/assessmentStore'
 
 type Sheet = 'commercial-view' | 'negotiation'
 

@@ -4,7 +4,7 @@ import type { Lead, LeadAction, LeadCustomerType } from './domain/lead'
 import { formatRupeesCompact } from './format'
 import { HEALTH_DOT, HEALTH_LABEL, RATING_DOT } from './LeadDetail'
 import { LEAD_ACTION_LABEL } from './LeadsList'
-import { leadStore } from './store'
+import { leadStore } from './store/leadStore'
 
 const ICON_USERS =
   'M8 11a3 3 0 100-6 3 3 0 000 6zM3 20a5 5 0 0110 0M17 11a3 3 0 100-6 3 3 0 000 6zM13.2 14.2a5 5 0 016.8 5.8'

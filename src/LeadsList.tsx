@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, PrimaryButton } from './components/ui'
 import { createLead, type Lead, type LeadAction, type LeadCustomerType } from './domain/lead'
-import { leadStore } from './store'
+import { leadStore } from './store/leadStore'
 
 export const LEAD_CUSTOMER_TYPE_CODE: Record<LeadCustomerType, string> = {
   non_existing: 'NC',
