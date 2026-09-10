@@ -10,7 +10,7 @@ export interface LeadStore {
 const STORAGE_KEY = 'ipi.leads.v1'
 
 /** Backfills fields onto leads saved before they existed (customerType/requirement/competition/opportunity/action/scoring). */
-function withLeadDefaults(lead: Lead): Lead {
+export function withLeadDefaults(lead: Lead): Lead {
   const needsBackfill =
     lead.customerType === undefined ||
     lead.requirement === undefined ||

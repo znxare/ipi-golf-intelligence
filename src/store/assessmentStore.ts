@@ -16,7 +16,7 @@ export interface AssessmentStore {
 const STORAGE_KEY = 'ipi.assessments.v1'
 
 /** Backfills cart-assumption fields onto assessments saved before they existed. */
-function withCartDefaults(assessment: Assessment): Assessment {
+export function withCartDefaults(assessment: Assessment): Assessment {
   const q = assessment.qualifyInput
   const needsQualifyBackfill =
     q.cartHoursPerTeeRound === undefined ||

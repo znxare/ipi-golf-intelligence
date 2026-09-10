@@ -10,7 +10,7 @@ import {
   type LeadRating,
 } from './domain/lead'
 import { LEAD_ACTION_LABEL } from './LeadsList'
-import { leadStore } from './store/leadStore'
+import { leadStore } from './store'
 
 const CUSTOMER_TYPE_OPTIONS: LeadCustomerType[] = ['non_existing', 'existing', 'new_build']
 const CUSTOMER_TYPE_LABEL: Record<LeadCustomerType, string> = {
