@@ -16,6 +16,9 @@ export function withLeadDefaults(lead: Lead): Lead {
     lead.requirement === undefined ||
     lead.competition === undefined ||
     lead.opportunity === undefined ||
+    lead.opportunity?.irrigation === undefined ||
+    lead.opportunity?.golfCart === undefined ||
+    lead.opportunity?.other === undefined ||
     lead.action === undefined ||
     lead.category === undefined ||
     lead.abilityToPay === undefined ||
@@ -34,7 +37,14 @@ export function withLeadDefaults(lead: Lead): Lead {
     customerType: lead.customerType ?? 'non_existing',
     requirement: lead.requirement ?? '',
     competition: lead.competition ?? '',
-    opportunity: lead.opportunity ?? { equipment: false, training: false, amc: false },
+    opportunity: {
+      equipment: lead.opportunity?.equipment ?? false,
+      training: lead.opportunity?.training ?? false,
+      amc: lead.opportunity?.amc ?? false,
+      irrigation: lead.opportunity?.irrigation ?? false,
+      golfCart: lead.opportunity?.golfCart ?? false,
+      other: lead.opportunity?.other ?? false,
+    },
     action: lead.action ?? 'qualify',
     category: lead.category ?? 'developing',
     abilityToPay: lead.abilityToPay ?? 'yellow',

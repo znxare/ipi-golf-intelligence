@@ -12,17 +12,14 @@ export type LeadRating = 'green' | 'yellow' | 'red'
 /** Overall deal health, judged by the owner — separate from stage and rating. */
 export type LeadHealth = 'on_track' | 'needs_attention' | 'stuck'
 
-/** Which kinds of deal are in play for this lead — shown as EQ / TR / AMC tags. */
+/** Which kinds of deal are in play for this lead — shown as short tags in the Leads list. */
 export interface LeadOpportunity {
   equipment: boolean
   training: boolean
   amc: boolean
-}
-
-export interface LeadActivityEntry {
-  id: string
-  at: string
-  note: string
+  irrigation: boolean
+  golfCart: boolean
+  other: boolean
 }
 
 export interface Lead {
@@ -54,8 +51,6 @@ export interface Lead {
   potentialValue: number
   /** Quantify/Verify-stage confirmed figure, in Rupees — feeds the Dashboard's actual-opportunity totals. */
   actualValue: number
-  /** Timeline entries logged after creation — stage changes and free-text updates. */
-  activity: LeadActivityEntry[]
 }
 
 export function createLead(courseName: string): Lead {
@@ -66,7 +61,7 @@ export function createLead(courseName: string): Lead {
     customerType: 'non_existing',
     requirement: '',
     competition: '',
-    opportunity: { equipment: false, training: false, amc: false },
+    opportunity: { equipment: false, training: false, amc: false, irrigation: false, golfCart: false, other: false },
     action: 'qualify',
     contactName: '',
     phone: '',
@@ -82,15 +77,5 @@ export function createLead(courseName: string): Lead {
     nextAction: '',
     potentialValue: 0,
     actualValue: 0,
-    activity: [],
-  }
-}
-
-/** Appends a timestamped timeline entry — used for both stage changes and free-text updates. */
-export function appendLeadActivity(lead: Lead, note: string): Lead {
-  if (!note.trim()) return lead
-  return {
-    ...lead,
-    activity: [...lead.activity, { id: crypto.randomUUID(), at: new Date().toISOString(), note: note.trim() }],
   }
 }

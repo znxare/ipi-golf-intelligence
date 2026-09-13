@@ -27,6 +27,9 @@ function opportunityTags(lead: Lead): string {
   if (lead.opportunity.equipment) tags.push('EQ')
   if (lead.opportunity.training) tags.push('TR')
   if (lead.opportunity.amc) tags.push('AMC')
+  if (lead.opportunity.irrigation) tags.push('IRR')
+  if (lead.opportunity.golfCart) tags.push('GC')
+  if (lead.opportunity.other) tags.push('OTH')
   return tags.length > 0 ? tags.join(' • ') : '—'
 }
 

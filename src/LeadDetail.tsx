@@ -1,14 +1,6 @@
 import { useState } from 'react'
 import { Card, Field, PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
-import {
-  appendLeadActivity,
-  type Lead,
-  type LeadAction,
-  type LeadCategory,
-  type LeadCustomerType,
-  type LeadHealth,
-  type LeadRating,
-} from './domain/lead'
+import type { Lead, LeadAction, LeadCategory, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
 import { LEAD_ACTION_LABEL } from './LeadsList'
 import { leadStore } from './store'
 
@@ -84,25 +76,27 @@ function RatingPicker<T extends string>({
   )
 }
 
-/** Update a lead's pipeline details and log free-text or stage-change updates to its own timeline. */
+/** Edit a lead's pipeline details locally, then commit them all at once with Save. */
 export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: () => void }) {
   const [lead, setLead] = useState(initialLead)
-  const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [justSaved, setJustSaved] = useState(false)
 
-  function persist(next: Lead) {
+  function update(next: Lead) {
     setLead(next)
-    leadStore.save(next)
+    setJustSaved(false)
   }
 
   function handleActionChange(action: LeadAction) {
-    if (action === lead.action) return
-    persist(appendLeadActivity({ ...lead, action }, `Moved to ${LEAD_ACTION_LABEL[action]}`))
+    update({ ...lead, action })
   }
 
-  function handleAddNote() {
-    if (!note.trim()) return
-    persist(appendLeadActivity(lead, note))
-    setNote('')
+  async function handleSave() {
+    setSaving(true)
+    await leadStore.save(lead)
+    setSaving(false)
+    setJustSaved(true)
+    setTimeout(() => setJustSaved(false), 2000)
   }
 
   return (
@@ -110,7 +104,15 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
       <PageHeader
         eyebrow="Component 1 — Frozen Backend"
         title={lead.courseName || 'Untitled lead'}
-        actions={<SecondaryButton onClick={onBack}>← Back to Leads</SecondaryButton>}
+        actions={
+          <>
+            {justSaved && <span className="text-xs font-medium text-mint-600">Saved</span>}
+            <PrimaryButton onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving…' : 'Save'}
+            </PrimaryButton>
+            <SecondaryButton onClick={onBack}>← Back to Leads</SecondaryButton>
+          </>
+        }
       />
 
       <SectionLabel>Lead details</SectionLabel>
@@ -118,19 +120,19 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
         <TextField
           label="Golf course / account name"
           value={lead.courseName}
-          onChange={(v) => persist({ ...lead, courseName: v })}
+          onChange={(v) => update({ ...lead, courseName: v })}
         />
         <TextField
           label="Contact name"
           value={lead.contactName}
-          onChange={(v) => persist({ ...lead, contactName: v })}
+          onChange={(v) => update({ ...lead, contactName: v })}
         />
-        <TextField label="Phone" value={lead.phone} onChange={(v) => persist({ ...lead, phone: v })} />
-        <TextField label="Email" value={lead.email} onChange={(v) => persist({ ...lead, email: v })} />
+        <TextField label="Phone" value={lead.phone} onChange={(v) => update({ ...lead, phone: v })} />
+        <TextField label="Email" value={lead.email} onChange={(v) => update({ ...lead, email: v })} />
         <TextField
           label="Source"
           value={lead.source}
-          onChange={(v) => persist({ ...lead, source: v })}
+          onChange={(v) => update({ ...lead, source: v })}
           placeholder="Referral, cold call, event…"
         />
       </div>
@@ -141,7 +143,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
           <button
             key={c}
             type="button"
-            onClick={() => persist({ ...lead, customerType: c })}
+            onClick={() => update({ ...lead, customerType: c })}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               lead.customerType === c
                 ? 'bg-ipi-900 text-white'
@@ -158,13 +160,13 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
         <TextField
           label="Requirement"
           value={lead.requirement}
-          onChange={(v) => persist({ ...lead, requirement: v })}
+          onChange={(v) => update({ ...lead, requirement: v })}
           placeholder="Toro, Elite/Yamaha…"
         />
         <TextField
           label="Competition"
           value={lead.competition}
-          onChange={(v) => persist({ ...lead, competition: v })}
+          onChange={(v) => update({ ...lead, competition: v })}
           placeholder="Competitor installed, or an offer already made…"
         />
       </div>
@@ -176,13 +178,16 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
             ['equipment', 'Equipment'],
             ['training', 'Training'],
             ['amc', 'AMC'],
+            ['irrigation', 'Irrigation'],
+            ['golfCart', 'Golf Cart'],
+            ['other', 'Other'],
           ] as const
         ).map(([key, label]) => (
           <label key={key} className="flex items-center gap-2 text-sm text-ink">
             <input
               type="checkbox"
               checked={lead.opportunity[key]}
-              onChange={(e) => persist({ ...lead, opportunity: { ...lead.opportunity, [key]: e.target.checked } })}
+              onChange={(e) => update({ ...lead, opportunity: { ...lead.opportunity, [key]: e.target.checked } })}
               className="h-4 w-4 accent-[var(--color-ipi-600)]"
             />
             {label}
@@ -199,7 +204,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
             value={lead.category}
             dot={CATEGORY_DOT}
             label={CATEGORY_LABEL}
-            onChange={(category) => persist({ ...lead, category })}
+            onChange={(category) => update({ ...lead, category })}
           />
         </div>
         <div>
@@ -209,7 +214,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
             value={lead.health}
             dot={HEALTH_DOT}
             label={HEALTH_LABEL}
-            onChange={(health) => persist({ ...lead, health })}
+            onChange={(health) => update({ ...lead, health })}
           />
         </div>
         <div>
@@ -219,7 +224,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
             value={lead.abilityToPay}
             dot={RATING_DOT}
             label={RATING_LABEL}
-            onChange={(abilityToPay) => persist({ ...lead, abilityToPay })}
+            onChange={(abilityToPay) => update({ ...lead, abilityToPay })}
           />
         </div>
         <div>
@@ -229,7 +234,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
             value={lead.maintenanceCommitment}
             dot={RATING_DOT}
             label={RATING_LABEL}
-            onChange={(maintenanceCommitment) => persist({ ...lead, maintenanceCommitment })}
+            onChange={(maintenanceCommitment) => update({ ...lead, maintenanceCommitment })}
           />
         </div>
       </div>
@@ -238,21 +243,21 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
         <Field
           label="Potential opportunity (₹)"
           value={lead.potentialValue}
-          onChange={(v) => persist({ ...lead, potentialValue: Number.isNaN(v) ? 0 : v })}
+          onChange={(v) => update({ ...lead, potentialValue: Number.isNaN(v) ? 0 : v })}
         />
         <Field
           label="Actual opportunity (₹)"
           value={lead.actualValue}
-          onChange={(v) => persist({ ...lead, actualValue: Number.isNaN(v) ? 0 : v })}
+          onChange={(v) => update({ ...lead, actualValue: Number.isNaN(v) ? 0 : v })}
         />
-        <TextField label="Deal owner" value={lead.owner} onChange={(v) => persist({ ...lead, owner: v })} />
+        <TextField label="Deal owner" value={lead.owner} onChange={(v) => update({ ...lead, owner: v })} />
         <label className="block">
           <span className="mb-1 block text-xs text-ipi-700/70">Target date</span>
           <span className="flex items-center rounded-lg border border-hairline bg-white px-2 py-1.5 transition-colors focus-within:border-ipi-600">
             <input
               type="date"
               value={lead.targetDate}
-              onChange={(e) => persist({ ...lead, targetDate: e.target.value })}
+              onChange={(e) => update({ ...lead, targetDate: e.target.value })}
               className="w-full bg-transparent text-sm outline-none"
             />
           </span>
@@ -261,7 +266,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
           <TextField
             label="Next action"
             value={lead.nextAction}
-            onChange={(v) => persist({ ...lead, nextAction: v })}
+            onChange={(v) => update({ ...lead, nextAction: v })}
             placeholder="Draft SoW, Funding structure, Customer meeting…"
           />
         </div>
@@ -289,44 +294,19 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
       <Card className="mb-5">
         <textarea
           value={lead.notes}
-          onChange={(e) => persist({ ...lead, notes: e.target.value })}
+          onChange={(e) => update({ ...lead, notes: e.target.value })}
           placeholder="General notes about this lead…"
           rows={3}
           className="w-full resize-none text-sm outline-none placeholder:text-ipi-700/30"
         />
       </Card>
 
-      <SectionLabel>Timeline</SectionLabel>
-      <div className="mb-3 flex gap-2">
-        <input
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
-          placeholder="Log a call, email, or update…"
-          className="flex-1 rounded-lg border border-hairline bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-ipi-600"
-        />
-        <PrimaryButton onClick={handleAddNote}>Add</PrimaryButton>
-      </div>
-
-      <div className="mb-5">
-        {[{ id: 'created', at: lead.createdAt, note: 'Lead created' }, ...lead.activity]
-          .sort((a, b) => b.at.localeCompare(a.at))
-          .map((entry, i, all) => (
-            <div key={entry.id} className="relative flex gap-4">
-              <div className="flex flex-col items-center">
-                <span className="mt-1 h-2.5 w-2.5 flex-none rounded-full bg-ipi-600 ring-4 ring-ipi-100" />
-                {i < all.length - 1 && <span className="w-px flex-1 bg-hairline" />}
-              </div>
-              <div className="min-w-0 flex-1 pb-4">
-                <div className="text-xs text-ipi-700/60">{new Date(entry.at).toLocaleString()}</div>
-                <div className="text-sm text-ink">{entry.note}</div>
-              </div>
-            </div>
-          ))}
-      </div>
-
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        {justSaved && <span className="text-xs font-medium text-mint-600">Saved</span>}
         <SecondaryButton onClick={onBack}>← Back to Leads</SecondaryButton>
+        <PrimaryButton onClick={handleSave} disabled={saving}>
+          {saving ? 'Saving…' : 'Save'}
+        </PrimaryButton>
       </div>
     </div>
   )
