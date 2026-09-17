@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Card, Field, PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
-import type { Lead, LeadAction, LeadCategory, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
-import { LEAD_ACTION_LABEL } from './LeadsList'
+import { PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
+import type { Lead, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
 import { leadStore } from './store'
 
 const CUSTOMER_TYPE_OPTIONS: LeadCustomerType[] = ['non_existing', 'existing', 'new_build']
@@ -10,29 +9,13 @@ const CUSTOMER_TYPE_LABEL: Record<LeadCustomerType, string> = {
   existing: 'Existing IPI',
   new_build: 'New build',
 }
-const ACTION_OPTIONS: LeadAction[] = ['qualify', 'quantify', 'verify', 'certify']
 
-const CATEGORY_OPTIONS: LeadCategory[] = ['growth', 'operational', 'developing']
-export const CATEGORY_LABEL: Record<LeadCategory, string> = {
-  growth: 'Growth',
-  operational: 'Operational',
-  developing: 'Developing',
-}
-export const CATEGORY_DOT: Record<LeadCategory, string> = {
-  growth: 'bg-ipi-700',
-  operational: 'bg-mint-600',
-  developing: 'bg-ipi-700/30',
-}
-
-const RATING_OPTIONS: LeadRating[] = ['green', 'yellow', 'red']
-export const RATING_LABEL: Record<LeadRating, string> = { green: 'Good', yellow: 'Watch', red: 'At risk' }
+/** Still consumed by Dashboard.tsx for the table's Ability/Maintenance/Health dot columns, even though there's no editor for them here anymore. */
 export const RATING_DOT: Record<LeadRating, string> = {
   green: 'bg-mint-600',
   yellow: 'bg-amber-600',
   red: 'bg-risk-600',
 }
-
-const HEALTH_OPTIONS: LeadHealth[] = ['on_track', 'needs_attention', 'stuck']
 export const HEALTH_LABEL: Record<LeadHealth, string> = {
   on_track: 'On track',
   needs_attention: 'Needs attention',
@@ -44,39 +27,7 @@ export const HEALTH_DOT: Record<LeadHealth, string> = {
   stuck: 'bg-risk-600',
 }
 
-function RatingPicker<T extends string>({
-  options,
-  value,
-  dot,
-  label,
-  onChange,
-}: {
-  options: T[]
-  value: T
-  dot: Record<T, string>
-  label: Record<T, string>
-  onChange: (v: T) => void
-}) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          onClick={() => onChange(opt)}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            value === opt ? 'bg-ipi-900 text-white' : 'border border-hairline text-ipi-700/70 hover:border-ipi-600'
-          }`}
-        >
-          <span className={`h-2 w-2 flex-none rounded-full ${dot[opt]}`} />
-          {label[opt]}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-/** Edit a lead's pipeline details locally, then commit them all at once with Save. */
+/** Edit a lead's basic details locally, then commit them all at once with Save. */
 export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: () => void }) {
   const [lead, setLead] = useState(initialLead)
   const [saving, setSaving] = useState(false)
@@ -85,10 +36,6 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
   function update(next: Lead) {
     setLead(next)
     setJustSaved(false)
-  }
-
-  function handleActionChange(action: LeadAction) {
-    update({ ...lead, action })
   }
 
   async function handleSave() {
@@ -194,112 +141,6 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
           </label>
         ))}
       </div>
-
-      <SectionLabel>Pipeline scoring — feeds the Dashboard</SectionLabel>
-      <div className="mb-5 grid grid-cols-2 gap-4">
-        <div>
-          <div className="mb-1.5 text-xs text-ipi-700/70">Customer category</div>
-          <RatingPicker
-            options={CATEGORY_OPTIONS}
-            value={lead.category}
-            dot={CATEGORY_DOT}
-            label={CATEGORY_LABEL}
-            onChange={(category) => update({ ...lead, category })}
-          />
-        </div>
-        <div>
-          <div className="mb-1.5 text-xs text-ipi-700/70">Deal health</div>
-          <RatingPicker
-            options={HEALTH_OPTIONS}
-            value={lead.health}
-            dot={HEALTH_DOT}
-            label={HEALTH_LABEL}
-            onChange={(health) => update({ ...lead, health })}
-          />
-        </div>
-        <div>
-          <div className="mb-1.5 text-xs text-ipi-700/70">Ability to pay</div>
-          <RatingPicker
-            options={RATING_OPTIONS}
-            value={lead.abilityToPay}
-            dot={RATING_DOT}
-            label={RATING_LABEL}
-            onChange={(abilityToPay) => update({ ...lead, abilityToPay })}
-          />
-        </div>
-        <div>
-          <div className="mb-1.5 text-xs text-ipi-700/70">Commitment to maintain</div>
-          <RatingPicker
-            options={RATING_OPTIONS}
-            value={lead.maintenanceCommitment}
-            dot={RATING_DOT}
-            label={RATING_LABEL}
-            onChange={(maintenanceCommitment) => update({ ...lead, maintenanceCommitment })}
-          />
-        </div>
-      </div>
-
-      <div className="mb-5 grid grid-cols-2 gap-3">
-        <Field
-          label="Potential opportunity (₹)"
-          value={lead.potentialValue}
-          onChange={(v) => update({ ...lead, potentialValue: Number.isNaN(v) ? 0 : v })}
-        />
-        <Field
-          label="Actual opportunity (₹)"
-          value={lead.actualValue}
-          onChange={(v) => update({ ...lead, actualValue: Number.isNaN(v) ? 0 : v })}
-        />
-        <TextField label="Deal owner" value={lead.owner} onChange={(v) => update({ ...lead, owner: v })} />
-        <label className="block">
-          <span className="mb-1 block text-xs text-ipi-700/70">Target date</span>
-          <span className="flex items-center rounded-lg border border-hairline bg-white px-2 py-1.5 transition-colors focus-within:border-ipi-600">
-            <input
-              type="date"
-              value={lead.targetDate}
-              onChange={(e) => update({ ...lead, targetDate: e.target.value })}
-              className="w-full bg-transparent text-sm outline-none"
-            />
-          </span>
-        </label>
-        <div className="col-span-2">
-          <TextField
-            label="Next action"
-            value={lead.nextAction}
-            onChange={(v) => update({ ...lead, nextAction: v })}
-            placeholder="Draft SoW, Funding structure, Customer meeting…"
-          />
-        </div>
-      </div>
-
-      <SectionLabel>Action</SectionLabel>
-      <div className="mb-5 flex flex-wrap gap-2">
-        {ACTION_OPTIONS.map((a) => (
-          <button
-            key={a}
-            type="button"
-            onClick={() => handleActionChange(a)}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              lead.action === a
-                ? 'bg-ipi-900 text-white'
-                : 'border border-hairline text-ipi-700/70 hover:border-ipi-600'
-            }`}
-          >
-            {LEAD_ACTION_LABEL[a]}
-          </button>
-        ))}
-      </div>
-
-      <SectionLabel>Notes</SectionLabel>
-      <Card className="mb-5">
-        <textarea
-          value={lead.notes}
-          onChange={(e) => update({ ...lead, notes: e.target.value })}
-          placeholder="General notes about this lead…"
-          rows={3}
-          className="w-full resize-none text-sm outline-none placeholder:text-ipi-700/30"
-        />
-      </Card>
 
       <div className="flex items-center justify-end gap-3">
         {justSaved && <span className="text-xs font-medium text-mint-600">Saved</span>}
