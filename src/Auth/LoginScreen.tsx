@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { db } from '../lib/db'
 
-/** Email/password gate shown when Supabase is configured but no session exists yet. */
-export function LoginScreen() {
+/** Email/password gate shown when the database is configured but no session exists yet. */
+export function LoginScreen({ onSignedIn }: { onSignedIn: () => void }) {
   const [mode, setMode] = useState<'sign_in' | 'sign_up'>('sign_in')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -12,19 +12,24 @@ export function LoginScreen() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!supabase) return
+    if (!db) return
     setError('')
     setInfo('')
     setBusy(true)
 
-    const { error: authError } =
+    const { data, error: authError } =
       mode === 'sign_in'
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password })
+        ? await db.auth.signInWithPassword({ email, password })
+        : await db.auth.signUp({ email, password })
 
     setBusy(false)
     if (authError) {
       setError(authError.message)
+      return
+    }
+    // Sign-up signs straight in when the project doesn't require email verification.
+    if (data.session) {
+      onSignedIn()
       return
     }
     if (mode === 'sign_up') {

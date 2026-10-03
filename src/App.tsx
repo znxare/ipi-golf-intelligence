@@ -1,16 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AssessmentsList } from './AssessmentsList'
 import { AssessmentWizard } from './AssessmentWizard'
-import { LoginScreen } from './Auth/LoginScreen'
 import { useSession } from './Auth/useSession'
 import { Icon } from './components/ui'
 import { CommercialLayer } from './CommercialLayer'
 import { Dashboard } from './Dashboard'
 import type { Assessment } from './domain/assessment'
 import type { Lead } from './domain/lead'
-import { isSupabaseConfigured, supabase } from './lib/supabaseClient'
+import { db, isDbConfigured } from './lib/db'
 import { LeadDetail } from './LeadDetail'
 import { LeadsList } from './LeadsList'
+import { importBrowserData } from './store'
 
 type Tab = 'dashboard' | 'transaction' | 'leads'
 
@@ -79,10 +79,12 @@ function TopHeader({
   search,
   onSearchChange,
   userEmail,
+  onSignOut,
 }: {
   search: string
   onSearchChange: (v: string) => void
   userEmail?: string
+  onSignOut: () => void
 }) {
   const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })
   return (
@@ -111,7 +113,7 @@ function TopHeader({
         type="button"
         aria-label={userEmail ? `Signed in as ${userEmail} — sign out` : 'Account'}
         title={userEmail ? `Signed in as ${userEmail} — click to sign out` : undefined}
-        onClick={userEmail ? () => supabase?.auth.signOut() : undefined}
+        onClick={userEmail ? onSignOut : undefined}
         className="flex h-9 w-9 items-center justify-center rounded-full bg-ipi-100 text-ipi-800 transition-colors hover:bg-ipi-100/70"
       >
         <Icon path={ICON_ACCOUNT} />
@@ -125,14 +127,52 @@ function App() {
   const [openAssessment, setOpenAssessment] = useState<Assessment | null>(null)
   const [openLead, setOpenLead] = useState<Lead | null>(null)
   const [search, setSearch] = useState('')
-  const { session, loading } = useSession()
+  const { session, refresh } = useSession()
+  const [importState, setImportState] = useState<'pending' | 'done' | 'failed'>('pending')
 
-  if (isSupabaseConfigured && loading) {
-    return <div className="flex min-h-screen items-center justify-center bg-ipi-50 text-sm text-ipi-700/60">Loading…</div>
+  // The database allows anonymous access, so this runs regardless of sign-in: copy any
+  // leads/assessments still saved in this browser into the database before the screens load,
+  // so they show up in the shared pipeline.
+  useEffect(() => {
+    if (!isDbConfigured || importState !== 'pending') return
+    importBrowserData()
+      .then(() => setImportState('done'))
+      .catch((err) => {
+        console.error('Importing browser data into the database failed', err)
+        setImportState('failed')
+      })
+  }, [importState])
+
+  if (isDbConfigured && importState === 'pending') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-ipi-50 text-sm text-ipi-700/60">
+        Syncing leads saved in this browser to the database…
+      </div>
+    )
   }
 
-  if (isSupabaseConfigured && !session) {
-    return <LoginScreen />
+  if (isDbConfigured && importState === 'failed') {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-ipi-50 px-4 text-center text-sm text-ipi-700/70">
+        <div>Couldn't move the leads saved in this browser into the database. They're still safe in this browser.</div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setImportState('pending')}
+            className="rounded-lg bg-ipi-900 px-4 py-2 text-sm font-medium text-white hover:bg-ipi-800"
+          >
+            Try again
+          </button>
+          <button
+            type="button"
+            onClick={() => setImportState('done')}
+            className="rounded-lg border border-hairline px-4 py-2 text-sm font-medium text-ipi-800 hover:bg-white"
+          >
+            Skip for now
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -146,7 +186,9 @@ function App() {
         }}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopHeader search={search} onSearchChange={setSearch} userEmail={session?.user.email} />
+        <TopHeader search={search} onSearchChange={setSearch} userEmail={session?.user.email}
+          onSignOut={() => db?.auth.signOut().finally(refresh)}
+        />
         <div className="min-w-0 flex-1 overflow-y-auto bg-ipi-50 p-6">
           <div className="mx-auto max-w-6xl">
             {openAssessment && openAssessment.status === 'in_progress' && (

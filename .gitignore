@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.neon
+.env.local.disabled-supabase
+
+# Claude Code local tooling (skills, lockfile) — not app code
+.claude/
+skills-lock.json
