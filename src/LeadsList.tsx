@@ -15,6 +15,13 @@ export const LEAD_CUSTOMER_TYPE_DOT: Record<LeadCustomerType, string> = {
   new_build: 'bg-amber-600',
 }
 
+/** Groups the Leads table by customer type (NC, EC, NB) instead of leaving it in create order. */
+const CUSTOMER_TYPE_SORT_ORDER: Record<LeadCustomerType, number> = {
+  non_existing: 0,
+  existing: 1,
+  new_build: 2,
+}
+
 export const LEAD_ACTION_LABEL: Record<LeadAction, string> = {
   qualify: 'Qualify',
   quantify: 'Quantify',
@@ -46,6 +53,10 @@ export function LeadsList({ onOpen }: { onOpen: (lead: Lead) => void }) {
   useEffect(() => {
     leadStore.list().then(setLeads)
   }, [])
+
+  const sortedLeads = [...leads].sort(
+    (a, b) => CUSTOMER_TYPE_SORT_ORDER[a.customerType] - CUSTOMER_TYPE_SORT_ORDER[b.customerType],
+  )
 
   function handleCreate() {
     const name = newCourseName.trim()
@@ -93,7 +104,7 @@ export function LeadsList({ onOpen }: { onOpen: (lead: Lead) => void }) {
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead, i) => (
+                {sortedLeads.map((lead, i) => (
                   <tr
                     key={lead.id}
                     onClick={() => onOpen(lead)}
