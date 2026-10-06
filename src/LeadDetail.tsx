@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
+import { createAssessmentFromLead, type Assessment } from './domain/assessment'
 import type { Lead, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
 import { LEAD_ACTION_LABEL } from './LeadsList'
-import { leadStore } from './store'
+import { assessmentStore, leadStore } from './store'
 
 const CUSTOMER_TYPE_OPTIONS: LeadCustomerType[] = ['non_existing', 'existing', 'new_build']
 const CUSTOMER_TYPE_LABEL: Record<LeadCustomerType, string> = {
@@ -29,12 +30,21 @@ export const HEALTH_DOT: Record<LeadHealth, string> = {
 }
 
 /** Edit a lead's basic details locally, then commit them all at once with Save. */
-export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: () => void }) {
+export function LeadDetail({
+  lead: initialLead,
+  onBack,
+  onStartTransaction,
+}: {
+  lead: Lead
+  onBack: () => void
+  onStartTransaction: (assessment: Assessment) => void
+}) {
   const [lead, setLead] = useState(initialLead)
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [startingTransaction, setStartingTransaction] = useState(false)
 
   function update(next: Lead) {
     setLead(next)
@@ -53,6 +63,17 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
     setDeleting(true)
     await leadStore.remove(lead.id)
     onBack()
+  }
+
+  /** Saves the lead at Quantify, then opens a new Transaction for it straight at the Quantify step. */
+  async function handleMoveToQuantify() {
+    setStartingTransaction(true)
+    const next: Lead = { ...lead, action: 'quantify' }
+    setLead(next)
+    await leadStore.save(next)
+    const assessment = createAssessmentFromLead(next)
+    await assessmentStore.save(assessment)
+    onStartTransaction(assessment)
   }
 
   return (
@@ -119,10 +140,11 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
         {lead.action === 'qualify' && (
           <button
             type="button"
-            onClick={() => update({ ...lead, action: 'quantify' })}
-            className="rounded-full border border-ipi-600 px-3 py-1.5 text-xs font-medium text-ipi-800 transition-colors hover:bg-ipi-50"
+            onClick={handleMoveToQuantify}
+            disabled={startingTransaction}
+            className="rounded-full border border-ipi-600 px-3 py-1.5 text-xs font-medium text-ipi-800 transition-colors hover:bg-ipi-50 disabled:opacity-40"
           >
-            Move to Quantify →
+            {startingTransaction ? 'Starting transaction…' : 'Move to Quantify →'}
           </button>
         )}
       </div>

@@ -200,7 +200,17 @@ function App() {
             {!openAssessment && !openLead && tab === 'dashboard' && <Dashboard onOpenLead={setOpenLead} search={search} />}
             {!openAssessment && !openLead && tab === 'transaction' && <AssessmentsList onOpen={setOpenAssessment} />}
             {!openAssessment && !openLead && tab === 'leads' && <LeadsList onOpen={setOpenLead} />}
-            {openLead && <LeadDetail lead={openLead} onBack={() => setOpenLead(null)} />}
+            {openLead && (
+              <LeadDetail
+                lead={openLead}
+                onBack={() => setOpenLead(null)}
+                onStartTransaction={(assessment) => {
+                  setOpenLead(null)
+                  setTab('transaction')
+                  setOpenAssessment(assessment)
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

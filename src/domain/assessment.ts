@@ -12,6 +12,7 @@ import type {
   QuantifyInput,
   QuantifyResult,
 } from '../calc/types'
+import type { Lead } from './lead'
 
 export type WizardStep = 'qualify' | 'quantify' | 'verify' | 'certify'
 export type AssessmentStatus = 'in_progress' | 'certified' | 'stopped'
@@ -86,5 +87,21 @@ export function createAssessment(accountName: string): Assessment {
     status: 'in_progress',
     step: 'qualify',
     qualifyInput: createDefaultQualifyInput(),
+  }
+}
+
+/**
+ * Starts a Transaction straight at the Quantify step for a lead that's already past Qualify in
+ * the pipeline — pre-fills the course name and customer type so Quantify's numbers line up.
+ */
+export function createAssessmentFromLead(lead: Lead): Assessment {
+  return {
+    id: crypto.randomUUID(),
+    accountName: lead.courseName,
+    createdAt: new Date().toISOString(),
+    status: 'in_progress',
+    step: 'quantify',
+    qualifyInput: { ...createDefaultQualifyInput(), courseName: lead.courseName, customerType: lead.customerType },
+    quantifyInput: createDefaultQuantifyInput(),
   }
 }
