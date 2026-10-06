@@ -84,6 +84,15 @@ export function LeadsList({
     onStartTransaction(assessment)
   }
 
+  /** Reverts a lead that was moved to Quantify back to Qualify — doesn't touch any Transaction already started. */
+  async function handleMoveToQualify(lead: Lead) {
+    setStartingId(lead.id)
+    const next: Lead = { ...lead, action: 'qualify' }
+    await leadStore.save(next)
+    setLeads((prev) => prev.map((l) => (l.id === lead.id ? next : l)))
+    setStartingId(null)
+  }
+
   return (
     <div>
       <PageHeader eyebrow="Component 1 — Frozen Backend" title="Leads" />
@@ -138,7 +147,7 @@ export function LeadsList({
                     <td className="px-4 py-2.5 text-ipi-700/70">{lead.competition || '—'}</td>
                     <td className="font-data px-4 py-2.5 tabular-nums text-ipi-700/70">{opportunityTags(lead)}</td>
                     <td className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ipi-900">
-                      {lead.action === 'qualify' ? (
+                      {lead.action === 'qualify' && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -146,13 +155,25 @@ export function LeadsList({
                             handleMoveToQuantify(lead)
                           }}
                           disabled={startingId === lead.id}
-                          className="rounded-full border border-ipi-600 px-2.5 py-1 text-[11px] font-medium normal-case tracking-normal text-ipi-800 transition-colors hover:bg-ipi-50 disabled:opacity-40"
+                          className="text-xs font-semibold uppercase tracking-wide text-ipi-700 underline decoration-ipi-600/40 decoration-dotted underline-offset-2 transition-colors hover:text-ipi-900 disabled:opacity-40"
                         >
-                          {startingId === lead.id ? 'Starting…' : 'Move to Quantify →'}
+                          {startingId === lead.id ? 'Starting…' : 'Quantify →'}
                         </button>
-                      ) : (
-                        LEAD_ACTION_LABEL[lead.action]
                       )}
+                      {lead.action === 'quantify' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleMoveToQualify(lead)
+                          }}
+                          disabled={startingId === lead.id}
+                          className="text-xs font-semibold uppercase tracking-wide text-ipi-700 underline decoration-ipi-600/40 decoration-dotted underline-offset-2 transition-colors hover:text-ipi-900 disabled:opacity-40"
+                        >
+                          {startingId === lead.id ? 'Moving…' : '← Qualify'}
+                        </button>
+                      )}
+                      {lead.action !== 'qualify' && lead.action !== 'quantify' && LEAD_ACTION_LABEL[lead.action]}
                     </td>
                   </tr>
                 ))}

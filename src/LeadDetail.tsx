@@ -73,6 +73,15 @@ export function LeadDetail({
     onStartTransaction(assessment)
   }
 
+  /** Reverts a lead that was moved to Quantify back to Qualify — doesn't touch any Transaction already started. */
+  async function handleMoveToQualify() {
+    const next: Lead = { ...lead, action: 'qualify' }
+    setLead(next)
+    await leadStore.save(next)
+    setJustSaved(true)
+    setTimeout(() => setJustSaved(false), 2000)
+  }
+
   return (
     <div>
       <PageHeader
@@ -142,6 +151,15 @@ export function LeadDetail({
             className="rounded-full border border-ipi-600 px-3 py-1.5 text-xs font-medium text-ipi-800 transition-colors hover:bg-ipi-50 disabled:opacity-40"
           >
             {startingTransaction ? 'Starting transaction…' : 'Move to Quantify →'}
+          </button>
+        )}
+        {lead.action === 'quantify' && (
+          <button
+            type="button"
+            onClick={handleMoveToQualify}
+            className="rounded-full border border-ipi-600 px-3 py-1.5 text-xs font-medium text-ipi-800 transition-colors hover:bg-ipi-50"
+          >
+            ← Move to Qualify
           </button>
         )}
       </div>
