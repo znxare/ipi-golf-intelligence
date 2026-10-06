@@ -90,7 +90,7 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
           <button
             key={c}
             type="button"
-            onClick={() => update({ ...lead, customerType: c })}
+            onClick={() => update({ ...lead, customerType: c, action: c === 'existing' ? 'quantify' : 'qualify' })}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               lead.customerType === c
                 ? 'bg-ipi-900 text-white'
