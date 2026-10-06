@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
 import type { Lead, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
+import { LEAD_ACTION_LABEL } from './LeadsList'
 import { leadStore } from './store'
 
 const CUSTOMER_TYPE_OPTIONS: LeadCustomerType[] = ['non_existing', 'existing', 'new_build']
@@ -100,6 +101,22 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
             {CUSTOMER_TYPE_LABEL[c]}
           </button>
         ))}
+      </div>
+
+      <SectionLabel>Pipeline stage</SectionLabel>
+      <div className="mb-5 flex items-center gap-3">
+        <span className="rounded-full bg-ipi-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-ipi-900">
+          {LEAD_ACTION_LABEL[lead.action]}
+        </span>
+        {lead.action === 'qualify' && (
+          <button
+            type="button"
+            onClick={() => update({ ...lead, action: 'quantify' })}
+            className="rounded-full border border-ipi-600 px-3 py-1.5 text-xs font-medium text-ipi-800 transition-colors hover:bg-ipi-50"
+          >
+            Move to Quantify →
+          </button>
+        )}
       </div>
 
       <SectionLabel>Requirement &amp; competition</SectionLabel>
