@@ -1,7 +1,8 @@
 export type LeadCustomerType = 'existing' | 'non_existing' | 'new_build'
 
-/** Pipeline stage this lead is ready for next — same vocabulary as the Assessment wizard steps. */
-export type LeadAction = 'qualify' | 'quantify' | 'verify' | 'certify'
+/** Pipeline stage this lead is ready for next — same vocabulary as the Assessment wizard steps, plus
+ * build_template, which stands in for Qualify on new-build courses (nothing to qualify financially yet). */
+export type LeadAction = 'build_template' | 'qualify' | 'quantify' | 'verify' | 'certify'
 
 /** BD's read on the account, independent of the Rupee math — drives the Dashboard's category donut. */
 export type LeadCategory = 'growth' | 'operational' | 'developing'
@@ -51,6 +52,13 @@ export interface Lead {
   potentialValue: number
   /** Quantify/Verify-stage confirmed figure, in Rupees — feeds the Dashboard's actual-opportunity totals. */
   actualValue: number
+}
+
+/** The pipeline stage a lead starts at (or jumps back to) when its customer type is set. */
+export function defaultActionForCustomerType(customerType: LeadCustomerType): LeadAction {
+  if (customerType === 'existing') return 'quantify'
+  if (customerType === 'new_build') return 'build_template'
+  return 'qualify'
 }
 
 export function createLead(courseName: string): Lead {

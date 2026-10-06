@@ -16,6 +16,7 @@ const ICON_CHECK_CIRCLE = 'M3 12a9 9 0 1018 0 9 9 0 10-18 0M8 12.5l2.5 2.5L16 9'
 const ICON_SHIELD = 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z'
 const ICON_MEDAL = 'M12 15a5 5 0 100-10 5 5 0 000 10zM8.5 14L6 21l6-3 6 3-2.5-7'
 const ICON_SEARCH_OFF = 'M11 19a8 8 0 100-16 8 8 0 000 16zM21 21l-4.3-4.3M8 8l6 6M14 8l-6 6'
+const ICON_TEMPLATE = 'M4 4h16v16H4zM4 10h16M10 4v16'
 
 const CUSTOMER_TYPE_LABEL: Record<LeadCustomerType, string> = {
   existing: 'Existing Customer',
@@ -40,6 +41,7 @@ const ICON_RAIN = 'M7 15a4 4 0 01-1-7.87 6 6 0 0111.44-1.98A4 4 0 0117 15h-1M8 1
 
 const STAGE_ICON: Record<'lead' | LeadAction, string> = {
   lead: ICON_PERSON,
+  build_template: ICON_TEMPLATE,
   qualify: ICON_CHECK_CIRCLE,
   quantify: ICON_BAR,
   verify: ICON_SHIELD,
@@ -54,6 +56,7 @@ const CARD_ACCENT = {
 
 const STAGE_TAB_CLASS: Record<'lead' | LeadAction, string> = {
   lead: 'bg-white border border-hairline text-ipi-800',
+  build_template: 'bg-ipi-600/10 text-ipi-800',
   qualify: 'bg-ipi-600/10 text-ipi-800',
   quantify: 'bg-ipi-600/20 text-ipi-800',
   verify: 'bg-ipi-600/35 text-ipi-900',
@@ -61,6 +64,7 @@ const STAGE_TAB_CLASS: Record<'lead' | LeadAction, string> = {
 }
 
 const STAGE_BADGE_CLASS: Record<LeadAction, string> = {
+  build_template: 'bg-ipi-600/10 text-ipi-800',
   qualify: 'bg-ipi-600/10 text-ipi-800',
   quantify: 'bg-ipi-600/20 text-ipi-800',
   verify: 'bg-ipi-600/35 text-ipi-900',

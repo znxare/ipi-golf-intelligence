@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
 import type { Assessment } from './domain/assessment'
-import type { Lead, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
+import { defaultActionForCustomerType, type Lead, type LeadCustomerType, type LeadHealth, type LeadRating } from './domain/lead'
 import { LEAD_ACTION_LABEL } from './LeadsList'
 import { leadStore, startQuantifyTransaction } from './store'
 
@@ -126,7 +126,7 @@ export function LeadDetail({
           <button
             key={c}
             type="button"
-            onClick={() => update({ ...lead, customerType: c, action: c === 'existing' ? 'quantify' : 'qualify' })}
+            onClick={() => update({ ...lead, customerType: c, action: defaultActionForCustomerType(c) })}
             className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               lead.customerType === c
                 ? 'bg-ipi-900 text-white'

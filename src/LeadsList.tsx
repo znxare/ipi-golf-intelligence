@@ -24,6 +24,7 @@ const CUSTOMER_TYPE_SORT_ORDER: Record<LeadCustomerType, number> = {
 }
 
 export const LEAD_ACTION_LABEL: Record<LeadAction, string> = {
+  build_template: 'Build Template',
   qualify: 'Qualify',
   quantify: 'Quantify',
   verify: 'Verify',
