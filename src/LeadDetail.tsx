@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { PageHeader, PrimaryButton, SecondaryButton, SectionLabel, TextField } from './components/ui'
-import { createAssessmentFromLead, type Assessment } from './domain/assessment'
+import type { Assessment } from './domain/assessment'
 import type { Lead, LeadCustomerType, LeadHealth, LeadRating } from './domain/lead'
 import { LEAD_ACTION_LABEL } from './LeadsList'
-import { assessmentStore, leadStore } from './store'
+import { leadStore, startQuantifyTransaction } from './store'
 
 const CUSTOMER_TYPE_OPTIONS: LeadCustomerType[] = ['non_existing', 'existing', 'new_build']
 const CUSTOMER_TYPE_LABEL: Record<LeadCustomerType, string> = {
@@ -68,11 +68,8 @@ export function LeadDetail({
   /** Saves the lead at Quantify, then opens a new Transaction for it straight at the Quantify step. */
   async function handleMoveToQuantify() {
     setStartingTransaction(true)
-    const next: Lead = { ...lead, action: 'quantify' }
-    setLead(next)
-    await leadStore.save(next)
-    const assessment = createAssessmentFromLead(next)
-    await assessmentStore.save(assessment)
+    setLead({ ...lead, action: 'quantify' })
+    const assessment = await startQuantifyTransaction(lead)
     onStartTransaction(assessment)
   }
 

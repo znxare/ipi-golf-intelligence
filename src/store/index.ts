@@ -1,4 +1,4 @@
-import type { Assessment } from '../domain/assessment'
+import { createAssessmentFromLead, type Assessment } from '../domain/assessment'
 import type { Lead } from '../domain/lead'
 import { isDbConfigured } from '../lib/db'
 import { assessmentStore as localAssessmentStore, withCartDefaults } from './assessmentStore'
@@ -18,6 +18,18 @@ const dbAssessmentStore = isDbConfigured ? createDbStore<Assessment>('assessment
 
 export const leadStore = dbLeadStore ?? localLeadStore
 export const assessmentStore = dbAssessmentStore ?? localAssessmentStore
+
+/**
+ * Saves a lead at the Quantify stage and opens a new Transaction for it, pre-filled from the
+ * lead — the one action behind both the Leads table's quick action and Lead details' button.
+ */
+export async function startQuantifyTransaction(lead: Lead): Promise<Assessment> {
+  const next: Lead = { ...lead, action: 'quantify' }
+  await leadStore.save(next)
+  const assessment = createAssessmentFromLead(next)
+  await assessmentStore.save(assessment)
+  return assessment
+}
 
 const IMPORTED_KEY = 'ipi.browserDataImported.v1'
 

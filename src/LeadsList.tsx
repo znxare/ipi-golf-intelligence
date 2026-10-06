@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { PageHeader, PrimaryButton } from './components/ui'
+import type { Assessment } from './domain/assessment'
 import { createLead, type Lead, type LeadAction, type LeadCustomerType } from './domain/lead'
-import { leadStore } from './store'
+import { leadStore, startQuantifyTransaction } from './store'
 
 export const LEAD_CUSTOMER_TYPE_CODE: Record<LeadCustomerType, string> = {
   non_existing: 'NC',
@@ -46,9 +47,16 @@ function opportunityTags(lead: Lead): string {
  * matching the sales team's lead-tracking sheet. Click a row to open
  * LeadDetail for the full record and its own editable timeline.
  */
-export function LeadsList({ onOpen }: { onOpen: (lead: Lead) => void }) {
+export function LeadsList({
+  onOpen,
+  onStartTransaction,
+}: {
+  onOpen: (lead: Lead) => void
+  onStartTransaction: (assessment: Assessment) => void
+}) {
   const [leads, setLeads] = useState<Lead[]>([])
   const [newCourseName, setNewCourseName] = useState('')
+  const [startingId, setStartingId] = useState<string | null>(null)
 
   useEffect(() => {
     leadStore.list().then(setLeads)
@@ -66,6 +74,14 @@ export function LeadsList({ onOpen }: { onOpen: (lead: Lead) => void }) {
       setNewCourseName('')
       onOpen(lead)
     })
+  }
+
+  /** Saves the lead at Quantify, then opens a new Transaction for it — without leaving the table. */
+  async function handleMoveToQuantify(lead: Lead) {
+    setStartingId(lead.id)
+    const assessment = await startQuantifyTransaction(lead)
+    setStartingId(null)
+    onStartTransaction(assessment)
   }
 
   return (
@@ -122,7 +138,21 @@ export function LeadsList({ onOpen }: { onOpen: (lead: Lead) => void }) {
                     <td className="px-4 py-2.5 text-ipi-700/70">{lead.competition || '—'}</td>
                     <td className="font-data px-4 py-2.5 tabular-nums text-ipi-700/70">{opportunityTags(lead)}</td>
                     <td className="px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ipi-900">
-                      {LEAD_ACTION_LABEL[lead.action]}
+                      {lead.action === 'qualify' ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleMoveToQuantify(lead)
+                          }}
+                          disabled={startingId === lead.id}
+                          className="rounded-full border border-ipi-600 px-2.5 py-1 text-[11px] font-medium normal-case tracking-normal text-ipi-800 transition-colors hover:bg-ipi-50 disabled:opacity-40"
+                        >
+                          {startingId === lead.id ? 'Starting…' : 'Move to Quantify →'}
+                        </button>
+                      ) : (
+                        LEAD_ACTION_LABEL[lead.action]
+                      )}
                     </td>
                   </tr>
                 ))}

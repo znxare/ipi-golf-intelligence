@@ -199,16 +199,14 @@ function App() {
             )}
             {!openAssessment && !openLead && tab === 'dashboard' && <Dashboard onOpenLead={setOpenLead} search={search} />}
             {!openAssessment && !openLead && tab === 'transaction' && <AssessmentsList onOpen={setOpenAssessment} />}
-            {!openAssessment && !openLead && tab === 'leads' && <LeadsList onOpen={setOpenLead} />}
+            {!openAssessment && !openLead && tab === 'leads' && (
+              <LeadsList onOpen={setOpenLead} onStartTransaction={handleStartTransaction} />
+            )}
             {openLead && (
               <LeadDetail
                 lead={openLead}
                 onBack={() => setOpenLead(null)}
-                onStartTransaction={(assessment) => {
-                  setOpenLead(null)
-                  setTab('transaction')
-                  setOpenAssessment(assessment)
-                }}
+                onStartTransaction={handleStartTransaction}
               />
             )}
           </div>
@@ -216,6 +214,12 @@ function App() {
       </div>
     </div>
   )
+
+  function handleStartTransaction(assessment: Assessment) {
+    setOpenLead(null)
+    setTab('transaction')
+    setOpenAssessment(assessment)
+  }
 }
 
 export default App
