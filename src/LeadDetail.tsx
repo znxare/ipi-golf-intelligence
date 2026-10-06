@@ -33,6 +33,8 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
   const [lead, setLead] = useState(initialLead)
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   function update(next: Lead) {
     setLead(next)
@@ -45,6 +47,12 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
     setSaving(false)
     setJustSaved(true)
     setTimeout(() => setJustSaved(false), 2000)
+  }
+
+  async function handleDelete() {
+    setDeleting(true)
+    await leadStore.remove(lead.id)
+    onBack()
   }
 
   return (
@@ -159,12 +167,42 @@ export function LeadDetail({ lead: initialLead, onBack }: { lead: Lead; onBack: 
         ))}
       </div>
 
-      <div className="flex items-center justify-end gap-3">
-        {justSaved && <span className="text-xs font-medium text-mint-600">Saved</span>}
-        <SecondaryButton onClick={onBack}>← Back to Leads</SecondaryButton>
-        <PrimaryButton onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </PrimaryButton>
+      <div className="flex items-center justify-between gap-3">
+        {confirmingDelete ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-ipi-700/70">Delete this lead? This can't be undone.</span>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="rounded-lg bg-risk-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-risk-600/90 disabled:opacity-40"
+            >
+              {deleting ? 'Deleting…' : 'Yes, delete'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(false)}
+              className="rounded-lg border border-hairline px-3 py-1.5 text-xs font-medium text-ipi-800 hover:bg-white"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConfirmingDelete(true)}
+            className="rounded-lg border border-risk-600/30 px-4 py-2 text-sm font-medium text-risk-600 transition-colors hover:bg-risk-600/10"
+          >
+            Delete lead
+          </button>
+        )}
+        <div className="flex items-center justify-end gap-3">
+          {justSaved && <span className="text-xs font-medium text-mint-600">Saved</span>}
+          <SecondaryButton onClick={onBack}>← Back to Leads</SecondaryButton>
+          <PrimaryButton onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : 'Save'}
+          </PrimaryButton>
+        </div>
       </div>
     </div>
   )
