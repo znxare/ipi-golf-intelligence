@@ -99,28 +99,13 @@ export function LeadDetail({
       />
 
       <SectionLabel>Lead details</SectionLabel>
-      <div className="mb-5 grid grid-cols-2 gap-3">
+      <div className="mb-3">
         <TextField
           label="Golf course / account name"
           value={lead.courseName}
           onChange={(v) => update({ ...lead, courseName: v })}
         />
-        <TextField
-          label="Contact name"
-          value={lead.contactName}
-          onChange={(v) => update({ ...lead, contactName: v })}
-        />
-        <TextField label="Phone" value={lead.phone} onChange={(v) => update({ ...lead, phone: v })} />
-        <TextField label="Email" value={lead.email} onChange={(v) => update({ ...lead, email: v })} />
-        <TextField
-          label="Source"
-          value={lead.source}
-          onChange={(v) => update({ ...lead, source: v })}
-          placeholder="Referral, cold call, event…"
-        />
       </div>
-
-      <SectionLabel>Sport</SectionLabel>
       <div className="mb-5 flex flex-wrap gap-4">
         {(
           [
@@ -139,6 +124,21 @@ export function LeadDetail({
             {label}
           </label>
         ))}
+      </div>
+      <div className="mb-5 grid grid-cols-2 gap-3">
+        <TextField
+          label="Contact name"
+          value={lead.contactName}
+          onChange={(v) => update({ ...lead, contactName: v })}
+        />
+        <TextField label="Phone" value={lead.phone} onChange={(v) => update({ ...lead, phone: v })} />
+        <TextField label="Email" value={lead.email} onChange={(v) => update({ ...lead, email: v })} />
+        <TextField
+          label="Source"
+          value={lead.source}
+          onChange={(v) => update({ ...lead, source: v })}
+          placeholder="Referral, cold call, event…"
+        />
       </div>
 
       <SectionLabel>Customer type</SectionLabel>
