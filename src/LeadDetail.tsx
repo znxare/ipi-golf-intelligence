@@ -120,6 +120,27 @@ export function LeadDetail({
         />
       </div>
 
+      <SectionLabel>Sport</SectionLabel>
+      <div className="mb-5 flex flex-wrap gap-4">
+        {(
+          [
+            ['golf', 'Golf course'],
+            ['cricket', 'Cricket'],
+            ['football', 'Football'],
+          ] as const
+        ).map(([key, label]) => (
+          <label key={key} className="flex items-center gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              checked={lead.sportTypes[key]}
+              onChange={(e) => update({ ...lead, sportTypes: { ...lead.sportTypes, [key]: e.target.checked } })}
+              className="h-4 w-4 accent-[var(--color-ipi-600)]"
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+
       <SectionLabel>Customer type</SectionLabel>
       <div className="mb-5 flex flex-wrap gap-2">
         {CUSTOMER_TYPE_OPTIONS.map((c) => (

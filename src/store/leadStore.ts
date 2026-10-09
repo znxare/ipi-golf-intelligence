@@ -12,6 +12,7 @@ const STORAGE_KEY = 'ipi.leads.v1'
 /** Backfills fields onto leads saved before they existed (customerType/requirement/competition/opportunity/action/scoring). */
 export function withLeadDefaults(lead: Lead): Lead {
   const needsBackfill =
+    lead.sportTypes === undefined ||
     lead.customerType === undefined ||
     lead.requirement === undefined ||
     lead.competition === undefined ||
@@ -34,6 +35,11 @@ export function withLeadDefaults(lead: Lead): Lead {
 
   return {
     ...lead,
+    sportTypes: {
+      golf: lead.sportTypes?.golf ?? true,
+      cricket: lead.sportTypes?.cricket ?? false,
+      football: lead.sportTypes?.football ?? false,
+    },
     customerType: lead.customerType ?? 'non_existing',
     requirement: lead.requirement ?? '',
     competition: lead.competition ?? '',
