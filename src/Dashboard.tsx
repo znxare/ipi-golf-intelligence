@@ -310,14 +310,14 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
     setTypeFilter((cur) => (cur === key ? null : key))
   }
 
-  /** "Not yet qualified" donut owns the stage filter too, so a slice scopes the table to the Lead stage. */
+  /** "Not yet qualified" donut owns the stage filter too, so a slice scopes the table to the Qualify stage. */
   function toggleUnqualified(key: LeadCustomerType) {
-    if (typeFilter === key && stageFilter === 'lead') {
+    if (typeFilter === key && stageFilter === 'qualify') {
       setTypeFilter(null)
       setStageFilter('all')
     } else {
       setTypeFilter(key)
-      setStageFilter('lead')
+      setStageFilter('qualify')
     }
   }
 
@@ -328,8 +328,8 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
 
   const searchTerm = search.trim().toLowerCase()
   let filtered = leads
-  if (stageFilter === 'lead') filtered = filtered.filter((l) => l.action === 'qualify')
-  else if (stageFilter !== 'all') filtered = filtered.filter((l) => l.action === stageFilter)
+  // 'lead' is the funnel's top-of-pipe tile — every lead counts, regardless of what stage it's at.
+  if (stageFilter !== 'all' && stageFilter !== 'lead') filtered = filtered.filter((l) => l.action === stageFilter)
   if (typeFilter) filtered = filtered.filter((l) => l.customerType === typeFilter)
   if (searchTerm) filtered = filtered.filter((l) => l.courseName.toLowerCase().includes(searchTerm))
 
@@ -337,7 +337,7 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
   const sorted = [...filtered].sort((a, b) => b.potentialValue - a.potentialValue)
   const visibleRows = filtersActive ? sorted : sorted.slice(0, 4)
 
-  const unqualifiedSelected = stageFilter === 'lead' ? typeFilter : null
+  const unqualifiedSelected = stageFilter === 'qualify' ? typeFilter : null
 
   return (
     <div>
@@ -367,7 +367,9 @@ export function Dashboard({ onOpenLead, search = '' }: { onOpenLead: (lead: Lead
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">Lead</span>
                   </div>
-                  <div className="text-[10px] leading-tight opacity-70">Identify &amp; capture</div>
+                  <div className="mb-1 text-[10px] leading-snug opacity-70">Identify &amp; capture</div>
+                  <div className="font-data text-lg font-semibold tabular-nums">{leads.length}</div>
+                  <div className="text-[10px] opacity-70">{formatRupeesCompact(potentialTotal)}</div>
                 </button>
 
                 {stageStats.map((s) => (
