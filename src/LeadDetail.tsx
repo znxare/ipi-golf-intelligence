@@ -110,8 +110,10 @@ export function LeadDetail({
         {(
           [
             ['golf', 'Golf course'],
-            ['cricket', 'Cricket'],
-            ['football', 'Football'],
+            ['cricket', 'Cricket ground'],
+            ['football', 'Football field'],
+            ['individual', 'Individual'],
+            ['retail', 'Retail'],
           ] as const
         ).map(([key, label]) => (
           <label key={key} className="flex items-center gap-2 text-sm text-ink">

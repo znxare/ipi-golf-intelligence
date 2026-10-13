@@ -23,11 +23,13 @@ export interface LeadOpportunity {
   other: boolean
 }
 
-/** Which sport(s) this facility is for — a multi-sport complex can check more than one. */
+/** Which sport(s)/segment(s) this account is for — a multi-sport complex can check more than one. */
 export interface LeadSportTypes {
   golf: boolean
   cricket: boolean
   football: boolean
+  individual: boolean
+  retail: boolean
 }
 
 export interface Lead {
@@ -74,7 +76,7 @@ export function createLead(courseName: string): Lead {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
     courseName,
-    sportTypes: { golf: true, cricket: false, football: false },
+    sportTypes: { golf: true, cricket: false, football: false, individual: false, retail: false },
     customerType: 'non_existing',
     requirement: '',
     competition: '',

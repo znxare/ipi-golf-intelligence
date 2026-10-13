@@ -13,6 +13,8 @@ const STORAGE_KEY = 'ipi.leads.v1'
 export function withLeadDefaults(lead: Lead): Lead {
   const needsBackfill =
     lead.sportTypes === undefined ||
+    lead.sportTypes?.individual === undefined ||
+    lead.sportTypes?.retail === undefined ||
     lead.customerType === undefined ||
     lead.requirement === undefined ||
     lead.competition === undefined ||
@@ -39,6 +41,8 @@ export function withLeadDefaults(lead: Lead): Lead {
       golf: lead.sportTypes?.golf ?? true,
       cricket: lead.sportTypes?.cricket ?? false,
       football: lead.sportTypes?.football ?? false,
+      individual: lead.sportTypes?.individual ?? false,
+      retail: lead.sportTypes?.retail ?? false,
     },
     customerType: lead.customerType ?? 'non_existing',
     requirement: lead.requirement ?? '',
