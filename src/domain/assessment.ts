@@ -34,6 +34,8 @@ export interface Assessment {
   quantifyResult?: QuantifyResult
   certifyResult?: CertifyResult
   negotiation?: Record<string, NegotiationLine>
+  /** True for a lead tagged "Individual" — buying a golf cart only, so Quantify skips the course-maintenance Equipment Template. */
+  isIndividual?: boolean
 }
 
 export function createDefaultQualifyInput(): QualifyInput {
@@ -103,5 +105,6 @@ export function createAssessmentFromLead(lead: Lead): Assessment {
     step: 'quantify',
     qualifyInput: { ...createDefaultQualifyInput(), courseName: lead.courseName, customerType: lead.customerType },
     quantifyInput: createDefaultQuantifyInput(),
+    isIndividual: lead.sportTypes.individual,
   }
 }

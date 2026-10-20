@@ -15,12 +15,15 @@ import { SelectedGolfCartDetail } from './SelectedGolfCartDetail'
 export function QuantifyStep({
   qualifyInput,
   input,
+  isIndividual = false,
   onChange,
   onNext,
   onBack,
 }: {
   qualifyInput: QualifyInput
   input: QuantifyInput
+  /** True for a lead buying a golf cart only — hides the course-maintenance Equipment Template below. */
+  isIndividual?: boolean
   onChange: (input: QuantifyInput) => void
   onNext: () => void
   onBack: () => void
@@ -89,10 +92,12 @@ export function QuantifyStep({
         />
       </div>
 
-      <EquipmentVerification
-        lines={input.equipmentVerification}
-        onChange={(equipmentVerification) => onChange({ ...input, equipmentVerification })}
-      />
+      {!isIndividual && (
+        <EquipmentVerification
+          lines={input.equipmentVerification}
+          onChange={(equipmentVerification) => onChange({ ...input, equipmentVerification })}
+        />
+      )}
 
       <GolfCartVerification
         lines={input.golfCartVerification}

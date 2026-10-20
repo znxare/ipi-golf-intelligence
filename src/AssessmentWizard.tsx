@@ -62,6 +62,7 @@ export function AssessmentWizard({
         <QuantifyStep
           qualifyInput={assessment.qualifyInput}
           input={assessment.quantifyInput}
+          isIndividual={assessment.isIndividual ?? false}
           onChange={(quantifyInput) => setAssessment({ ...assessment, quantifyInput })}
           onBack={() => setAssessment({ ...assessment, step: 'qualify' })}
           onNext={() => {
