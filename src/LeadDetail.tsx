@@ -45,6 +45,7 @@ export function LeadDetail({
   const [deleting, setDeleting] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [startingTransaction, setStartingTransaction] = useState(false)
+  const isIndividual = lead.sportTypes.individual
 
   function update(next: Lead) {
     setLead(next)
@@ -120,7 +121,15 @@ export function LeadDetail({
             <input
               type="checkbox"
               checked={lead.sportTypes[key]}
-              onChange={(e) => update({ ...lead, sportTypes: { ...lead.sportTypes, [key]: e.target.checked } })}
+              onChange={(e) => {
+                const checked = e.target.checked
+                const next: Lead = { ...lead, sportTypes: { ...lead.sportTypes, [key]: checked } }
+                // Individual means "selling a golf cart only" — course equipment/irrigation don't apply.
+                if (key === 'individual' && checked) {
+                  next.opportunity = { ...next.opportunity, equipment: false, irrigation: false }
+                }
+                update(next)
+              }}
               className="h-4 w-4 accent-[var(--color-ipi-600)]"
             />
             {label}
@@ -149,8 +158,9 @@ export function LeadDetail({
           <button
             key={c}
             type="button"
+            disabled={isIndividual}
             onClick={() => update({ ...lead, customerType: c, action: defaultActionForCustomerType(c) })}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
               lead.customerType === c
                 ? 'bg-ipi-900 text-white'
                 : 'border border-hairline text-ipi-700/70 hover:border-ipi-600'
@@ -160,6 +170,9 @@ export function LeadDetail({
           </button>
         ))}
       </div>
+      {isIndividual && (
+        <div className="-mt-3 mb-5 text-xs text-ipi-700/60">Customer type doesn't apply to Individual leads.</div>
+      )}
 
       <SectionLabel>Pipeline stage</SectionLabel>
       <div className="mb-5 flex items-center gap-3">
@@ -214,17 +227,24 @@ export function LeadDetail({
             ['golfCart', 'Golf Cart'],
             ['other', 'Other'],
           ] as const
-        ).map(([key, label]) => (
-          <label key={key} className="flex items-center gap-2 text-sm text-ink">
-            <input
-              type="checkbox"
-              checked={lead.opportunity[key]}
-              onChange={(e) => update({ ...lead, opportunity: { ...lead.opportunity, [key]: e.target.checked } })}
-              className="h-4 w-4 accent-[var(--color-ipi-600)]"
-            />
-            {label}
-          </label>
-        ))}
+        ).map(([key, label]) => {
+          const blocked = isIndividual && (key === 'equipment' || key === 'irrigation')
+          return (
+            <label
+              key={key}
+              className={`flex items-center gap-2 text-sm ${blocked ? 'text-ipi-700/35' : 'text-ink'}`}
+            >
+              <input
+                type="checkbox"
+                checked={lead.opportunity[key]}
+                disabled={blocked}
+                onChange={(e) => update({ ...lead, opportunity: { ...lead.opportunity, [key]: e.target.checked } })}
+                className="h-4 w-4 accent-[var(--color-ipi-600)] disabled:cursor-not-allowed"
+              />
+              {label}
+            </label>
+          )
+        })}
       </div>
 
       <div className="flex items-center justify-between gap-3">

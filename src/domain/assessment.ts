@@ -93,18 +93,21 @@ export function createAssessment(accountName: string): Assessment {
 }
 
 /**
- * Starts a Transaction straight at the Quantify step for a lead that's already past Qualify in
- * the pipeline — pre-fills the course name and customer type so Quantify's numbers line up.
+ * Starts a Transaction for a lead that's already past Qualify in the pipeline — pre-fills the
+ * course name and customer type so Quantify's numbers line up. Individual leads (golf cart only)
+ * still open at Qualify, but a reduced one (QualifyStep hides everything but the customer-type
+ * picker and the Customer Input Card for these); everyone else skips straight to Quantify.
  */
 export function createAssessmentFromLead(lead: Lead): Assessment {
+  const isIndividual = lead.sportTypes.individual
   return {
     id: crypto.randomUUID(),
     accountName: lead.courseName,
     createdAt: new Date().toISOString(),
     status: 'in_progress',
-    step: 'quantify',
+    step: isIndividual ? 'qualify' : 'quantify',
     qualifyInput: { ...createDefaultQualifyInput(), courseName: lead.courseName, customerType: lead.customerType },
     quantifyInput: createDefaultQuantifyInput(),
-    isIndividual: lead.sportTypes.individual,
+    isIndividual,
   }
 }

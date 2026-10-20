@@ -54,10 +54,15 @@ const ICON_PATHS = {
 
 export function QualifyStep({
   input,
+  isIndividual = false,
   onChange,
   onNext,
 }: {
   input: QualifyInput
+  /** True for a lead buying a golf cart only — Qualify keeps just the customer-type picker and
+   * Customer Input Card; the golf-course-specific Equipment Audit, Potential Opportunity and
+   * Revenue Scenario Matrix below don't apply and are hidden. */
+  isIndividual?: boolean
   onChange: (input: QualifyInput) => void
   onNext: () => void
 }) {
@@ -233,56 +238,60 @@ export function QualifyStep({
         </div>
       </div>
 
-      {input.customerType === 'non_existing' && (
+      {!isIndividual && input.customerType === 'non_existing' && (
         <EquipmentAudit
           items={input.equipmentAudit}
           onChange={(equipmentAudit) => onChange({ ...input, equipmentAudit })}
         />
       )}
 
-      <StatBar title="Potential Opportunity">
-        <BarStat
-          icon={ICON_PATHS.players}
-          label="Players / Day"
-          value={formatNumber(result.potentialPlayersPerDay)}
-          sublabel="Potential"
-          first
-        />
-        <BarStat
-          icon={ICON_PATHS.calendar}
-          label="Annual Players"
-          value={formatNumber(result.annualPlayers)}
-          sublabel="Potential"
-        />
-        <BarStat
-          icon={ICON_PATHS.revenue}
-          label="Potential Revenue"
-          value={formatRupeesCompact(result.potentialRevenueAnnual)}
-          sublabel="Annual"
-        />
-        <BarStat
-          icon={ICON_PATHS.cost}
-          label="Total Cost of Operations"
-          value={formatRupeesCompact(result.totalCostOfOperations)}
-          sublabel="Expenses + Salary + Water · Annual"
-        />
-        <BarStat
-          icon={ICON_PATHS.target}
-          label="IPI Opportunity"
-          value={formatRupeesCompact(result.ipiOpportunityAnnual)}
-          sublabel="Annual"
-        />
-      </StatBar>
+      {!isIndividual && (
+        <StatBar title="Potential Opportunity">
+          <BarStat
+            icon={ICON_PATHS.players}
+            label="Players / Day"
+            value={formatNumber(result.potentialPlayersPerDay)}
+            sublabel="Potential"
+            first
+          />
+          <BarStat
+            icon={ICON_PATHS.calendar}
+            label="Annual Players"
+            value={formatNumber(result.annualPlayers)}
+            sublabel="Potential"
+          />
+          <BarStat
+            icon={ICON_PATHS.revenue}
+            label="Potential Revenue"
+            value={formatRupeesCompact(result.potentialRevenueAnnual)}
+            sublabel="Annual"
+          />
+          <BarStat
+            icon={ICON_PATHS.cost}
+            label="Total Cost of Operations"
+            value={formatRupeesCompact(result.totalCostOfOperations)}
+            sublabel="Expenses + Salary + Water · Annual"
+          />
+          <BarStat
+            icon={ICON_PATHS.target}
+            label="IPI Opportunity"
+            value={formatRupeesCompact(result.ipiOpportunityAnnual)}
+            sublabel="Annual"
+          />
+        </StatBar>
+      )}
 
-      <RevenueScenarioMatrix
-        playableHoursPerDay={input.playableHoursPerDay}
-        cartHoursPerTeeRound={input.cartHoursPerTeeRound}
-        playersPerCart={input.playersPerCart}
-        cartRevenuePerRound={input.cartRevenuePerRound}
-        cartCost={input.cartCost}
-        avgGreenFee={input.pricePerRound}
-        expensesPerDay={input.expensesPerDay}
-      />
+      {!isIndividual && (
+        <RevenueScenarioMatrix
+          playableHoursPerDay={input.playableHoursPerDay}
+          cartHoursPerTeeRound={input.cartHoursPerTeeRound}
+          playersPerCart={input.playersPerCart}
+          cartRevenuePerRound={input.cartRevenuePerRound}
+          cartCost={input.cartCost}
+          avgGreenFee={input.pricePerRound}
+          expensesPerDay={input.expensesPerDay}
+        />
+      )}
 
       <div className="flex justify-end">
         <PrimaryButton onClick={onNext}>

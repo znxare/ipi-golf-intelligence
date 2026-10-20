@@ -45,6 +45,7 @@ export function AssessmentWizard({
       {assessment.step === 'qualify' && (
         <QualifyStep
           input={assessment.qualifyInput}
+          isIndividual={assessment.isIndividual ?? false}
           onChange={(qualifyInput) => setAssessment({ ...assessment, qualifyInput })}
           onNext={() => {
             const qualifyResult = calculateQualify(assessment.qualifyInput)
