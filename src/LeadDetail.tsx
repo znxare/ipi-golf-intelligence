@@ -124,9 +124,13 @@ export function LeadDetail({
               onChange={(e) => {
                 const checked = e.target.checked
                 const next: Lead = { ...lead, sportTypes: { ...lead.sportTypes, [key]: checked } }
-                // Individual means "selling a golf cart only" — course equipment/irrigation don't apply.
+                // Individual means "selling a golf cart only" — course equipment/irrigation/new-build don't apply.
                 if (key === 'individual' && checked) {
                   next.opportunity = { ...next.opportunity, equipment: false, irrigation: false }
+                  if (next.customerType === 'new_build') {
+                    next.customerType = 'non_existing'
+                    next.action = defaultActionForCustomerType('non_existing')
+                  }
                 }
                 update(next)
               }}

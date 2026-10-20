@@ -67,12 +67,14 @@ export function QualifyStep({
   onNext: () => void
 }) {
   const result = calculateQualify(input)
+  // New build doesn't apply to a golf-cart-only sale — there's no course-build project to feasibility-check.
+  const customerTypes = isIndividual ? CUSTOMER_TYPES.filter((c) => c.type !== 'new_build') : CUSTOMER_TYPES
 
   return (
     <div>
       <SectionLabel>Establish customer type</SectionLabel>
-      <div className="mb-5 grid grid-cols-3 gap-3">
-        {CUSTOMER_TYPES.map((c) => {
+      <div className={`mb-5 grid gap-3 ${isIndividual ? 'grid-cols-2' : 'grid-cols-3'}`}>
+        {customerTypes.map((c) => {
           const selected = input.customerType === c.type
           return (
             <button
