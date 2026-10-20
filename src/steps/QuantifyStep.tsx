@@ -104,18 +104,22 @@ export function QuantifyStep({
         onChange={(golfCartVerification) => onChange({ ...input, golfCartVerification })}
       />
 
-      <IpiOpportunityBreakdown
-        breakdown={input.breakdown}
-        total={result.actualIpiOpportunity}
-        onChange={(breakdown) => onChange({ ...input, breakdown })}
-        equipmentAuto
-        onEquipmentClick={() => setShowEquipmentDetail((v) => !v)}
-        golfCartAuto
-        onGolfCartClick={() => setShowGolfCartDetail((v) => !v)}
-      />
+      {!isIndividual && (
+        <>
+          <IpiOpportunityBreakdown
+            breakdown={input.breakdown}
+            total={result.actualIpiOpportunity}
+            onChange={(breakdown) => onChange({ ...input, breakdown })}
+            equipmentAuto
+            onEquipmentClick={() => setShowEquipmentDetail((v) => !v)}
+            golfCartAuto
+            onGolfCartClick={() => setShowGolfCartDetail((v) => !v)}
+          />
 
-      {showEquipmentDetail && <SelectedEquipmentDetail lines={input.equipmentVerification} />}
-      {showGolfCartDetail && <SelectedGolfCartDetail lines={input.golfCartVerification} />}
+          {showEquipmentDetail && <SelectedEquipmentDetail lines={input.equipmentVerification} />}
+          {showGolfCartDetail && <SelectedGolfCartDetail lines={input.golfCartVerification} />}
+        </>
+      )}
 
       <div className="flex justify-between">
         <SecondaryButton onClick={onBack}>← Back</SecondaryButton>
