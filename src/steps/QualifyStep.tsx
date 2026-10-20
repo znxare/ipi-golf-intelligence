@@ -119,94 +119,98 @@ export function QualifyStep({
             />
           </div>
 
-          <SectionLabel>Capacity</SectionLabel>
-          <div className="mb-5 grid grid-cols-3 gap-3">
-            <FixedField label="Slot interval" value={`${SLOT_INTERVAL_MINUTES} min`} />
-            <SelectField
-              label="Playable hours / day"
-              value={input.playableHoursPerDay}
-              onChange={(v) => onChange({ ...input, playableHoursPerDay: v })}
-              options={HOURS_OPTIONS}
-            />
-            <Field
-              label="Avg green fee"
-              value={input.pricePerRound}
-              onChange={(v) => onChange({ ...input, pricePerRound: v })}
-              suffix="₹"
-            />
-          </div>
+          {!isIndividual && (
+            <>
+              <SectionLabel>Capacity</SectionLabel>
+              <div className="mb-5 grid grid-cols-3 gap-3">
+                <FixedField label="Slot interval" value={`${SLOT_INTERVAL_MINUTES} min`} />
+                <SelectField
+                  label="Playable hours / day"
+                  value={input.playableHoursPerDay}
+                  onChange={(v) => onChange({ ...input, playableHoursPerDay: v })}
+                  options={HOURS_OPTIONS}
+                />
+                <Field
+                  label="Avg green fee"
+                  value={input.pricePerRound}
+                  onChange={(v) => onChange({ ...input, pricePerRound: v })}
+                  suffix="₹"
+                />
+              </div>
 
-          <SectionLabel>Costs</SectionLabel>
-          <div className="mb-5 grid grid-cols-2 gap-3">
-            <Field
-              label="Expenses / day"
-              value={input.expensesPerDay}
-              onChange={(v) => onChange({ ...input, expensesPerDay: v })}
-              suffix="₹"
-            />
-            <Field
-              label="Salaries / month"
-              value={input.salariesPerMonth}
-              onChange={(v) => onChange({ ...input, salariesPerMonth: v })}
-              suffix="₹"
-            />
-          </div>
+              <SectionLabel>Costs</SectionLabel>
+              <div className="mb-5 grid grid-cols-2 gap-3">
+                <Field
+                  label="Expenses / day"
+                  value={input.expensesPerDay}
+                  onChange={(v) => onChange({ ...input, expensesPerDay: v })}
+                  suffix="₹"
+                />
+                <Field
+                  label="Salaries / month"
+                  value={input.salariesPerMonth}
+                  onChange={(v) => onChange({ ...input, salariesPerMonth: v })}
+                  suffix="₹"
+                />
+              </div>
 
-          <SectionLabel>Water</SectionLabel>
-          <div className="mb-5 grid grid-cols-3 gap-3">
-            <Field
-              label="Potential water required / day"
-              value={input.waterRequiredPerDay}
-              onChange={(v) => onChange({ ...input, waterRequiredPerDay: v })}
-              suffix="L"
-            />
-            <Field
-              label="Water tanker cost"
-              value={input.tankerCost}
-              onChange={(v) => onChange({ ...input, tankerCost: v })}
-              suffix="₹"
-            />
-            <Field
-              label="Tanker capacity"
-              value={input.tankerCapacity}
-              onChange={(v) => onChange({ ...input, tankerCapacity: v })}
-              suffix="L"
-            />
-          </div>
+              <SectionLabel>Water</SectionLabel>
+              <div className="mb-5 grid grid-cols-3 gap-3">
+                <Field
+                  label="Potential water required / day"
+                  value={input.waterRequiredPerDay}
+                  onChange={(v) => onChange({ ...input, waterRequiredPerDay: v })}
+                  suffix="L"
+                />
+                <Field
+                  label="Water tanker cost"
+                  value={input.tankerCost}
+                  onChange={(v) => onChange({ ...input, tankerCost: v })}
+                  suffix="₹"
+                />
+                <Field
+                  label="Tanker capacity"
+                  value={input.tankerCapacity}
+                  onChange={(v) => onChange({ ...input, tankerCapacity: v })}
+                  suffix="L"
+                />
+              </div>
 
-          <SectionLabel>Customer team</SectionLabel>
-          <div className="mb-4 grid grid-cols-3 gap-3">
-            <TextField
-              label="Superintendent"
-              value={input.superintendent}
-              onChange={(v) => onChange({ ...input, superintendent: v })}
-              placeholder="__________"
-            />
-            <TextField
-              label="Director / Head of operations"
-              value={input.directorOfOperations}
-              onChange={(v) => onChange({ ...input, directorOfOperations: v })}
-              placeholder="__________"
-            />
-            <TextField
-              label="Procurement head / equivalent"
-              value={input.procurementHead}
-              onChange={(v) => onChange({ ...input, procurementHead: v })}
-              placeholder="__________"
-            />
-            <TextField
-              label="Key decision maker"
-              value={input.keyDecisionMaker}
-              onChange={(v) => onChange({ ...input, keyDecisionMaker: v })}
-              placeholder="__________"
-            />
-            <TextField
-              label="IPI account / sales owner"
-              value={input.ipiAccountOwner}
-              onChange={(v) => onChange({ ...input, ipiAccountOwner: v })}
-              placeholder="__________"
-            />
-          </div>
+              <SectionLabel>Customer team</SectionLabel>
+              <div className="mb-4 grid grid-cols-3 gap-3">
+                <TextField
+                  label="Superintendent"
+                  value={input.superintendent}
+                  onChange={(v) => onChange({ ...input, superintendent: v })}
+                  placeholder="__________"
+                />
+                <TextField
+                  label="Director / Head of operations"
+                  value={input.directorOfOperations}
+                  onChange={(v) => onChange({ ...input, directorOfOperations: v })}
+                  placeholder="__________"
+                />
+                <TextField
+                  label="Procurement head / equivalent"
+                  value={input.procurementHead}
+                  onChange={(v) => onChange({ ...input, procurementHead: v })}
+                  placeholder="__________"
+                />
+                <TextField
+                  label="Key decision maker"
+                  value={input.keyDecisionMaker}
+                  onChange={(v) => onChange({ ...input, keyDecisionMaker: v })}
+                  placeholder="__________"
+                />
+                <TextField
+                  label="IPI account / sales owner"
+                  value={input.ipiAccountOwner}
+                  onChange={(v) => onChange({ ...input, ipiAccountOwner: v })}
+                  placeholder="__________"
+                />
+              </div>
+            </>
+          )}
 
           <SectionLabel>Cart assumptions</SectionLabel>
           <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
