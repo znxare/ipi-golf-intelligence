@@ -214,33 +214,37 @@ export function QualifyStep({
             </>
           )}
 
-          <SectionLabel>Cart assumptions</SectionLabel>
-          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Field
-              label="Golf cart hrs / tee round"
-              value={input.cartHoursPerTeeRound}
-              onChange={(v) => onChange({ ...input, cartHoursPerTeeRound: v })}
-              suffix="hrs"
-            />
-            <SelectField
-              label="Players per cart"
-              value={input.playersPerCart}
-              onChange={(v) => onChange({ ...input, playersPerCart: v })}
-              options={PLAYERS_PER_CART_OPTIONS}
-            />
-            <Field
-              label="Revenue per player / cart round"
-              value={input.cartRevenuePerRound}
-              onChange={(v) => onChange({ ...input, cartRevenuePerRound: v })}
-              suffix="₹"
-            />
-            <Field
-              label="Cart cost"
-              value={input.cartCost}
-              onChange={(v) => onChange({ ...input, cartCost: v })}
-              suffix="₹"
-            />
-          </div>
+          {!isIndividual && (
+            <>
+              <SectionLabel>Cart assumptions</SectionLabel>
+              <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Field
+                  label="Golf cart hrs / tee round"
+                  value={input.cartHoursPerTeeRound}
+                  onChange={(v) => onChange({ ...input, cartHoursPerTeeRound: v })}
+                  suffix="hrs"
+                />
+                <SelectField
+                  label="Players per cart"
+                  value={input.playersPerCart}
+                  onChange={(v) => onChange({ ...input, playersPerCart: v })}
+                  options={PLAYERS_PER_CART_OPTIONS}
+                />
+                <Field
+                  label="Revenue per player / cart round"
+                  value={input.cartRevenuePerRound}
+                  onChange={(v) => onChange({ ...input, cartRevenuePerRound: v })}
+                  suffix="₹"
+                />
+                <Field
+                  label="Cart cost"
+                  value={input.cartCost}
+                  onChange={(v) => onChange({ ...input, cartCost: v })}
+                  suffix="₹"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
